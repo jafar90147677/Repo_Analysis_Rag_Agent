@@ -1,0 +1,21 @@
+{
+  "name": "offline-folder-rag",
+  "displayName": "Offline Folder RAG",
+  "version": "0.0.1",
+  "publisher": "local",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "activationEvents": [
+    "onCommand:offlineFolderRag.openChat"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "offlineFolderRag.openChat",
+        "title": "Offline Folder RAG: Open Chat"
+      }
+    ]
+  }
+}
