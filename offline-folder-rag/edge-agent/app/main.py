@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
 from app.api.routes import router as api_router
 
 def _error_response(error_code: str, message: str, remediation: str, status_code: int) -> JSONResponse:
@@ -29,6 +30,15 @@ def create_app() -> FastAPI:
             "Unhandled error.",
             "Retry the request.",
             exc.status_code,
+        )
+
+    @app.exception_handler(RequestValidationError)
+    async def validation_exception_handler(_, exc: RequestValidationError):
+        return _error_response(
+            "INVALID_INPUT",
+            f"Validation error: {exc.errors()}",
+            "Ensure the request body matches the expected schema.",
+            400,
         )
 
     app.include_router(api_router)
