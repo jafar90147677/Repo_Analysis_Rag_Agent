@@ -6,16 +6,38 @@
   "engines": {
     "vscode": "^1.85.0"
   },
-  "activationEvents": [
-    "onCommand:offlineFolderRag.openChat"
-  ],
   "main": "./out/extension.js",
+  "scripts": {
+    "compile": "tsc -p ."
+  },
+  "devDependencies": {
+    "@types/node": "^20.16.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.7.0"
+  },
   "contributes": {
     "commands": [
       {
         "command": "offlineFolderRag.openChat",
         "title": "Offline Folder RAG: Open Chat"
       }
+<<<<<<< HEAD
     ]
+  },
+  "scripts": {
+    "test": "mocha -r ts-node/register \"../tests/vscode_extension/**/*.test.ts\" \"../tests/vscode_extension/**/*.test.js\""
+  },
+  "devDependencies": {
+    "mocha": "^10.2.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+=======
+    ],
+    "devDependencies": {
+      "@types/node": "^20.16.0",
+      "typescript": "^5.7.0",
+      "vscode": "^1.94.0"
+    }
+>>>>>>> ffcecf79898557bcf6d963e70963c4794706e021
   }
 }
