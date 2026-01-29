@@ -4,13 +4,12 @@ from pathlib import Path
 from fastapi import HTTPException
 from fastapi.testclient import TestClient
 
-# Add edge-agent to sys.path
 repo_root = Path(__file__).resolve().parents[3]
-edge_agent_path = str(repo_root / "offline-folder-rag" / "edge-agent")
-if edge_agent_path not in sys.path:
-    sys.path.insert(0, edge_agent_path)
+project_root = repo_root / "offline-folder-rag"
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
 
-from app.main import create_app # type: ignore
+from edge_agent.app.main import create_app  # type: ignore
 
 def test_http_exception_handler_unknown_error():
     app = create_app()

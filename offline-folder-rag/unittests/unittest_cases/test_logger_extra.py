@@ -3,13 +3,12 @@ import sys
 import logging
 from pathlib import Path
 
-# Add edge-agent to sys.path
 repo_root = Path(__file__).resolve().parents[3]
-edge_agent_path = str(repo_root / "offline-folder-rag" / "edge-agent")
-if edge_agent_path not in sys.path:
-    sys.path.insert(0, edge_agent_path)
+project_root = repo_root / "offline-folder-rag"
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
 
-from app.logging.logger import TokenFilter # type: ignore
+from edge_agent.app.logging.logger import TokenFilter  # type: ignore
 
 def test_token_filter_non_string_msg():
     filter = TokenFilter()
