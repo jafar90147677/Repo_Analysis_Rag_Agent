@@ -1,14 +1,18 @@
 // @ts-nocheck
 import * as vscode from "vscode";
 
+import { CommandRouter, CommandResultMessage } from "../commands/commandRouter";
 import { getChatPanelHtml } from "./ui/chatPanelHtml";
 
 export class ChatPanelViewProvider {
     private panel: vscode.WebviewPanel | undefined;
-    private readonly extensionUri: vscode.Uri;
+    private readonly router: CommandRouter;
 
-    constructor(extensionUri: vscode.Uri) {
-        this.extensionUri = extensionUri;
+    constructor(
+        private readonly extensionContext: vscode.ExtensionContext,
+        private readonly extensionUri: vscode.Uri
+    ) {
+        this.router = new CommandRouter(extensionContext, (message) => this.postMessage(message));
     }
 
     public show(): void {
@@ -22,7 +26,7 @@ export class ChatPanelViewProvider {
             "Offline Folder RAG",
             vscode.ViewColumn.One,
             {
-                enableScripts: false,
+                enableScripts: true,
             }
         );
 
@@ -40,6 +44,6 @@ export class ChatPanelViewProvider {
             </div>
         `;
 
-        this.panel.webview.html = getChatPanelHtml(composerPlaceholder, localRowHtml);
+        this.panel.webview.html = getChatPanelHtml(this.extensionUri, composerPlaceholder);
     }
 }
