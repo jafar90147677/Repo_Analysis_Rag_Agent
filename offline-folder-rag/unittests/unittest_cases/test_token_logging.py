@@ -5,19 +5,13 @@ import logging
 from pathlib import Path
 from io import StringIO
 
-# Add edge-agent to sys.path to resolve 'app' module
 repo_root = Path(__file__).resolve().parents[3]
-edge_agent_path = str(repo_root / "offline-folder-rag" / "edge-agent")
-if edge_agent_path not in sys.path:
-    sys.path.insert(0, edge_agent_path)
+project_root = repo_root / "offline-folder-rag"
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
 
-# Ensure 'app' is importable from the edge-agent directory
-app_path = str(repo_root / "offline-folder-rag" / "edge-agent")
-if app_path not in sys.path:
-    sys.path.insert(0, app_path)
-
-from app.logging.logger import logger  # type: ignore
-from app.security.token_store import get_or_create_token  # type: ignore
+from edge_agent.app.logging.logger import logger  # type: ignore
+from edge_agent.app.security.token_store import get_or_create_token  # type: ignore
 
 def test_token_logging_prevention():
     # Setup log capture

@@ -6,13 +6,33 @@ from __future__ import annotations
 import hashlib
 from pathlib import Path
 
-from fastapi import APIRouter, Header, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 from ..indexing import indexer
-from ..security import TOKEN_HEADER, verify_token
+from ..security import TOKEN_HEADER, verify_token, require_token
+from .schemas import (
+    ErrorResponse,
+    IndexRequest,
+    IndexResponse,
+    HealthResponse,
+    ToolResponse,
+    AskRequest,
+    OverviewRequest,
+    SearchRequest,
+    DoctorRequest,
+    IndexReportRequest,
+)
 
-router = APIRouter()
+router = APIRouter(
+    dependencies=[Depends(require_token)],
+    responses={
+        401: {"model": ErrorResponse},
+        400: {"model": ErrorResponse},
+        404: {"model": ErrorResponse},
+        500: {"model": ErrorResponse},
+    },
+)
 
 
 class IndexRequest(BaseModel):
@@ -34,9 +54,8 @@ def compute_repo_id(root_path: str) -> str:
     return hashlib.sha256(normalized.encode("utf-8")).hexdigest()
 
 
-@router.post("/index")
-async def index_route(request: IndexRequest, x_local_token: str | None = Header(default=None, alias=TOKEN_HEADER)):
-    verify_token(x_local_token)
+@router.post("/index", response_model=IndexResponse)
+async def index_route(request: IndexRequest):
     repo_id = compute_repo_id(request.root_path)
     if indexer.is_indexing_in_progress(repo_id):
         raise HTTPException(
@@ -47,25 +66,14 @@ async def index_route(request: IndexRequest, x_local_token: str | None = Header(
                 "remediation": "Retry once the active indexing run completes.",
             },
         )
-    return {"repo_id": repo_id, "status": "accepted"}
-
-from fastapi import APIRouter, Depends
-from app.security.token_guard import verify_token
-from app.api.schemas import (
-    ErrorResponse, IndexRequest, IndexResponse, HealthResponse, 
-    ToolResponse, AskRequest, OverviewRequest, SearchRequest, 
-    DoctorRequest, IndexReportRequest
-)
-
-router = APIRouter(
-    dependencies=[Depends(verify_token)],
-    responses={
-        401: {"model": ErrorResponse},
-        400: {"model": ErrorResponse},
-        404: {"model": ErrorResponse},
-        500: {"model": ErrorResponse},
+    return {
+        "repo_id": "placeholder-repo-id",
+        "mode": "full",
+        "indexed_files": 0,
+        "skipped_files": 0,
+        "chunks_added": 0,
+        "duration_ms": 0,
     }
-)
 
 @router.get("/health", response_model=HealthResponse)
 async def health():
@@ -76,18 +84,7 @@ async def health():
         "last_index_completed_epoch_ms": 0,
         "ollama_ok": True,
         "ripgrep_ok": True,
-        "chroma_ok": True
-    }
-
-@router.post("/index", response_model=IndexResponse)
-async def index(request: IndexRequest):
-    return {
-        "repo_id": "placeholder-repo-id",
-        "mode": "full",
-        "indexed_files": 0,
-        "skipped_files": 0,
-        "chunks_added": 0,
-        "duration_ms": 0
+        "chroma_ok": True,
     }
 
 @router.post("/ask", response_model=ToolResponse)
@@ -96,7 +93,7 @@ async def ask(request: AskRequest):
         "mode": "rag",
         "confidence": "high",
         "answer": "This is a placeholder answer",
-        "citations": []
+        "citations": [],
     }
 
 @router.post("/overview", response_model=ToolResponse)
@@ -105,7 +102,7 @@ async def overview(request: OverviewRequest):
         "mode": "analysis",
         "confidence": "medium",
         "answer": "Project overview placeholder",
-        "citations": []
+        "citations": [],
     }
 
 @router.post("/search", response_model=ToolResponse)
@@ -114,7 +111,7 @@ async def search(request: SearchRequest):
         "mode": "search",
         "confidence": "high",
         "answer": "Search results placeholder",
-        "citations": []
+        "citations": [],
     }
 
 @router.post("/doctor", response_model=ToolResponse)
@@ -123,7 +120,7 @@ async def doctor(request: DoctorRequest):
         "mode": "diagnostic",
         "confidence": "high",
         "answer": "System is healthy",
-        "citations": []
+        "citations": [],
     }
 
 @router.post("/index_report", response_model=ToolResponse)
@@ -132,10 +129,6 @@ async def index_report(request: IndexReportRequest):
         "mode": "report",
         "confidence": "high",
         "answer": "Index report placeholder",
-        "citations": []
+        "citations": [],
     }
-@router.post("/ask")
-async def ask():
-    # Placeholder for RAG query logic
-    return {"answer": "This is a placeholder answer"}
 

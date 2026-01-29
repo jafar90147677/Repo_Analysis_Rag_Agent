@@ -11,22 +11,19 @@ import pytest
 
 def _load_indexer_module():
     repo_root = Path(__file__).resolve().parents[2]
-    indexer_path = repo_root / "edge-agent" / "app" / "indexing" / "indexer.py"
-    spec = importlib.util.spec_from_file_location("edge_agent_indexer", indexer_path)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
+    if str(repo_root) not in sys.path:
+        sys.path.insert(0, str(repo_root))
+    import edge_agent.app.indexing.indexer as module  # type: ignore
     return module
 
 
 def _load_edge_agent_app_modules():
     repo_root = Path(__file__).resolve().parents[2]
-    edge_agent_dir = repo_root / "edge-agent"
-    edge_agent_path = str(edge_agent_dir)
-    if edge_agent_path not in sys.path:
-        sys.path.insert(0, edge_agent_path)
-    app_main = importlib.import_module("app.main")
-    routes_module = importlib.import_module("app.api.routes")
-    security_module = importlib.import_module("app.security")
+    if str(repo_root) not in sys.path:
+        sys.path.insert(0, str(repo_root))
+    app_main = importlib.import_module("edge_agent.app.main")
+    routes_module = importlib.import_module("edge_agent.app.api.routes")
+    security_module = importlib.import_module("edge_agent.app.security")
     return app_main, routes_module, security_module
 
 

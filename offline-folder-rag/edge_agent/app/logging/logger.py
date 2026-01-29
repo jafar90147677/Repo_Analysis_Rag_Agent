@@ -1,6 +1,6 @@
 import logging
 import re
-from edge_agent.app.security.token_store import get_or_create_token
+from ..security.token_store import get_or_create_token
 
 class TokenFilter(logging.Filter):
     def filter(self, record):
