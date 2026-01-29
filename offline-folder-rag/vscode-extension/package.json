@@ -10,6 +10,14 @@
     "onCommand:offlineFolderRag.openChat"
   ],
   "main": "./out/extension.js",
+  "scripts": {
+    "test": "ts-node -O \"{\\\"module\\\":\\\"commonjs\\\"}\" ../tests/indexGate.test.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.1",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.4.1"
+  },
   "contributes": {
     "commands": [
       {
