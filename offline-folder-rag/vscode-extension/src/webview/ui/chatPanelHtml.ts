@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 const PLACEHOLDER_TEXT = "Plan, @ for context, / for commands";
 
 function getNonce(): string {
@@ -9,6 +10,9 @@ function getNonce(): string {
 
 export function getChatPanelHtml(_: vscode.Uri): string {
     const nonce = getNonce();
+=======
+export function getChatPanelHtml(placeholderText: string, localRowHtml: string): string {
+>>>>>>> abb8a4848decc5461e8c53c1ab70cb76bdef6e54
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,6 +22,7 @@ export function getChatPanelHtml(_: vscode.Uri): string {
     <title>Offline Folder RAG</title>
     <style>
         body {
+<<<<<<< HEAD
             font-family: system-ui, sans-serif;
             padding: 0;
             margin: 0;
@@ -80,10 +85,30 @@ export function getChatPanelHtml(_: vscode.Uri): string {
             display: flex;
             flex-direction: column;
             gap: 12px;
+=======
+            margin: 0;
+            font-family: sans-serif;
+        }
+
+        #chat-panel-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            padding: 16px;
+            box-sizing: border-box;
+        }
+
+        #conversation {
+            flex: 1;
+            overflow-y: auto;
+            border-top: 1px solid #ccc;
+            padding-top: 12px;
+>>>>>>> abb8a4848decc5461e8c53c1ab70cb76bdef6e54
         }
     </style>
 </head>
 <body>
+<<<<<<< HEAD
     <main>
         <div id="chatLog" role="log" aria-live="polite"></div>
         <form id="commandForm">
@@ -158,6 +183,47 @@ export function getChatPanelHtml(_: vscode.Uri): string {
             }
         });
     </script>
+=======
+    <div id="chat-panel-container">
+        <header id="chat-panel-header">
+            <div id="header-titles">
+                <h1>Chat</h1>
+                <p>Offline Folder RAG</p>
+            </div>
+            <div id="header-actions" role="toolbar" aria-label="Chat header actions">
+                <button type="button" aria-label="Start new chat">+</button>
+                <button type="button" aria-label="More options">…</button>
+            </div>
+        </header>
+
+        <section id="chat-panel-composer">
+            <label for="composer">Message</label>
+            <textarea id="composer" placeholder="${placeholderText}"></textarea>
+            <div id="composer-bottom-row">
+                <div class="composer-dropdown">
+                    <label for="infinity-dropdown">∞</label>
+                    <select id="infinity-dropdown" aria-label="Infinity options">
+                        <option value="1">∞ option</option>
+                    </select>
+                </div>
+                <div class="composer-dropdown">
+                    <label for="auto-dropdown">Auto</label>
+                    <select id="auto-dropdown" aria-label="Auto options">
+                        <option value="auto">Auto</option>
+                    </select>
+                </div>
+                <button id="attachment-button" type="button" aria-label="Attach file">📎</button>
+                <button id="microphone-button" type="button" aria-label="Record voice">🎤</button>
+            </div>
+        </section>
+
+        ${localRowHtml}
+
+        <section id="conversation" role="log" aria-live="polite">
+            <p>No conversation yet.</p>
+        </section>
+    </div>
+>>>>>>> abb8a4848decc5461e8c53c1ab70cb76bdef6e54
 </body>
 </html>`;
 }

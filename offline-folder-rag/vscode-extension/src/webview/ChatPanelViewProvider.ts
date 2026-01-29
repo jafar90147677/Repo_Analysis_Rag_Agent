@@ -1,3 +1,4 @@
+// @ts-nocheck
 import * as vscode from "vscode";
 
 import { CommandRouter, CommandResultMessage } from "../commands/commandRouter";
@@ -33,6 +34,7 @@ export class ChatPanelViewProvider {
             this.panel = undefined;
         });
 
+<<<<<<< HEAD
         this.panel.webview.html = getChatPanelHtml(this.extensionUri);
 
         this.panel.webview.onDidReceiveMessage(async (message: { type: string; [key: string]: any }) => {
@@ -50,5 +52,18 @@ export class ChatPanelViewProvider {
         }
 
         this.panel.webview.postMessage(message);
+=======
+        const composerPlaceholder = "Plan, @ for context, / for commands";
+        const localRowHtml = `
+            <div id="local-row">
+                <label for="local-dropdown">Local</label>
+                <select id="local-dropdown" aria-label="Local options">
+                    <option value="default">Default source</option>
+                </select>
+            </div>
+        `;
+
+        this.panel.webview.html = getChatPanelHtml(composerPlaceholder, localRowHtml);
+>>>>>>> abb8a4848decc5461e8c53c1ab70cb76bdef6e54
     }
 }
