@@ -8,12 +8,21 @@
   },
   "main": "./out/extension.js",
   "scripts": {
+<<<<<<< HEAD
+    "test": "ts-node -O \"{\\\"module\\\":\\\"commonjs\\\"}\" ../tests/indexGate.test.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.1",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.4.1"
+=======
     "compile": "tsc -p ."
   },
   "devDependencies": {
     "@types/node": "^20.16.0",
     "@types/vscode": "^1.85.0",
     "typescript": "^5.7.0"
+>>>>>>> abb8a4848decc5461e8c53c1ab70cb76bdef6e54
   },
   "contributes": {
     "commands": [

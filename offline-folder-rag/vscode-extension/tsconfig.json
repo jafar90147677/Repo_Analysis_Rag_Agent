@@ -1,5 +1,17 @@
 {
   "compilerOptions": {
+<<<<<<< HEAD
+    "module": "commonjs",
+    "target": "es2020",
+    "moduleResolution": "node",
+    "outDir": "out",
+    "rootDir": "src",
+    "strict": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["src", "../tests"]
+=======
     "target": "ES2020",
     "module": "commonjs",
     "lib": ["ES2020"],
@@ -12,4 +24,5 @@
     "types": ["node", "vscode"]
   },
   "include": ["src"]
+>>>>>>> abb8a4848decc5461e8c53c1ab70cb76bdef6e54
 }
