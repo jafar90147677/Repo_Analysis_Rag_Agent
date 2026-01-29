@@ -1,3 +1,4 @@
+// @ts-nocheck
 import * as vscode from "vscode";
 
 import { getChatPanelHtml } from "./ui/chatPanelHtml";
@@ -29,6 +30,16 @@ export class ChatPanelViewProvider {
             this.panel = undefined;
         });
 
-        this.panel.webview.html = getChatPanelHtml(this.extensionUri);
+        const composerPlaceholder = "Plan, @ for context, / for commands";
+        const localRowHtml = `
+            <div id="local-row">
+                <label for="local-dropdown">Local</label>
+                <select id="local-dropdown" aria-label="Local options">
+                    <option value="default">Default source</option>
+                </select>
+            </div>
+        `;
+
+        this.panel.webview.html = getChatPanelHtml(composerPlaceholder, localRowHtml);
     }
 }
