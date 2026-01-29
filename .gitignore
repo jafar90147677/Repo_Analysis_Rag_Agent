@@ -1,4 +1,27 @@
-./Below is FINAL User Stories v1.docx
-./FINAL PRD v1.docx
-./pytest_cache
-./__pycache__
+
+/.Below is FINAL User Stories v1.docx
+
+/.FINAL PRD v1.docx
+./node_modules
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.coverage
+.pytest_cache/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# VS Code
+.vscode/
+out/
+
+# Temporary Word Files
+~$*.docx
+
