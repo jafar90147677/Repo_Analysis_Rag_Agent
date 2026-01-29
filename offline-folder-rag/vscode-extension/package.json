@@ -8,12 +8,16 @@
   },
   "main": "./out/extension.js",
   "scripts": {
+    "compile": "tsc -p .",
     "test": "mocha -r ts-node/register \"../tests/vscode_extension/**/*.test.ts\" \"../tests/vscode_extension/**/*.test.js\""
   },
   "devDependencies": {
+    "@types/chai": "^4.3.20",
+    "@types/mocha": "^10.0.10",
     "@types/node": "^20.16.0",
     "@types/vscode": "^1.85.0",
-    "mocha": "^10.2.0",
+    "chai": "^4.5.0",
+    "mocha": "^10.8.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.0"
   },

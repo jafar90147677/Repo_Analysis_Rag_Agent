@@ -34,10 +34,11 @@ export class ChatPanelViewProvider {
 
         this.panel.onDidDispose(() => {
             this.panel = undefined;
+            stopHealthPolling();
         });
 
-<<<<<<< HEAD
-        this.panel.webview.html = getChatPanelHtml(this.extensionUri);
+        const composerPlaceholder = "Plan, @ for context, / for commands";
+        this.panel.webview.html = getChatPanelHtml(this.extensionUri, composerPlaceholder);
 
         this.panel.webview.onDidReceiveMessage(async (message: { type: string; [key: string]: any }) => {
             if (message.type === "command") {
@@ -56,15 +57,17 @@ export class ChatPanelViewProvider {
             this.agentBaseUrl,
             (health: HealthResponse) => {
                 let progressText = "";
-                if (health.estimated_total_files > 0) {
-                    progressText = `Indexing: ${health.indexed_files_so_far} files processed`;
-                } else {
-                    progressText = "Scanning...";
+                if (health.indexing) {
+                    if (health.indexed_files_so_far > 0) {
+                        progressText = `Indexing: ${health.indexed_files_so_far} files processed`;
+                    } else {
+                        progressText = "Scanning...";
+                    }
+                    this.postMessage({
+                        type: "commandResult",
+                        payload: progressText
+                    });
                 }
-                this.postMessage({
-                    type: "commandResult",
-                    payload: progressText
-                });
             },
             (error) => {
                 this.postMessage({
@@ -81,18 +84,5 @@ export class ChatPanelViewProvider {
         }
 
         this.panel.webview.postMessage(message);
-=======
-        const composerPlaceholder = "Plan, @ for context, / for commands";
-        const localRowHtml = `
-            <div id="local-row">
-                <label for="local-dropdown">Local</label>
-                <select id="local-dropdown" aria-label="Local options">
-                    <option value="default">Default source</option>
-                </select>
-            </div>
-        `;
-
-        this.panel.webview.html = getChatPanelHtml(composerPlaceholder, localRowHtml);
->>>>>>> abb8a4848decc5461e8c53c1ab70cb76bdef6e54
     }
 }

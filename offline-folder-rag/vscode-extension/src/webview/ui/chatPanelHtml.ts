@@ -1,4 +1,5 @@
-<<<<<<< HEAD
+import * as vscode from "vscode";
+
 const PLACEHOLDER_TEXT = "Plan, @ for context, / for commands";
 
 function getNonce(): string {
@@ -8,11 +9,8 @@ function getNonce(): string {
         .join("");
 }
 
-export function getChatPanelHtml(_: vscode.Uri): string {
+export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: string = PLACEHOLDER_TEXT): string {
     const nonce = getNonce();
-=======
-export function getChatPanelHtml(placeholderText: string, localRowHtml: string): string {
->>>>>>> abb8a4848decc5461e8c53c1ab70cb76bdef6e54
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -22,7 +20,6 @@ export function getChatPanelHtml(placeholderText: string, localRowHtml: string):
     <title>Offline Folder RAG</title>
     <style>
         body {
-<<<<<<< HEAD
             font-family: system-ui, sans-serif;
             padding: 0;
             margin: 0;
@@ -30,15 +27,16 @@ export function getChatPanelHtml(placeholderText: string, localRowHtml: string):
             color: #eee;
         }
 
-        main {
+        #chat-panel-container {
             display: flex;
             flex-direction: column;
             height: 100vh;
-            gap: 12px;
             padding: 16px;
+            box-sizing: border-box;
+            gap: 12px;
         }
 
-        #chatLog {
+        #conversation {
             flex: 1;
             overflow-y: auto;
             border: 1px solid #333;
@@ -46,21 +44,42 @@ export function getChatPanelHtml(placeholderText: string, localRowHtml: string):
             background: #1b1b1b;
         }
 
-        #commandForm {
+        #chat-panel-composer {
             display: flex;
+            flex-direction: column;
             gap: 8px;
         }
 
-        input {
-            flex: 1;
+        textarea {
+            width: 100%;
             background: #222;
             border: 1px solid #333;
             color: #eee;
             padding: 8px;
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        #composer-bottom-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .composer-dropdown {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        select {
+            background: #222;
+            color: #eee;
+            border: 1px solid #333;
         }
 
         button {
-            padding: 8px 12px;
+            padding: 4px 8px;
             background: #0e639c;
             border: none;
             color: #fff;
@@ -85,37 +104,43 @@ export function getChatPanelHtml(placeholderText: string, localRowHtml: string):
             display: flex;
             flex-direction: column;
             gap: 12px;
-=======
-            margin: 0;
-            font-family: sans-serif;
-        }
-
-        #chat-panel-container {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            padding: 16px;
-            box-sizing: border-box;
-        }
-
-        #conversation {
-            flex: 1;
-            overflow-y: auto;
-            border-top: 1px solid #ccc;
-            padding-top: 12px;
->>>>>>> abb8a4848decc5461e8c53c1ab70cb76bdef6e54
         }
     </style>
 </head>
 <body>
-<<<<<<< HEAD
-    <main>
-        <div id="chatLog" role="log" aria-live="polite"></div>
-        <form id="commandForm">
-            <input type="text" id="commandInput" placeholder="${PLACEHOLDER_TEXT}" autocomplete="off" />
-            <button type="submit">Send</button>
-        </form>
-    </main>
+    <div id="chat-panel-container">
+        <header id="chat-panel-header">
+            <div id="header-titles">
+                <h1>Chat</h1>
+                <p>Offline Folder RAG</p>
+            </div>
+        </header>
+
+        <section id="conversation" role="log" aria-live="polite">
+            <p>No conversation yet.</p>
+        </section>
+
+        <section id="chat-panel-composer">
+            <label for="composer">Message</label>
+            <textarea id="composer" placeholder="${placeholderText}"></textarea>
+            <div id="composer-bottom-row">
+                <div class="composer-dropdown">
+                    <label for="infinity-dropdown">∞</label>
+                    <select id="infinity-dropdown">
+                        <option value="1">∞ option</option>
+                    </select>
+                </div>
+                <div class="composer-dropdown">
+                    <label for="auto-dropdown">Auto</label>
+                    <select id="auto-dropdown">
+                        <option value="auto">Auto</option>
+                    </select>
+                </div>
+                <button id="attachment-button" type="button">📎</button>
+                <button id="microphone-button" type="button">🎤</button>
+            </div>
+        </section>
+    </div>
 
     <div class="modal-backdrop" id="indexModal">
         <div class="modal">
@@ -127,9 +152,8 @@ export function getChatPanelHtml(placeholderText: string, localRowHtml: string):
 
     <script nonce="${nonce}">
         const vscode = acquireVsCodeApi();
-        const log = document.getElementById("chatLog");
-        const form = document.getElementById("commandForm");
-        const input = document.getElementById("commandInput");
+        const conversation = document.getElementById("conversation");
+        const composer = document.getElementById("composer");
         const modal = document.getElementById("indexModal");
         const indexFullButton = document.getElementById("indexFull");
         const indexCancelButton = document.getElementById("indexCancel");
@@ -137,8 +161,8 @@ export function getChatPanelHtml(placeholderText: string, localRowHtml: string):
         function appendLog(text) {
             const entry = document.createElement("p");
             entry.textContent = text;
-            log.appendChild(entry);
-            log.scrollTop = log.scrollHeight;
+            conversation.appendChild(entry);
+            conversation.scrollTop = conversation.scrollHeight;
         }
 
         function showModal() {
@@ -149,15 +173,19 @@ export function getChatPanelHtml(placeholderText: string, localRowHtml: string):
             modal.style.display = "none";
         }
 
-        form.addEventListener("submit", (event) => {
-            event.preventDefault();
-            if (!input.value.trim()) {
-                return;
+        composer.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") {
+                if (event.shiftKey) {
+                    return;
+                }
+                event.preventDefault();
+                const text = composer.value.trim();
+                if (text) {
+                    appendLog("> " + text);
+                    vscode.postMessage({ type: "command", text: text });
+                    composer.value = "";
+                }
             }
-
-            appendLog(`> ${input.value.trim()}`);
-            vscode.postMessage({ type: "command", text: input.value.trim() });
-            input.value = "";
         });
 
         indexFullButton.addEventListener("click", () => {
@@ -170,9 +198,7 @@ export function getChatPanelHtml(placeholderText: string, localRowHtml: string):
 
         window.addEventListener("message", (event) => {
             const message = event.data;
-            if (!message) {
-                return;
-            }
+            if (!message) return;
 
             if (message.type === "showIndexModal") {
                 showModal();
@@ -183,47 +209,6 @@ export function getChatPanelHtml(placeholderText: string, localRowHtml: string):
             }
         });
     </script>
-=======
-    <div id="chat-panel-container">
-        <header id="chat-panel-header">
-            <div id="header-titles">
-                <h1>Chat</h1>
-                <p>Offline Folder RAG</p>
-            </div>
-            <div id="header-actions" role="toolbar" aria-label="Chat header actions">
-                <button type="button" aria-label="Start new chat">+</button>
-                <button type="button" aria-label="More options">…</button>
-            </div>
-        </header>
-
-        <section id="chat-panel-composer">
-            <label for="composer">Message</label>
-            <textarea id="composer" placeholder="${placeholderText}"></textarea>
-            <div id="composer-bottom-row">
-                <div class="composer-dropdown">
-                    <label for="infinity-dropdown">∞</label>
-                    <select id="infinity-dropdown" aria-label="Infinity options">
-                        <option value="1">∞ option</option>
-                    </select>
-                </div>
-                <div class="composer-dropdown">
-                    <label for="auto-dropdown">Auto</label>
-                    <select id="auto-dropdown" aria-label="Auto options">
-                        <option value="auto">Auto</option>
-                    </select>
-                </div>
-                <button id="attachment-button" type="button" aria-label="Attach file">📎</button>
-                <button id="microphone-button" type="button" aria-label="Record voice">🎤</button>
-            </div>
-        </section>
-
-        ${localRowHtml}
-
-        <section id="conversation" role="log" aria-live="polite">
-            <p>No conversation yet.</p>
-        </section>
-    </div>
->>>>>>> abb8a4848decc5461e8c53c1ab70cb76bdef6e54
 </body>
 </html>`;
 }
