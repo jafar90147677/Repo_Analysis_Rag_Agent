@@ -7,7 +7,7 @@ from fastapi.testclient import TestClient
 
 def _load_main_module():
     repo_root = Path(__file__).resolve().parents[3]
-    main_path = repo_root / "edge-agent" / "app" / "main.py"
+    main_path = repo_root / "edge_agent" / "app" / "main.py"
     spec = importlib.util.spec_from_file_location("edge_agent_main", main_path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
