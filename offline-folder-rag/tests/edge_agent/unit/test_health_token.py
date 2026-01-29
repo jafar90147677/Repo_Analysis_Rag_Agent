@@ -40,7 +40,15 @@ def test_health_requires_token(tmp_path, monkeypatch):
     token = token_file.read_text(encoding="utf-8").strip()
     response_ok = client.get("/health", headers={"X-LOCAL-TOKEN": token})
     assert response_ok.status_code == 200
-    assert response_ok.json() == {"status": "ok"}
+    assert response_ok.json() == {
+        "indexing": False,
+        "indexed_files_so_far": 0,
+        "estimated_total_files": 0,
+        "last_index_completed_epoch_ms": 0,
+        "ollama_ok": True,
+        "ripgrep_ok": True,
+        "chroma_ok": True
+    }
 
 
 def test_token_creation_and_reuse(tmp_path, monkeypatch):
