@@ -125,6 +125,14 @@ export async function parseSlashCommand(
     return { type: 'commandResult', payload: 'INVALID_COMMAND' };
 }
 
+export function handleToolsSlashCommand(input: string): string {
+    const parsed = parseSlashCommandInstruction(input);
+    if (!parsed.success) {
+        return "INVALID_COMMAND";
+    }
+    return describeCommand(parsed.command);
+}
+
 export class CommandRouter {
     constructor(
         private readonly context: vscode.ExtensionContext,
@@ -176,6 +184,7 @@ export class CommandRouter {
         }
     }
 
+<<<<<<< HEAD
     public async route(options: { text: string; mode: string; extraContext?: any }): Promise<void> {
         const { text, mode, extraContext } = options;
         if (mode === "RAG" && !text.startsWith("/")) {
@@ -197,5 +206,9 @@ export class CommandRouter {
         } else {
             await this.handleCommand(text, extraContext);
         }
+=======
+    public handleToolsSlashCommand(input: string): string {
+        return handleToolsSlashCommand(input);
+>>>>>>> 1b9ef19 (npm test error resolve)
     }
 }
