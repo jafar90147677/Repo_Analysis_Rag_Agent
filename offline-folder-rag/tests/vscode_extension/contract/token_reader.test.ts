@@ -2,29 +2,7 @@ import * as assert from "assert";
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
-import { fileURLToPath, pathToFileURL } from "url";
 
-const __filename = "";
-const __dirname = "";
-// const __filename = fileURLToPath(import.meta.url);
-// const __dirname = path.dirname(__filename);
-
-const repoRoot = path.resolve(__dirname, "..", "..", "..");
-const serviceModulePath = path.join(
-  repoRoot,
-  "vscode-extension",
-  "src",
-  "services",
-  "agentClient.ts"
-);
-
-async function loadService() {
-  const module = await import(pathToFileURL(serviceModulePath).href);
-  if (module.default && typeof module.default === 'object') {
-    return module.default;
-  }
-  return module;
-}
 import { getTokenFilePath, readAgentToken } from "../../../vscode-extension/src/services/agentClient";
 
 async function withTempDir(run: (dir: string) => Promise<void>) {

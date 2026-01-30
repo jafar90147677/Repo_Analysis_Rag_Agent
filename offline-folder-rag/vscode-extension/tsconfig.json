@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "module": "commonjs",
+    "moduleResolution": "node",
     "target": "ES2022",
     "esModuleInterop": true,
     "allowJs": true,
@@ -9,9 +10,16 @@
     "types": ["node", "vscode", "mocha"],
     "baseUrl": ".",
     "paths": {
+      "vscode": ["./node_modules/jest-mock-vscode/dist/index.d.ts"],
       "axios": ["./node_modules/axios/index.js"],
       "expect": ["./node_modules/expect/build/index.js"],
       "*": ["node_modules/*"]
+    }
+  },
+  "ts-node": {
+    "transpileOnly": true,
+    "compilerOptions": {
+      "module": "commonjs"
     }
   },
   "include": ["src", "../tests", "../unittests"]
