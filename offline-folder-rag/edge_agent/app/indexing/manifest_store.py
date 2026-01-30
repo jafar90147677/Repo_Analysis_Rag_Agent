@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-<<<<<<< HEAD
 import os
 from pathlib import Path
 from typing import Dict, Any, List
@@ -119,7 +118,6 @@ __all__ = [
     "SKIP_REASON_CHUNK_LIMIT",
     "record_file_truncation",
 ]
-=======
 from enum import Enum
 from pathlib import Path
 from typing import Dict, List, Set
@@ -297,4 +295,3 @@ def append_manifest_entry(repo_id: str, entry: Dict[str, object]) -> Path:
     entries = read_manifest_entries(repo_id)
     entries.append(entry)
     return write_manifest_entries(repo_id, entries)
->>>>>>> 48ceb7c (us_30)

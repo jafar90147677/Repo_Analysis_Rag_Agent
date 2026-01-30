@@ -184,7 +184,6 @@ export class CommandRouter {
         }
     }
 
-<<<<<<< HEAD
     public async route(options: { text: string; mode: string; extraContext?: any }): Promise<void> {
         const { text, mode, extraContext } = options;
         if (mode === "RAG" && !text.startsWith("/")) {
@@ -206,9 +205,9 @@ export class CommandRouter {
         } else {
             await this.handleCommand(text, extraContext);
         }
-=======
+    }
+
     public handleToolsSlashCommand(input: string): string {
         return handleToolsSlashCommand(input);
->>>>>>> 1b9ef19 (npm test error resolve)
     }
 }

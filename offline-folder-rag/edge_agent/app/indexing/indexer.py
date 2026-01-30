@@ -27,9 +27,9 @@ _repo_indexing_state: Dict[str, bool] = {}
 _repo_indexed_files: Dict[str, int] = {}
 _repo_indexing_state_lock = threading.Lock()
 
-<<<<<<< HEAD
+
 _config_store = RepoConfigStore()
-=======
+
 _chroma_client_cache: Dict[str, object] = {}
 _chroma_collection_cache: Dict[Tuple[str, str], object] = {}
 _chroma_lock = threading.Lock()
@@ -103,8 +103,6 @@ def reset_chroma_state() -> None:
     with _chroma_lock:
         _chroma_client_cache.clear()
         _chroma_collection_cache.clear()
-
->>>>>>> 48ceb7c (us_30)
 
 class _RepoIndexingState:
     """Process-global, repo-keyed state for in-progress indexing."""
@@ -287,16 +285,13 @@ def perform_indexing_scan(root_path: str, repo_id: str) -> dict:
     skipped_files = 0
     start_time = time.time()
 
-<<<<<<< HEAD
     # Initialize manifest store
     manifest_path = scan_rules.index_dir() / repo_id / "manifest.json"
     manifest = ManifestStore(str(manifest_path))
-=======
     try:
         ensure_repo_collections(repo_id)
     except Exception as exc:
         logger.warning("chroma_init_failed repo_id=%s err=%s", repo_id, exc)
->>>>>>> 48ceb7c (us_30)
 
     # Use os.walk to traverse the directory tree
     for root, dirs, files in os.walk(root_path):
