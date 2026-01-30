@@ -2,6 +2,7 @@ import * as assert from "assert";
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
+
 import { getTokenFilePath, readAgentToken } from "../../../vscode-extension/src/services/agentClient";
 
 async function withTempDir(run: (dir: string) => Promise<void>) {
