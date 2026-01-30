@@ -46,3 +46,40 @@ export async function sendMessageToAgent(message: string): Promise<void> {
     console.log('Sending message to agent:', message);
     // Implementation for sending message to agent
 }
+
+export function ask(question: string) {
+  return fetch('/ask', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ question }),
+  });
+}
+
+export function overview(question: string) {
+  return fetch('/overview', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ question }),
+  });
+}
+
+export function search(question: string) {
+  return fetch('/search', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ question }),
+  });
+}
+
+export function askWithOverride(question: string, modeOverride: string) {
+  return fetch('/ask', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      question,
+      mode_override: modeOverride
+    }),
+  });
+}

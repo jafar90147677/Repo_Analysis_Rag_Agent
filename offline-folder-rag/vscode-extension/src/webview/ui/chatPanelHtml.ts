@@ -124,16 +124,21 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
             <label for="composer">Message</label>
             <textarea id="composer" placeholder="${placeholderText}"></textarea>
             <div id="composer-bottom-row">
-                <div class="composer-dropdown">
-                    <label for="infinity-dropdown">∞</label>
-                    <select id="infinity-dropdown">
-                        <option value="1">∞ option</option>
+                {/* ∞ Dropdown Scope */}
+                <div class="composer-scope-dropdown">
+                    <label for="scopeSelect" class="sr-only">Scope</label>
+                    <select id="scopeSelect" data-testid="scope-dropdown">
+                        <option value="Local">Local</option>
+                        <option value="RAG" disabled>RAG</option>
+                        <option value="Tools" disabled>Tools</option>
                     </select>
                 </div>
                 <div class="composer-dropdown">
-                    <label for="auto-dropdown">Auto</label>
-                    <select id="auto-dropdown">
-                        <option value="auto">Auto</option>
+                    <label for="autoModeSelect">Auto</label>
+                    <select id="autoModeSelect">
+                        <option value="Auto">Auto</option>
+                        <option value="RAG">RAG</option>
+                        <option value="Tools">Tools</option>
                     </select>
                 </div>
                 <button id="attachment-button" type="button">📎</button>
@@ -154,6 +159,7 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
         const vscode = acquireVsCodeApi();
         const conversation = document.getElementById("conversation");
         const composer = document.getElementById("composer");
+        const autoModeSelect = document.getElementById("autoModeSelect");
         const modal = document.getElementById("indexModal");
         const indexFullButton = document.getElementById("indexFull");
         const indexCancelButton = document.getElementById("indexCancel");
@@ -180,9 +186,10 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
                 }
                 event.preventDefault();
                 const text = composer.value.trim();
+                const mode = autoModeSelect.value;
                 if (text) {
                     appendLog("> " + text);
-                    vscode.postMessage({ type: "command", text: text });
+                    vscode.postMessage({ type: "command", text: text, mode: mode });
                     composer.value = "";
                 }
             }
