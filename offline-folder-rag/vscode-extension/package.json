@@ -9,7 +9,7 @@
   "main": "./out/extension.js",
   "scripts": {
     "compile": "tsc -p .",
-    "test": "mocha -r ts-node/register -r tsconfig-paths/register --extension ts --node-option no-warnings \"../tests/vscode_extension/**/test_*.ts\" \"../tests/vscode_extension/**/*.test.ts\" \"../unittests/**/*.test.ts\""
+    "test": "mocha --loader ts-node/esm -r tsconfig-paths/register --extension ts \"../tests/vscode_extension/**/test_*.ts\" \"../tests/vscode_extension/**/*.test.ts\" \"../unittests/**/*.test.ts\""
   },
   "devDependencies": {
     "@types/axios": "^0.9.36",
