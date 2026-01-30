@@ -12,6 +12,7 @@ def test_markdown_files_use_markdown_chunker(monkeypatch):
                 "chunk_id": "c1",
                 "line_start": 1,
                 "line_end": 2,
+                "line_count": 2,
                 "file_type": "markdown",
                 "mtime_epoch_ms": 4,
                 "sha256": "jkl",
