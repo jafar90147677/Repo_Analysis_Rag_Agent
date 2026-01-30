@@ -10,6 +10,7 @@ def _build_chunk(path: str, index: int) -> dict[str, object]:
         "chunk_id": f"c{index}",
         "line_start": index,
         "line_end": index,
+        "line_count": 1,
         "file_type": "code",
         "mtime_epoch_ms": index,
         "sha256": f"hash-{index}",
