@@ -124,18 +124,100 @@ def test_index_route_blocks_when_repo_busy(tmp_path, monkeypatch):
     repo_path.mkdir()
     normalized = scan_rules_module.normalize_root_path(str(repo_path))
     repo_id = scan_rules_module.compute_repo_id(normalized)
-    indexer.mark_indexing_started(repo_id)
+    
+    lock_acquired = threading.Event()
+    release_lock = threading.Event()
 
+    def hold_repo_lock():
+        with indexer.acquire_indexing_lock(repo_id):
+            lock_acquired.set()
+            release_lock.wait(timeout=2)
+
+    holder_thread = threading.Thread(target=hold_repo_lock, daemon=True)
+    holder_thread.start()
+    assert lock_acquired.wait(timeout=2)
+
+    response = client.post(
+        "/index",
+        json={"root_path": str(repo_path)},
+        headers={security_module.TOKEN_HEADER: security_module.get_or_create_token()},
+    )
+    assert response.status_code == 409
+    payload = response.json()
+    assert payload["error_code"] == "INDEXING_IN_PROGRESS"
+    assert payload["message"] == "Indexing already in progress for this repo."
+    assert payload["remediation"] == "Wait for the active indexing run to finish before retrying."
+
+    release_lock.set()
+    holder_thread.join(timeout=2)
+
+
+def test_index_route_allows_distinct_repos(tmp_path, monkeypatch):
+    monkeypatch.setenv("RAG_INDEX_DIR", str(tmp_path))
+    main_module, routes_module, security_module, scan_rules_module = _load_edge_agent_app_modules()
+    indexer = _load_indexer_module()
+    client = TestClient(main_module.app)
+
+    repo_a_path = tmp_path / "repo-a"
+    repo_b_path = tmp_path / "repo-b"
+    repo_a_path.mkdir()
+    repo_b_path.mkdir()
+    
+    normalized_a = scan_rules_module.normalize_root_path(str(repo_a_path))
+    repo_a_id = scan_rules_module.compute_repo_id(normalized_a)
+
+    lock_acquired = threading.Event()
+    release_lock = threading.Event()
+
+    def hold_repo_lock():
+        with indexer.acquire_indexing_lock(repo_a_id):
+            lock_acquired.set()
+            release_lock.wait(timeout=2)
+
+    holder_thread = threading.Thread(target=hold_repo_lock, daemon=True)
+    holder_thread.start()
+    assert lock_acquired.wait(timeout=2)
+
+    response = client.post(
+        "/index",
+        json={"root_path": str(repo_b_path)},
+        headers={security_module.TOKEN_HEADER: security_module.get_or_create_token()},
+    )
+    assert response.status_code == 200
+
+    release_lock.set()
+    holder_thread.join(timeout=2)
+
+
+def test_health_reflects_indexing_state(tmp_path, monkeypatch):
+    monkeypatch.setenv("RAG_INDEX_DIR", str(tmp_path))
+    main_module, routes_module, security_module, scan_rules_module = _load_edge_agent_app_modules()
+    indexer = _load_indexer_module()
+    client = TestClient(main_module.app)
+
+    repo_path = tmp_path / "repo"
+    repo_path.mkdir()
+    normalized = scan_rules_module.normalize_root_path(str(repo_path))
+    repo_id = scan_rules_module.compute_repo_id(normalized)
+    token = security_module.get_or_create_token()
+
+    indexer.mark_indexing_started(repo_id)
     try:
-        response = client.post(
-            "/index",
-            json={"root_path": str(repo_path)},
-            headers={security_module.TOKEN_HEADER: security_module.get_or_create_token()},
+        response = client.get(
+            "/health",
+            headers={security_module.TOKEN_HEADER: token},
         )
-        assert response.status_code == 409
-        assert response.json()["error_code"] == "INDEXING_IN_PROGRESS"
+        assert response.status_code == 200
+        assert response.json()["indexing"] is True
     finally:
         indexer.mark_indexing_finished(repo_id)
+
+    response = client.get(
+        "/health",
+        headers={security_module.TOKEN_HEADER: token},
+    )
+    assert response.status_code == 200
+    assert response.json()["indexing"] is False
 
 
 def test_read_only_indexing_state_accessor():

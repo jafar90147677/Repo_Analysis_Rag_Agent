@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
 from typing import List, Optional
 
 class ErrorResponse(BaseModel):
@@ -17,6 +17,8 @@ class IndexResponse(BaseModel):
     chunks_added: int
     duration_ms: int
 
+    model_config = ConfigDict(extra="forbid")
+
 class HealthResponse(BaseModel):
     indexing: bool
     indexed_files_so_far: int
@@ -28,7 +30,12 @@ class HealthResponse(BaseModel):
 
 class Citation(BaseModel):
     file_path: str
+    path: str
     line_number: int
+    line_start: int
+    start_line: int
+    line_end: int
+    end_line: int
     snippet: str
 
 class ToolResponse(BaseModel):
@@ -36,9 +43,20 @@ class ToolResponse(BaseModel):
     confidence: str
     answer: str
     citations: List[Citation]
+    truncated: bool = False
 
 class AskRequest(BaseModel):
     query: str
+    top_k: int | None = Field(
+        default=None,
+        gt=0,
+        description="Optional override for the number of vector hits returned per category.",
+    )
+    max_context_chunks: int | None = Field(
+        default=None,
+        gt=0,
+        description="Optional upper bound on the number of chunks returned in the response.",
+    )
 
 class OverviewRequest(BaseModel):
     root_path: str

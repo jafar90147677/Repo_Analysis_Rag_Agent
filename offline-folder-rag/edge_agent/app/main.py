@@ -3,6 +3,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 from .api.routes import router as api_router
+from .indexing import indexer
 from .security import TOKEN_HEADER, verify_token
 
 
@@ -19,6 +20,7 @@ def _error_response(error_code: str, message: str, remediation: str, status_code
 
 def create_app() -> FastAPI:
     app = FastAPI()
+    indexer.reset_indexer_state()
 
     @app.exception_handler(HTTPException)
     async def http_exception_handler(_, exc: HTTPException):
