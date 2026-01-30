@@ -69,7 +69,7 @@ def scan_repository(root_path: str) -> dict:
     })
     return results
 
-def should_skip_path(root_path: str, file_path: str, is_dir: bool) -> bool:
+def should_skip_path(root_path: str, file_path: str, is_dir: bool, max_file_size_mb: int = 5) -> bool:
     """
     Deterministic exclusion logic based on PRD §11.1-11.3.
     Returns True if the path should be skipped, False otherwise.
@@ -98,9 +98,81 @@ def should_skip_path(root_path: str, file_path: str, is_dir: bool) -> bool:
         _, ext = os.path.splitext(file_path)
         if ext.lower() in {e.lower() for e in EXCLUDED_EXTENSIONS}:
             return True
+            
+        # 4. Classification-aware size cap
+        # "code" and "other" use a fixed 5MB cap.
+        # "docs/config" (markdown or others) use the configurable max_file_size_mb.
+        
+        # Simple classification logic matching chunker.py
+        if ext.lower() == ".md":
+            effective_max_mb = max_file_size_mb
+        else:
+            # For now, we treat non-markdown as "code" or "other" which have fixed 5MB cap
+            effective_max_mb = 5
 
-    # 4. Default: Return False for all other cases
+        try:
+            # Only check size if file exists (to avoid issues with mock paths in tests)
+            if os.path.exists(file_path):
+                file_size_mb = os.path.getsize(file_path) / (1024 * 1024)
+                if file_size_mb > effective_max_mb:
+                    return True
+        except OSError:
+            pass
+
+    # 5. Default: Return False for all other cases
     return False
+
+def should_skip_path_with_reason(root_path: str, file_path: str, is_dir: bool, max_file_size_mb: int = 5) -> (bool, str | None):
+    """
+    Deterministic exclusion logic based on PRD §11.1-11.3.
+    Returns (True, skip_reason) if the path should be skipped, (False, None) otherwise.
+    """
+    # 1. Boundary check: If file_path is not under root_path → return True
+    try:
+        # Use abspath to ensure we are comparing absolute paths
+        abs_root = os.path.abspath(root_path)
+        abs_file = os.path.abspath(file_path)
+        
+        # commonpath returns the longest common sub-path of each passed pathname.
+        # If the common path is not the root path, then the file is outside the root.
+        if os.path.commonpath([abs_root, abs_file]) != abs_root:
+            return True, "OUT_OF_BOUNDS"
+    except (ValueError, OSError):
+        # Safe by default: When unsure, return True (skip)
+        return True, "PATH_ERROR"
+
+    if is_dir:
+        # 2. Directory exclusion: If is_dir and directory name matches PRD excluded list
+        dir_name = os.path.basename(file_path)
+        if dir_name.lower() in {d.lower() for d in EXCLUDED_DIRECTORIES}:
+            return True, "EXCLUDED_DIR"
+    else:
+        # 3. File extension exclusion: If not is_dir and file extension matches PRD excluded extensions
+        _, ext = os.path.splitext(file_path)
+        if ext.lower() in {e.lower() for e in EXCLUDED_EXTENSIONS}:
+            return True, "EXCLUDED_EXT"
+            
+        # 4. Classification-aware size cap
+        # "code" and "other" use a fixed 5MB cap.
+        # "docs/config" (markdown or others) use the configurable max_file_size_mb.
+        
+        # Simple classification logic matching chunker.py
+        if ext.lower() == ".md":
+            effective_max_mb = max_file_size_mb
+        else:
+            # For now, we treat non-markdown as "code" or "other" which have fixed 5MB cap
+            effective_max_mb = 5
+
+        try:
+            if os.path.exists(file_path):
+                file_size_mb = os.path.getsize(file_path) / (1024 * 1024)
+                if file_size_mb > effective_max_mb:
+                    return True, "SIZE_CAP"
+        except OSError:
+            return True, "SIZE_CAP"
+
+    # 5. Default: Return False for all other cases
+    return False, None
 
 def is_symlink_entry(path: str) -> bool:
     """
