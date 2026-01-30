@@ -106,7 +106,7 @@ export function startHealthPolling(baseUrl: string, onUpdate: (health: HealthRes
             if (!response.ok) {
                 throw new Error(`Health check failed: ${response.statusText}`);
             }
-            const health: HealthResponse = await response.json();
+            const health = await response.json() as HealthResponse;
             onUpdate(health);
             if (!health.indexing) {
                 stopHealthPolling();
@@ -132,4 +132,41 @@ export function stopHealthPolling() {
 export async function sendMessageToAgent(message: string): Promise<void> {
     console.log('Sending message to agent:', message);
     // Implementation for sending message to agent
+}
+
+export function ask(question: string) {
+  return fetch('/ask', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ question }),
+  });
+}
+
+export function overview(question: string) {
+  return fetch('/overview', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ question }),
+  });
+}
+
+export function askWithOverride(question: string, modeOverride: string) {
+  return fetch('/ask', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      question,
+      mode_override: modeOverride
+    }),
+  });
+}
+
+export function search(question: string) {
+  return fetch('/search', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ question }),
+  });
 }

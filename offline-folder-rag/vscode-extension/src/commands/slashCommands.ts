@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 export type SlashCommandInstruction =
     | { kind: "index"; mode: "full" | "incremental" | "report" }
     | { kind: "overview" }
@@ -79,7 +78,6 @@ export function parseSlashCommand(input: string): SlashCommandParseResult {
             return { success: false, reason: "INVALID_COMMAND" };
     }
 }
-=======
 /**
  * Deterministic registry of supported slash commands.
  * ONLY supported commands are included here.
@@ -113,4 +111,3 @@ export const slashCommandRegistry: { [key: string]: (args: string) => string } =
         return `Asking the system: ${args}`;
     }
 };
->>>>>>> 31ecd6f019cdef3270a68e61b1c6464827aa0ee7

@@ -2,15 +2,19 @@
   "compilerOptions": {
     "module": "commonjs",
     "target": "ES2022",
-    "lib": ["ES2022"],
+    "lib": ["ES2022", "DOM"],
     "sourceMap": true,
+    "rootDir": "..",
     "outDir": "out",
-    "rootDir": "src",
     "strict": true,
     "moduleResolution": "node",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "types": ["node", "vscode", "mocha"]
+    "types": ["node", "vscode", "mocha"],
+    "baseUrl": ".",
+    "paths": {
+      "*": ["node_modules/*"]
+    }
   },
-  "include": ["src"]
+  "include": ["src", "../tests", "../unittests"]
 }

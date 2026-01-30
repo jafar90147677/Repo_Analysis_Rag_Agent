@@ -4,16 +4,14 @@ import * as vscode from "vscode";
 
 import { CommandRouter, CommandResultMessage } from "../commands/commandRouter";
 import { getChatPanelHtml } from "./ui/chatPanelHtml";
+import { askWithOverride } from "../services/agentClient";
 import { startHealthPolling, stopHealthPolling, HealthResponse } from "../services/agentClient";
 
 export class ChatPanelViewProvider {
     private panel: vscode.WebviewPanel | undefined;
     private readonly router: CommandRouter;
-<<<<<<< HEAD
     private readonly modeState = new ComposerModeState();
-=======
     private readonly agentBaseUrl = "http://localhost:8000"; // Default agent URL
->>>>>>> 31ecd6f019cdef3270a68e61b1c6464827aa0ee7
 
     constructor(
         private readonly extensionContext: vscode.ExtensionContext,
@@ -42,12 +40,41 @@ export class ChatPanelViewProvider {
             stopHealthPolling();
         });
 
-<<<<<<< HEAD
+        this.panel.webview.onDidReceiveMessage(async (message) => {
+            if (message.type === "command") {
+                const { text, mode } = message;
+                if (mode === "RAG" && !text.startsWith("/")) {
+                    try {
+                        const response = await askWithOverride(text, "rag");
+                        const result = await response.json();
+                        this.postMessage({
+                            type: "commandResult",
+                            payload: result.answer || JSON.stringify(result),
+                        });
+                    } catch (error) {
+                        this.postMessage({
+                            type: "commandResult",
+                            payload: `Error: ${error instanceof Error ? error.message : String(error)}`,
+                        });
+                    }
+                } else if (mode === "Auto" && !text.startsWith("/")) {
+                    try {
+                        await this.router.autoRouteInput(text);
+                    } catch (error) {
+                        this.postMessage({
+                            type: "commandResult",
+                            payload: `Error: ${error instanceof Error ? error.message : String(error)}`,
+                        });
+                    }
+                } else {
+                    await this.router.handleCommand(text);
+                }
+            }
+        });
+
         this.panel.webview.html = getChatPanelHtml();
-=======
         const composerPlaceholder = "Plan, @ for context, / for commands";
         this.panel.webview.html = getChatPanelHtml(this.extensionUri, composerPlaceholder);
->>>>>>> 31ecd6f019cdef3270a68e61b1c6464827aa0ee7
 
         this.panel.webview.onDidReceiveMessage(async (message: { type: string; [key: string]: any }) => {
             if (message.type === "command") {
@@ -121,7 +148,6 @@ export class ChatPanelViewProvider {
         }
 
         this.panel.webview.postMessage(message);
-<<<<<<< HEAD
     }
 
     private postModeState(): void {
@@ -225,7 +251,9 @@ export class ChatPanelViewProvider {
         }
 
         return undefined;
-=======
->>>>>>> 31ecd6f019cdef3270a68e61b1c6464827aa0ee7
+    }
+
+    private postMessage(message: any): void {
+        this.panel?.webview.postMessage(message);
     }
 }
