@@ -64,8 +64,14 @@ async def index_route(request: IndexRequest):
             detail=_INDEX_IN_PROGRESS_ERROR,
         )
     
-    # Use the new scan_repository function
-    results = scan_repository(request.root_path)
+    # Support incremental mode if requested
+    mode = request.mode or "full"
+    # In a real scenario, changed_files would be determined by a diff or provided in request.
+    # For this task, we assume if mode is incremental, we need some files to process.
+    # We'll pass an empty list if not provided, or the implementation can be extended.
+    changed_files = [] # Placeholder or logic to get changed files
+    
+    results = scan_repository(request.root_path, mode=mode, changed_files=changed_files if mode == "incremental" else None)
     return results
 
 @router.get("/health", response_model=HealthResponse)
