@@ -144,7 +144,7 @@ def test_index_route_blocks_when_repo_busy(tmp_path, monkeypatch):
     )
     assert response.status_code == 409
     payload = response.json()
-    assert payload["error_code"] == "INDEXING_IN_PROGRESS"
+    assert payload["error_code"] == "INDEX_IN_PROGRESS"
     assert payload["message"] == "Indexing already in progress for this repo."
     assert payload["remediation"] == "Wait for the active indexing run to finish before retrying."
 
@@ -193,6 +193,10 @@ def test_health_reflects_indexing_state(tmp_path, monkeypatch):
     monkeypatch.setenv("RAG_INDEX_DIR", str(tmp_path))
     main_module, routes_module, security_module, scan_rules_module = _load_edge_agent_app_modules()
     indexer = _load_indexer_module()
+    
+    # Reset state to ensure clean test
+    indexer.reset_indexing_stats()
+    
     client = TestClient(main_module.app)
 
     repo_path = tmp_path / "repo"

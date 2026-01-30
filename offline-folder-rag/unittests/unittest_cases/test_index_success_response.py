@@ -8,7 +8,7 @@ from edge_agent.app.security import TOKEN_HEADER, get_or_create_token
 
 
 def _load_fastapi_app():
-    repo_root = Path(__file__).resolve().parents[1]
+    repo_root = Path(__file__).resolve().parents[3]
     if str(repo_root) not in sys.path:
         sys.path.insert(0, str(repo_root))
     module = importlib.import_module("edge_agent.app.main")
@@ -35,7 +35,10 @@ def test_index_success_response_contract(tmp_path, monkeypatch):
     assert response.headers["content-type"].startswith("application/json")
 
     payload = response.json()
-    expected_fields = {"repo_id", "mode", "indexed_files", "skipped_files", "chunks_added", "duration_ms"}
+    expected_fields = {
+        "repo_id", "mode", "indexed_files", "skipped_files", 
+        "chunks_added", "duration_ms", "manifest_path", "collections"
+    }
     assert set(payload.keys()) == expected_fields
     assert isinstance(payload["repo_id"], str)
     assert isinstance(payload["mode"], str)

@@ -16,8 +16,10 @@ class IndexResponse(BaseModel):
     skipped_files: int
     chunks_added: int
     duration_ms: int
+    manifest_path: Optional[str] = None
+    collections: Optional[List[str]] = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="ignore")
 
 class HealthResponse(BaseModel):
     indexing: bool
