@@ -8,6 +8,8 @@ export interface IndexGateConfig {
     storageRoot: string;
 }
 
+const MANIFEST_FILE = "manifest.json";
+
 function getRepoId(normalizedRootPath: string): string {
     return crypto.createHash("sha256").update(normalizedRootPath).digest("hex");
 }
@@ -18,11 +20,22 @@ export function getIndexDir(config: IndexGateConfig, rootPath: string): string {
     return path.join(config.storageRoot, "indexes", repoId);
 }
 
+function getManifestPath(dir: string): string {
+    return path.join(dir, MANIFEST_FILE);
+}
+
 export async function checkIndexExists(config: IndexGateConfig, rootPath: string): Promise<boolean> {
+    const normalizedRootPath = normalizeRootPath(rootPath);
     const dir = getIndexDir(config, rootPath);
+    const manifestPath = getManifestPath(dir);
+
     try {
-        await fs.promises.access(dir, fs.constants.F_OK);
-        return true;
+        const content = await fs.promises.readFile(manifestPath, "utf-8");
+        const parsed = JSON.parse(content);
+        return (
+            parsed?.repoId === getRepoId(normalizedRootPath) &&
+            parsed?.rootPath === normalizedRootPath
+        );
     } catch {
         return false;
     }
@@ -39,14 +52,14 @@ export async function triggerFullIndex(
     await fs.promises.mkdir(dir, { recursive: true });
     onProgress?.("Index directory prepared.");
 
-    const metadataPath = path.join(dir, "metadata.json");
+    const manifestPath = getManifestPath(dir);
     const metadata = {
         repoId: getRepoId(normalizedRootPath),
         rootPath: normalizedRootPath,
         indexedAt: new Date().toISOString(),
     };
 
-    await fs.promises.writeFile(metadataPath, JSON.stringify(metadata, null, 2), "utf-8");
+    await fs.promises.writeFile(manifestPath, JSON.stringify(metadata, null, 2), "utf-8");
     onProgress?.("Indexing complete.");
 }
 
