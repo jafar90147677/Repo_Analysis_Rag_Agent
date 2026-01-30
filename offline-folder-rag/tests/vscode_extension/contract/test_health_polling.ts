@@ -1,3 +1,9 @@
+// import * as assert from "assert";
+// import * as path from "path";
+// import { fileURLToPath, pathToFileURL } from "url";
+// const assert = require("assert");
+// const path = require("path");
+// const { fileURLToPath, pathToFileURL } = require("url");
 import * as assert from "assert";
 import * as path from "path";
 import { fileURLToPath, pathToFileURL } from "url";
@@ -24,6 +30,8 @@ async function loadService() {
   }
   return module;
 }
+// import { startHealthPolling, stopHealthPolling } from "../../../vscode-extension/src/services/agentClient";
+// const { startHealthPolling, stopHealthPolling } = require("../../../vscode-extension/src/services/agentClient");
 import { startHealthPolling, stopHealthPolling } from "../../../vscode-extension/src/services/agentClient";
 
 describe("Health Polling Contract Test", () => {
