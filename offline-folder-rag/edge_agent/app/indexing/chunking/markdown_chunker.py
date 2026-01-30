@@ -7,7 +7,7 @@ HEADING_RE = re.compile(r"^#{1,6}\s+")
 
 
 def chunk(file_path: Path | str, *args, **kwargs) -> Iterable[Dict[str, Any]]:
-    """
+    r"""
     Split markdown into sections starting at lines that match ^#{1,6}\s+.
     Returns chunks with required metadata; headings define boundaries.
     """

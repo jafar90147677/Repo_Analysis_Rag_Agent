@@ -29,15 +29,11 @@ def test_excluded_ext():
     assert result == "EXCLUDED_EXT"
 
 
-def test_symlink():
-    with tempfile.NamedTemporaryFile() as temp_file:
-        symlink_path = temp_file.name + "_symlink"
-        try:
-            os.symlink(temp_file.name, symlink_path)
-        except OSError:
-            pytest.skip("Symlink creation not permitted on this platform")
-        result = scan_file(symlink_path)
-        os.unlink(symlink_path)
+def test_symlink(mocker):
+    # Mock os.path.islink to return True for a dummy path
+    file_path = "/path/to/symlink"
+    mocker.patch("os.path.islink", return_value=True)
+    result = scan_file(file_path)
     assert result == "SYMLINK"
 
 
