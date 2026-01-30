@@ -8,12 +8,37 @@ from fastapi.testclient import TestClient
 
 import pytest
 
+_DEBUG_LOG = Path(r"c:\Users\FAZLEEN ANEESA\Desktop\Rag_Agent\.cursor\debug.log")
+_SESSION = "debug-session"
+_RUN = "run2"
+
+
+def _log(hypothesis_id: str, location: str, message: str, data: dict):
+    try:
+        _DEBUG_LOG.parent.mkdir(parents=True, exist_ok=True)
+        payload = {
+            "sessionId": _SESSION,
+            "runId": _RUN,
+            "hypothesisId": hypothesis_id,
+            "location": location,
+            "message": message,
+            "data": data,
+            "timestamp": __import__("time").time(),
+        }
+        with _DEBUG_LOG.open("a", encoding="utf-8") as f:
+            import json
+
+            f.write(json.dumps(payload) + "\n")
+    except Exception:
+        pass
 
 def _load_indexer_module():
     repo_root = Path(__file__).resolve().parents[2]
     if str(repo_root) not in sys.path:
         sys.path.insert(0, str(repo_root))
+    _log("H1", "test_indexer_state.py:_load_indexer_module", "sys.path updated", {"repo_root": str(repo_root), "sys_path": sys.path})
     import edge_agent.app.indexing.indexer as module  # type: ignore
+    _log("H1", "test_indexer_state.py:_load_indexer_module", "imported indexer", {"module": str(module)})
     return module
 
 
@@ -21,6 +46,7 @@ def _load_edge_agent_app_modules():
     repo_root = Path(__file__).resolve().parents[2]
     if str(repo_root) not in sys.path:
         sys.path.insert(0, str(repo_root))
+    _log("H1", "test_indexer_state.py:_load_edge_agent_app_modules", "sys.path updated", {"repo_root": str(repo_root), "sys_path": sys.path})
     app_main = importlib.import_module("edge_agent.app.main")
     routes_module = importlib.import_module("edge_agent.app.api.routes")
     security_module = importlib.import_module("edge_agent.app.security")

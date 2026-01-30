@@ -4,9 +4,11 @@ const PLACEHOLDER_TEXT = "Plan, @ for context, / for commands";
 
 function getNonce(): string {
     const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    return Array.from({ length: 16 })
-        .map(() => possible.charAt(Math.floor(Math.random() * possible.length)))
-        .join("");
+    let text = "";
+    for (let i = 0; i < 16; i++) {
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+    }
+    return text;
 }
 
 export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: string = PLACEHOLDER_TEXT): string {
@@ -16,7 +18,7 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'nonce-\${nonce}'; style-src 'unsafe-inline';" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'nonce-${nonce}'; style-src 'unsafe-inline';" />
     <title>Offline Folder RAG</title>
     <style>
         :root {
@@ -236,22 +238,6 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
 
         .citation-link:hover {
             text-decoration: underline;
-        }
-
-        #chat-panel-composer {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        textarea {
-            width: 100%;
-            background: #222;
-            border: 1px solid #333;
-            color: #eee;
-            padding: 8px;
-            resize: vertical;
-            min-height: 60px;
         }
 
         #composer-bottom-row {
@@ -494,7 +480,7 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
                 <label for="composer-input">Message</label>
                 <textarea
                     id="composer-input"
-                    placeholder="\${placeholderText}"
+                    placeholder="${placeholderText}"
                     aria-label="Message input"
                     aria-describedby="composer-hint"
                     autocomplete="off"
@@ -562,7 +548,7 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
         </div>
     </div>
 
-    <script nonce="\${nonce}">
+    <script nonce="${nonce}">
         (function () {
             const vscode = acquireVsCodeApi();
             const conversation = document.getElementById("conversation");
@@ -587,7 +573,7 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
             };
 
             function generateContextId() {
-                return \`ctx-\${Date.now()}-\${Math.random().toString(16).slice(2)}\`;
+                return "ctx-" + Date.now() + "-" + Math.random().toString(16).slice(2);
             }
 
             function applyMode(newMode, notify = false) {
@@ -614,7 +600,7 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
                     return;
                 }
 
-                localDropdown.innerHTML = \`<option value="\${LOCAL_SELECT_VALUE}">Select Folder…</option>\`;
+                localDropdown.innerHTML = '<option value="' + LOCAL_SELECT_VALUE + '">Select Folder…</option>';
 
                 const seen = new Set();
                 const rootPath = state?.rootPath;
@@ -704,7 +690,7 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
                 }
 
                 const entry = document.createElement("div");
-                entry.className = \`conversation-message \${role}\`;
+                entry.className = "conversation-message " + role;
                 entry.textContent = text;
                 conversation.appendChild(entry);
                 conversation.scrollTop = conversation.scrollHeight;
@@ -715,7 +701,7 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
                 chip.className = "context-chip";
 
                 const text = document.createElement("span");
-                text.textContent = \`\${label}: \${value}\`;
+                text.textContent = label + ": " + value;
                 text.title = value;
                 chip.appendChild(text);
 
@@ -726,7 +712,7 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
                     removeButton.dataset.removeId = id;
                 }
                 removeButton.textContent = "×";
-                removeButton.ariaLabel = \`Remove \${label} context\`;
+                removeButton.ariaLabel = "Remove " + label + " context";
                 chip.appendChild(removeButton);
 
                 return chip;

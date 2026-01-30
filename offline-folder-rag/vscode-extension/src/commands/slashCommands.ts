@@ -10,7 +10,7 @@ export type SlashCommandParseResult =
     | { success: true; command: SlashCommandInstruction }
     | { success: false; reason: "INVALID_COMMAND" };
 
-export function parseSlashCommand(input: string): SlashCommandParseResult {
+export function parseSlashCommandInstruction(input: string): SlashCommandParseResult {
     const trimmed = input.trim();
     if (!trimmed.startsWith("/")) {
         return { success: false, reason: "INVALID_COMMAND" };
@@ -78,6 +78,7 @@ export function parseSlashCommand(input: string): SlashCommandParseResult {
             return { success: false, reason: "INVALID_COMMAND" };
     }
 }
+
 /**
  * Deterministic registry of supported slash commands.
  * ONLY supported commands are included here.
