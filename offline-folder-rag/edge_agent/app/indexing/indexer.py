@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import os
 import threading
 import time
 from typing import Dict
 
+from . import scan_rules
 from .scan_rules import compute_repo_id
 from ..logging.logger import logger
 
@@ -185,3 +187,43 @@ class RepoIndexingLock:
 def acquire_indexing_lock(repo_id: str) -> RepoIndexingLock:
     """Return a context manager that holds the repo lock for `repo_id`."""
     return RepoIndexingLock(repo_id)
+
+
+def perform_indexing_scan(root_path: str, repo_id: str) -> dict:
+    """
+    Traverse the file system starting from root_path, enforcing boundaries and exclusions.
+    """
+    indexed_files = 0
+    skipped_files = 0
+    start_time = time.time()
+
+    # Use os.walk to traverse the directory tree
+    for root, dirs, files in os.walk(root_path):
+        # 1. Directory Exclusion: Modify 'dirs' in-place to skip excluded directories
+        # We must iterate over a copy of 'dirs' to safely remove items
+        for d in list(dirs):
+            dir_path = os.path.join(root, d)
+            if scan_rules.should_skip_path(root_path, dir_path, is_dir=True):
+                dirs.remove(d)
+                skipped_files += 1
+
+        # 2. File Exclusion: Process files in the current directory
+        for f in files:
+            file_path = os.path.join(root, f)
+            if scan_rules.should_skip_path(root_path, file_path, is_dir=False):
+                skipped_files += 1
+            else:
+                indexed_files += 1
+                increment_indexed_files(repo_id)
+
+    duration_ms = int((time.time() - start_time) * 1000)
+
+    # Note: Integration with manifest_store.py for skipped items will be handled separately.
+    return {
+        "repo_id": repo_id,
+        "mode": "full",
+        "indexed_files": indexed_files,
+        "skipped_files": skipped_files,
+        "chunks_added": 0,  # Placeholder until chunking is integrated
+        "duration_ms": duration_ms,
+    }

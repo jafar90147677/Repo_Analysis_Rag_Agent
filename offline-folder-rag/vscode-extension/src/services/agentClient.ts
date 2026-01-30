@@ -98,7 +98,7 @@ let healthPollingInterval: NodeJS.Timeout | undefined;
 export function startHealthPolling(baseUrl: string, onUpdate: (health: HealthResponse) => void, onError: (error: any) => void) {
     if (healthPollingInterval) {
         return;
-    }
+  }
 
     const poll = async () => {
         try {
