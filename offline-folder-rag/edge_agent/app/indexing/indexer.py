@@ -20,7 +20,7 @@ from .scan_rules import compute_repo_id
 from .manifest_store import ManifestStore
 from .config_store import RepoConfigStore
 from ..logging.logger import logger
-from ..config.defaults import DEFAULT_INDEX_DIR
+from .index_dir import resolve_index_dir
 
 
 _repo_indexing_state: Dict[str, bool] = {}
@@ -33,14 +33,6 @@ _config_store = RepoConfigStore()
 _chroma_client_cache: Dict[str, object] = {}
 _chroma_collection_cache: Dict[Tuple[str, str], object] = {}
 _chroma_lock = threading.Lock()
-
-def resolve_index_dir() -> Path:
-    """Return RAG_INDEX_DIR when set; otherwise the default index directory."""
-    env_dir = os.environ.get("RAG_INDEX_DIR")
-    if env_dir:
-        return Path(env_dir)
-    return DEFAULT_INDEX_DIR
-
 
 def _get_persist_directory(repo_id: str) -> Path:
     base = resolve_index_dir()

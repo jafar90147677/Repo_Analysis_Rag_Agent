@@ -68,7 +68,7 @@ describe('Slash Command Parsing', () => {
     });
     it('should return correct response for /doctor', async () => {
         const result = await parseSlashCommand('/doctor', mockContext);
-        assert.strictEqual(result.type, 'commandResult');
+        assert.strictEqual(result.type, 'assistantResponse');
     });
 
     it('should return correct response for /autoindex on', () => {

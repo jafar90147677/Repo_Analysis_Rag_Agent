@@ -122,7 +122,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Dict, List, Set
 
-from .indexer import resolve_index_dir
+from .index_dir import resolve_index_dir
 
 __all__ = [
     "ManifestStatus",

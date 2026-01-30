@@ -1,25 +1,5 @@
 import * as assert from "assert";
 import { startHealthPolling, stopHealthPolling } from "../../../vscode-extension/src/services/agentClient";
-import * as path from "path";
-import { fileURLToPath } from "url";
-import { createRequire } from "module";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const require = createRequire(import.meta.url);
-
-const repoRoot = path.resolve(__dirname, "..", "..", "..");
-const serviceModulePath = path.join(
-  repoRoot,
-  "vscode-extension",
-  "src",
-  "services",
-  "agentClient.ts"
-);
-
-async function loadService() {
-  return require(serviceModulePath);
-}
 
 describe("Health Polling Contract Test", () => {
     let originalFetch: typeof fetch;

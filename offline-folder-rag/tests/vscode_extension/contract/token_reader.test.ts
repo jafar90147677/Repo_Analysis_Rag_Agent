@@ -3,25 +3,6 @@ import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
 import { getTokenFilePath, readAgentToken } from "../../../vscode-extension/src/services/agentClient";
-import { fileURLToPath } from "url";
-import { createRequire } from "module";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const require = createRequire(import.meta.url);
-
-const repoRoot = path.resolve(__dirname, "..", "..", "..");
-const serviceModulePath = path.join(
-  repoRoot,
-  "vscode-extension",
-  "src",
-  "services",
-  "agentClient.ts"
-);
-
-async function loadService() {
-  return require(serviceModulePath);
-}
 
 async function withTempDir(run: (dir: string) => Promise<void>) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "token-reader-"));
