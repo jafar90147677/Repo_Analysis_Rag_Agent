@@ -134,23 +134,23 @@ export async function sendMessageToAgent(message: string): Promise<void> {
     // Implementation for sending message to agent
 }
 
-export function ask(question: string) {
+export function ask(question: string, extraContext?: any) {
   return fetch('/ask', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ question }),
+    body: JSON.stringify({ question, extra_context: extraContext }),
   });
 }
 
-export function overview(question: string) {
+export function overview(question: string, extraContext?: any) {
   return fetch('/overview', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ question }),
+    body: JSON.stringify({ question, extra_context: extraContext }),
   });
 }
 
-export function askWithOverride(question: string, modeOverride: string) {
+export function askWithOverride(question: string, modeOverride: string, extraContext?: any) {
   return fetch('/ask', {
     method: 'POST',
     headers: {
@@ -158,15 +158,16 @@ export function askWithOverride(question: string, modeOverride: string) {
     },
     body: JSON.stringify({
       question,
-      mode_override: modeOverride
+      mode_override: modeOverride,
+      extra_context: extraContext
     }),
   });
 }
 
-export function search(question: string) {
+export function search(question: string, extraContext?: any) {
   return fetch('/search', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ question }),
+    body: JSON.stringify({ question, extra_context: extraContext }),
   });
 }

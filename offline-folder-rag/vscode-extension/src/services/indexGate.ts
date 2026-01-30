@@ -10,6 +10,12 @@ export interface IndexGateConfig {
 
 const MANIFEST_FILE = "manifest.json";
 
+export function isPathInsideRoot(rootPath: string, targetPath: string): boolean {
+    const normalizedRoot = normalizeRootPath(rootPath);
+    const normalizedTarget = path.resolve(targetPath);
+    return normalizedTarget.startsWith(normalizedRoot);
+}
+
 function getRepoId(normalizedRootPath: string): string {
     return crypto.createHash("sha256").update(normalizedRootPath).digest("hex");
 }

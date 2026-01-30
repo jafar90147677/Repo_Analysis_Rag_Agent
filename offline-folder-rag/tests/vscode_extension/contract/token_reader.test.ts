@@ -17,7 +17,8 @@ const serviceModulePath = path.join(
 );
 
 async function loadService() {
-  return import(pathToFileURL(serviceModulePath).href);
+  const module = await import(pathToFileURL(serviceModulePath).href);
+  return module.default || module;
 }
 
 async function withTempDir(run: (dir: string) => Promise<void>) {

@@ -4,8 +4,18 @@ import * as vscode from "vscode";
 
 import { CommandRouter, CommandResultMessage } from "../commands/commandRouter";
 import { getChatPanelHtml } from "./ui/chatPanelHtml";
-import { askWithOverride } from "../services/agentClient";
-import { startHealthPolling, stopHealthPolling, HealthResponse } from "../services/agentClient";
+import { readRootPath, writeRootPath, readRecentFolders } from "../services/storage";
+import { isPathInsideRoot } from "../services/indexGate";
+
+class ComposerModeState {
+    private mode: "auto" | "rag" | "tools" = "auto";
+    public getMode() { return this.mode; }
+    public setMode(mode: "auto" | "rag" | "tools") { this.mode = mode; }
+}
+
+function isComposerMode(mode: any): mode is "auto" | "rag" | "tools" {
+    return ["auto", "rag", "tools"].includes(mode);
+}
 
 export class ChatPanelViewProvider {
     private panel: vscode.WebviewPanel | undefined;
@@ -40,50 +50,36 @@ export class ChatPanelViewProvider {
             stopHealthPolling();
         });
 
-        this.panel.webview.onDidReceiveMessage(async (message) => {
-            if (message.type === "command") {
-                const { text, mode } = message;
-                if (mode === "RAG" && !text.startsWith("/")) {
-                    try {
-                        const response = await askWithOverride(text, "rag");
-                        const result = await response.json();
-                        this.postMessage({
-                            type: "commandResult",
-                            payload: result.answer || JSON.stringify(result),
-                        });
-                    } catch (error) {
-                        this.postMessage({
-                            type: "commandResult",
-                            payload: `Error: ${error instanceof Error ? error.message : String(error)}`,
-                        });
-                    }
-                } else if (mode === "Auto" && !text.startsWith("/")) {
-                    try {
-                        await this.router.autoRouteInput(text);
-                    } catch (error) {
-                        this.postMessage({
-                            type: "commandResult",
-                            payload: `Error: ${error instanceof Error ? error.message : String(error)}`,
-                        });
-                    }
-                } else {
-                    await this.router.handleCommand(text);
-                }
-            }
-        });
-
-        this.panel.webview.html = getChatPanelHtml();
-        const composerPlaceholder = "Plan, @ for context, / for commands";
-        this.panel.webview.html = getChatPanelHtml(this.extensionUri, composerPlaceholder);
-
         this.panel.webview.onDidReceiveMessage(async (message: { type: string; [key: string]: any }) => {
             if (message.type === "command") {
-                const mode = isComposerMode(message.mode) ? message.mode : this.modeState.getMode();
+                const { text, mode, extraContext } = message;
+                const modeToUse = isComposerMode(mode) ? mode : this.modeState.getMode();
                 await this.router.route({
-                    text: message.text ?? "",
-                    mode,
-                    extraContext: message.extraContext,
+                    text: text ?? "",
+                    mode: modeToUse,
+                    extraContext,
                 });
+            } else if (message.type === "attachmentPick") {
+                const files = await vscode.window.showOpenDialog({
+                    canSelectMany: false,
+                    canSelectFolders: false,
+                    canSelectFiles: true,
+                    openLabel: "Select Attachment",
+                });
+
+                if (files && files.length > 0) {
+                    const selectedPath = files[0].fsPath;
+                    const rootPath = this.getEffectiveRootPath();
+
+                    if (rootPath && isPathInsideRoot(rootPath, selectedPath)) {
+                        this.panel?.webview.postMessage({
+                            type: "insertText",
+                            text: `@file:${selectedPath}`,
+                        });
+                    } else {
+                        vscode.window.showErrorMessage("Select a file inside the chosen folder.");
+                    }
+                }
             } else if (message.type === "setMode" && isComposerMode(message.mode)) {
                 this.modeState.setMode(message.mode);
                 this.postModeState();
@@ -111,6 +107,9 @@ export class ChatPanelViewProvider {
                 }
             }
         });
+
+        const composerPlaceholder = "Plan · @ for context · / for commands";
+        this.panel.webview.html = getChatPanelHtml(this.extensionUri, composerPlaceholder);
 
         this.postModeState();
         this.postLocalState();

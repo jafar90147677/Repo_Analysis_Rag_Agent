@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { slashCommandRegistry } from './slashCommands';
-import { overview, search, ask } from '../services/agentClient';
+import { overview, search, ask, askWithOverride } from '../services/agentClient';
 
 export interface CommandResultMessage {
     type: "commandResult";
@@ -13,7 +13,7 @@ export class CommandRouter {
         private readonly onResult: (message: CommandResultMessage) => void
     ) {}
 
-    public async handleCommand(input: string): Promise<void> {
+    public async handleCommand(input: string, extraContext?: any): Promise<void> {
         const result = this.handleToolsSlashCommand(input);
         this.onResult({
             type: "commandResult",
@@ -21,18 +21,18 @@ export class CommandRouter {
         });
     }
 
-    public async autoRouteInput(input: string): Promise<void> {
+    public async autoRouteInput(input: string, extraContext?: any): Promise<void> {
         const trimmed = input.trim();
         const overviewKeywords = ['overview', 'structure', 'languages'];
         const searchKeywords = ['search', 'find', 'where', 'locate'];
 
         let response: Response;
         if (overviewKeywords.some(k => trimmed.toLowerCase().includes(k))) {
-            response = await overview(trimmed);
+            response = await overview(trimmed, extraContext);
         } else if (searchKeywords.some(k => trimmed.toLowerCase().includes(k))) {
-            response = await search(trimmed);
+            response = await search(trimmed, extraContext);
         } else {
-            response = await ask(trimmed);
+            response = await ask(trimmed, extraContext);
         }
 
         const result = await response.json() as any;
@@ -40,6 +40,33 @@ export class CommandRouter {
             type: "commandResult",
             payload: result.answer || JSON.stringify(result)
         });
+    }
+
+    public async handleIndexAction(action: string): Promise<void> {
+        // ... implementation ...
+    }
+
+    public async route(options: { text: string; mode: string; extraContext?: any }): Promise<void> {
+        const { text, mode, extraContext } = options;
+        if (mode === "RAG" && !text.startsWith("/")) {
+            try {
+                const response = await askWithOverride(text, "rag", extraContext);
+                const result = await response.json();
+                this.onResult({
+                    type: "commandResult",
+                    payload: result.answer || JSON.stringify(result),
+                });
+            } catch (error) {
+                this.onResult({
+                    type: "commandResult",
+                    payload: `Error: \${error instanceof Error ? error.message : String(error)}`,
+                });
+            }
+        } else if (mode === "Auto" && !text.startsWith("/")) {
+            await this.autoRouteInput(text, extraContext);
+        } else {
+            await this.handleCommand(text, extraContext);
+        }
     }
 
     public handleToolsSlashCommand(input: string): string {
