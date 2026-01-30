@@ -72,12 +72,11 @@ def test_ask_endpoint_auth(auth_token):
         json={"query": "test query"}
     )
     assert response.status_code == 200
-    assert response.json() == {
-        "mode": "rag",
-        "confidence": "high",
-        "answer": "This is a placeholder answer",
-        "citations": []
-    }
+    payload = response.json()
+    assert payload["mode"] == "rag"
+    assert payload["confidence"] in {"found", "partial", "not_found"}
+    assert isinstance(payload.get("answer"), str)
+    assert isinstance(payload.get("citations"), list)
 
     # Invalid token
     response = client.post(
