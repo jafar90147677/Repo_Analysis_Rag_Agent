@@ -1,0 +1,8 @@
+{
+  "files": {
+    "C:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\pytest_tmp\\pytest-of-FAZLEEN ANEESA\\pytest-0\\test_chunking_workflow_truncat0\\repo\\large_module.py": {
+      "truncated": true,
+      "skip_reason": "CHUNK_LIMIT"
+    }
+  }
+}
