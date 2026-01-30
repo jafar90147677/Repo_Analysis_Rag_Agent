@@ -44,7 +44,6 @@ export function readAgentToken(): string | null {
     }
 }
 
-<<<<<<< HEAD
 export function readComposerMode(): ComposerMode | null {
     const statePath = getModeStateFilePath();
     try {
@@ -68,7 +67,8 @@ export function writeComposerMode(mode: ComposerMode): void {
     } catch {
         // best effort persistence only
     }
-=======
+}
+
 export interface HealthResponse {
     indexing: boolean;
     indexed_files_so_far: number;
@@ -77,7 +77,6 @@ export interface HealthResponse {
     ollama_ok: boolean;
     ripgrep_ok: boolean;
     chroma_ok: boolean;
->>>>>>> 31ecd6f019cdef3270a68e61b1c6464827aa0ee7
 }
 
 export async function authenticatedFetch(url: string, options: RequestInit = {}): Promise<Response> {
@@ -99,7 +98,7 @@ let healthPollingInterval: NodeJS.Timeout | undefined;
 export function startHealthPolling(baseUrl: string, onUpdate: (health: HealthResponse) => void, onError: (error: any) => void) {
     if (healthPollingInterval) {
         return;
-    }
+  }
 
     const poll = async () => {
         try {
