@@ -14,7 +14,11 @@ describe('POST /overview E2E', () => {
       expect(response.data.mode).toBeDefined();
       expect(response.data.answer).toBeDefined();
     } catch (error: any) {
-      if (error.response?.status !== 200) throw error;
+      if (error.response) {
+        if (error.response.status !== 200) throw error;
+      } else {
+        throw error;
+      }
     }
   });
 });

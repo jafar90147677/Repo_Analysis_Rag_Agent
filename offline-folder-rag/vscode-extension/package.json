@@ -9,7 +9,7 @@
   "main": "./out/extension.js",
   "scripts": {
     "compile": "tsc -p .",
-    "test": "mocha -r ts-node/register \"../tests/vscode_extension/**/test_*.ts\" \"../tests/vscode_extension/**/*.test.ts\" \"../unittests/**/*.test.ts\""
+    "test": "mocha -r ts-node/register -r tsconfig-paths/register \"../tests/vscode_extension/**/test_*.ts\" \"../tests/vscode_extension/**/*.test.ts\" \"../unittests/**/*.test.ts\""
   },
   "devDependencies": {
     "@types/axios": "^0.9.36",
@@ -24,6 +24,7 @@
     "expect": "^29.7.0",
     "mocha": "^10.8.2",
     "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "^5.7.0"
   },
   "contributes": {

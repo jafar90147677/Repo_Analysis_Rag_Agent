@@ -13,7 +13,11 @@ describe('POST /index_report E2E', () => {
       expect(response.status).toBe(200);
       expect(response.data.mode).toBe('report');
     } catch (error: any) {
-      if (error.response?.status !== 200) throw error;
+      if (error.response) {
+        if (error.response.status !== 200) throw error;
+      } else {
+        throw error;
+      }
     }
   });
 });

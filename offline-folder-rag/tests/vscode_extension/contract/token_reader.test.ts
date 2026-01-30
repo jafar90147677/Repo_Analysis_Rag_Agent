@@ -2,23 +2,7 @@ import * as assert from "assert";
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
-import { fileURLToPath, pathToFileURL } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const repoRoot = path.resolve(__dirname, "..", "..", "..");
-const serviceModulePath = path.join(
-  repoRoot,
-  "vscode-extension",
-  "src",
-  "services",
-  "agentClient.ts"
-);
-
-async function loadService() {
-  return import(pathToFileURL(serviceModulePath).href);
-}
+import { getTokenFilePath, readAgentToken } from "../../../vscode-extension/src/services/agentClient";
 
 async function withTempDir(run: (dir: string) => Promise<void>) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "token-reader-"));
@@ -39,7 +23,6 @@ describe("agentClient token reading", () => {
   it("reads token using RAG_INDEX_DIR path", async () => {
     await withTempDir(async (tempDir) => {
       process.env.RAG_INDEX_DIR = tempDir;
-      const { getTokenFilePath, readAgentToken } = await loadService();
       const tokenPath = getTokenFilePath();
       fs.mkdirSync(path.dirname(tokenPath), { recursive: true });
       fs.writeFileSync(tokenPath, "abc123", "utf8");
@@ -54,7 +37,6 @@ describe("agentClient token reading", () => {
       delete process.env.RAG_INDEX_DIR;
       process.env.USERPROFILE = tempDir;
 
-      const { getTokenFilePath, readAgentToken } = await loadService();
       const tokenPath = getTokenFilePath();
       fs.mkdirSync(path.dirname(tokenPath), { recursive: true });
       fs.writeFileSync(tokenPath, "from_profile", "utf8");

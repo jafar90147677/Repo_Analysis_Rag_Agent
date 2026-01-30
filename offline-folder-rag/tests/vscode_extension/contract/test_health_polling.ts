@@ -1,23 +1,5 @@
 import * as assert from "assert";
-import * as path from "path";
-import { fileURLToPath, pathToFileURL } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const repoRoot = path.resolve(__dirname, "..", "..", "..");
-const serviceModulePath = path.join(
-  repoRoot,
-  "vscode-extension",
-  "src",
-  "services",
-  "agentClient.ts"
-);
-
-async function loadService() {
-  // Use dynamic import with file:// URL for ESM compatibility on Windows
-  return import(pathToFileURL(serviceModulePath).href);
-}
+import { startHealthPolling, stopHealthPolling } from "../../../vscode-extension/src/services/agentClient";
 
 describe("Health Polling Contract Test", () => {
     let originalFetch: typeof fetch;
@@ -32,7 +14,6 @@ describe("Health Polling Contract Test", () => {
 
     it("polls at ~2 second intervals and stops when indexing=false", async function() {
         this.timeout(10000);
-        const { startHealthPolling, stopHealthPolling } = await loadService();
 
         let callCount = 0;
         const callTimes: number[] = [];
@@ -92,7 +73,6 @@ describe("Health Polling Contract Test", () => {
 
     it("stops polling on error", async function() {
         this.timeout(5000);
-        const { startHealthPolling, stopHealthPolling } = await loadService();
 
         let callCount = 0;
         global.fetch = (async () => {

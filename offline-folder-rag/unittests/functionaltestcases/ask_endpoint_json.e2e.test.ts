@@ -15,9 +15,13 @@ describe('POST /ask E2E', () => {
       expect(response.data).toHaveProperty('confidence');
       expect(response.data).toHaveProperty('answer');
       expect(response.data).toHaveProperty('citations');
-      expect(Array.isArray(response.data.citations)).toBe(true);
+      expect(Array.isArray((response.data as any).citations)).toBe(true);
     } catch (error: any) {
-      if (error.response?.status !== 200) throw error;
+      if (error.response) {
+        if (error.response.status !== 200) throw error;
+      } else {
+        throw error;
+      }
     }
   });
 
@@ -27,7 +31,11 @@ describe('POST /ask E2E', () => {
         headers: { 'X-LOCAL-TOKEN': TOKEN }
       });
     } catch (error: any) {
-      expect(error.response.status).toBe(422); // Validation Error
+      if (error.response) {
+        expect(error.response.status).toBe(422); // Validation Error
+      } else {
+        throw error;
+      }
       // Note: FastAPI returns 422 for missing fields by default, 
       // but the requirement asks for PRD error schema.
     }

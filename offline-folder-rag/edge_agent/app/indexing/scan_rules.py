@@ -1,8 +1,9 @@
 import os
 import hashlib
+from pathlib import Path
 from ..security.token_store import index_dir
 
-__all__ = ["normalize_root_path", "compute_repo_id", "scan_repository", "should_skip_path"]
+__all__ = ["normalize_root_path", "compute_repo_id", "scan_repository", "should_skip_path", "is_symlink_entry"]
 
 EXCLUDED_DIRECTORIES = {
     ".git", "node_modules", ".venv", "venv", "dist", "build",
@@ -100,3 +101,31 @@ def should_skip_path(root_path: str, file_path: str, is_dir: bool) -> bool:
 
     # 4. Default: Return False for all other cases
     return False
+
+def is_symlink_entry(path: str) -> bool:
+    """
+    Detects if a path is a symlink, junction, or reparse point.
+    Handles Unix symlinks and Windows junctions/reparse points.
+    Returns True if it's a symbolic link/junction, False otherwise.
+    Does not raise exceptions for broken/dangling symlinks.
+    """
+    try:
+        # os.path.islink handles Unix symlinks and Windows symlinks.
+        # However, for Windows junctions, os.path.islink may return False 
+        # depending on the Python version and link type.
+        # pathlib.Path.is_symlink() also has similar behavior.
+        # A more robust way on Windows is to check for reparse point attribute.
+        if os.path.islink(path):
+            return True
+            
+        if os.name == 'nt':
+            import stat
+            try:
+                lstat_res = os.lstat(path)
+                return bool(lstat_res.st_file_attributes & stat.FILE_ATTRIBUTE_REPARSE_POINT)
+            except (AttributeError, OSError):
+                return False
+        return False
+    except (OSError, ValueError):
+        # Return False if we can't access the path or it's invalid
+        return False
