@@ -2,16 +2,19 @@
   "compilerOptions": {
     "module": "commonjs",
     "target": "ES2022",
-    "outDir": "out",
-    "lib": ["ES2022"],
+    "lib": ["ES2022", "DOM"],
     "sourceMap": true,
     "rootDir": "..",
+    "outDir": "out",
     "strict": true,
     "moduleResolution": "node",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "types": ["node", "mocha", "chai", "vscode"]
+    "types": ["node", "vscode", "mocha"],
+    "baseUrl": ".",
+    "paths": {
+      "*": ["node_modules/*"]
+    }
   },
-  "include": ["src", "../tests"],
-  "exclude": ["../tests/vscode_extension/contract/token_reader.test.ts"]
+  "include": ["src", "../tests", "../unittests"]
 }
