@@ -48,7 +48,7 @@ def compute_repo_id(normalized_path: str) -> str:
     """Compute a unique repo ID from a normalized path."""
     return hashlib.sha256(normalized_path.encode('utf-8')).hexdigest().lower()
 
-def scan_repository(root_path: str) -> dict:
+def scan_repository(root_path: str, mode: str = "full", changed_files: list[str] | None = None) -> dict:
     """Scan a repository and return indexing results."""
     from . import indexer
     normalized_path = normalize_root_path(root_path)
@@ -59,8 +59,11 @@ def scan_repository(root_path: str) -> dict:
     code_collection = f"{repo_id}_code_chunks"
     doc_collection = f"{repo_id}_doc_chunks"
     
-    # Perform the actual scan using the integrated logic in indexer.py
-    results = indexer.perform_indexing_scan(root_path, repo_id)
+    if mode == "incremental" and changed_files is not None:
+        results = indexer._run_incremental_index(repo_id, changed_files)
+    else:
+        # Perform the actual scan using the integrated logic in indexer.py
+        results = indexer.perform_indexing_scan(root_path, repo_id)
     
     # Enrich results with paths and collections
     results.update({
