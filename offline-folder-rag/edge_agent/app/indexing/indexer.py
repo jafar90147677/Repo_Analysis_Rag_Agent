@@ -6,8 +6,11 @@ import threading
 import time
 from typing import Dict
 
+from .scan_rules import compute_repo_id
+
 
 _repo_indexing_state: Dict[str, bool] = {}
+_repo_indexed_files: Dict[str, int] = {}
 _repo_indexing_state_lock = threading.Lock()
 
 _repo_locks: Dict[str, threading.Lock] = {}
@@ -32,6 +35,7 @@ def mark_indexing_started(repo_id: str) -> None:
     """Record that indexing has started for `repo_id`."""
     with _repo_indexing_state_lock:
         _repo_indexing_state[repo_id] = True
+        _repo_indexed_files[repo_id] = 0
     with _health_tracking_lock:
         global _indexed_files_so_far
         _indexed_files_so_far = 0
@@ -46,8 +50,11 @@ def mark_indexing_finished(repo_id: str) -> None:
         _last_index_completed_epoch_ms = int(time.time() * 1000)
 
 
-def increment_indexed_files() -> None:
+def increment_indexed_files(repo_id: str | None = None) -> None:
     """Increment the count of indexed files."""
+    if repo_id:
+        with _repo_indexing_state_lock:
+            _repo_indexed_files[repo_id] = _repo_indexed_files.get(repo_id, 0) + 1
     with _health_tracking_lock:
         global _indexed_files_so_far
         _indexed_files_so_far += 1
@@ -59,16 +66,32 @@ def is_indexing_in_progress(repo_id: str) -> bool:
         return _repo_indexing_state.get(repo_id, False)
 
 
-def get_health_stats() -> dict:
+def get_health_stats(repo_id: str | None = None) -> dict:
     """Return the current indexing health statistics."""
     with _repo_indexing_state_lock:
-        is_indexing = any(_repo_indexing_state.values())
+        if repo_id:
+            is_indexing = _repo_indexing_state.get(repo_id, False)
+            indexed_files = _repo_indexed_files.get(repo_id, 0)
+        else:
+            is_indexing = any(_repo_indexing_state.values())
+            indexed_files = _indexed_files_so_far
     with _health_tracking_lock:
         return {
             "indexing": is_indexing,
-            "indexed_files_so_far": _indexed_files_so_far,
+            "indexed_files_so_far": indexed_files,
             "last_index_completed_epoch_ms": _last_index_completed_epoch_ms,
         }
+
+
+def reset_indexing_stats() -> None:
+    """Reset all indexing statistics and states (primarily for testing)."""
+    with _repo_indexing_state_lock:
+        _repo_indexing_state.clear()
+        _repo_indexed_files.clear()
+    with _health_tracking_lock:
+        global _indexed_files_so_far, _last_index_completed_epoch_ms
+        _indexed_files_so_far = 0
+        _last_index_completed_epoch_ms = 0
 
 
 class RepoIndexingLock:

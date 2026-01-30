@@ -10,6 +10,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 from ..indexing import indexer
+from ..indexing.scan_rules import scan_repository, normalize_root_path, compute_repo_id as compute_repo_id_func
 from ..security import TOKEN_HEADER, verify_token, require_token
 from ..tools.doctor import check_ollama, check_ripgrep, check_chroma
 from .schemas import (
@@ -41,23 +42,11 @@ class IndexRequest(BaseModel):
     mode: str | None = None
 
 
-def _normalize_root_path(root_path: str) -> str:
-    path = Path(root_path).expanduser().resolve(strict=False)
-    normalized = str(path).replace("/", "\\")
-    anchor = path.anchor.replace("/", "\\")
-    if normalized.endswith("\\") and normalized != anchor:
-        normalized = normalized.rstrip("\\")
-    return normalized.lower()
-
-
-def compute_repo_id(root_path: str) -> str:
-    normalized = _normalize_root_path(root_path)
-    return hashlib.sha256(normalized.encode("utf-8")).hexdigest()
-
-
 @router.post("/index", response_model=IndexResponse)
 async def index_route(request: IndexRequest):
-    repo_id = compute_repo_id(request.root_path)
+    normalized_path = normalize_root_path(request.root_path)
+    repo_id = compute_repo_id_func(normalized_path)
+    
     if indexer.is_indexing_in_progress(repo_id):
         raise HTTPException(
             status_code=409,
@@ -67,14 +56,10 @@ async def index_route(request: IndexRequest):
                 "remediation": "Retry once the active indexing run completes.",
             },
         )
-    return {
-        "repo_id": "placeholder-repo-id",
-        "mode": "full",
-        "indexed_files": 0,
-        "skipped_files": 0,
-        "chunks_added": 0,
-        "duration_ms": 0,
-    }
+    
+    # Use the new scan_repository function
+    results = scan_repository(request.root_path)
+    return results
 
 @router.get("/health", response_model=HealthResponse)
 async def health():

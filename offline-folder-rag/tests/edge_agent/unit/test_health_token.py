@@ -25,6 +25,11 @@ def _load_token_store():
 def test_health_requires_token(tmp_path, monkeypatch):
     monkeypatch.setenv("RAG_INDEX_DIR", str(tmp_path))
     module = _load_main_module()
+    
+    # Reset state to ensure clean test
+    import edge_agent.app.indexing.indexer as indexer_mod
+    indexer_mod.reset_indexing_stats()
+    
     app = module.create_app()
     client = TestClient(app)
 

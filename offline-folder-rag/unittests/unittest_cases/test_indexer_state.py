@@ -24,7 +24,8 @@ def _load_edge_agent_app_modules():
     app_main = importlib.import_module("edge_agent.app.main")
     routes_module = importlib.import_module("edge_agent.app.api.routes")
     security_module = importlib.import_module("edge_agent.app.security")
-    return app_main, routes_module, security_module
+    scan_rules_module = importlib.import_module("edge_agent.app.indexing.scan_rules")
+    return app_main, routes_module, security_module, scan_rules_module
 
 
 def test_indexer_state_transitions_isolated():
@@ -115,13 +116,14 @@ def test_indexing_locks_isolated_by_repo():
 
 def test_index_route_blocks_when_repo_busy(tmp_path, monkeypatch):
     monkeypatch.setenv("RAG_INDEX_DIR", str(tmp_path))
-    main_module, routes_module, security_module = _load_edge_agent_app_modules()
+    main_module, routes_module, security_module, scan_rules_module = _load_edge_agent_app_modules()
     indexer = _load_indexer_module()
     client = TestClient(main_module.app)
 
     repo_path = tmp_path / "repo"
     repo_path.mkdir()
-    repo_id = routes_module.compute_repo_id(str(repo_path))
+    normalized = scan_rules_module.normalize_root_path(str(repo_path))
+    repo_id = scan_rules_module.compute_repo_id(normalized)
     indexer.mark_indexing_started(repo_id)
 
     try:
