@@ -95,7 +95,11 @@ export async function authenticatedFetch(url: string, options: RequestInit = {})
 
 let healthPollingInterval: NodeJS.Timeout | undefined;
 
-export function startHealthPolling(baseUrl: string, onUpdate: (health: HealthResponse) => void, onError: (error: any) => void) {
+export function startHealthPolling(
+    baseUrl: string,
+    onUpdate: (health: HealthResponse) => void,
+    onError: (error: any) => void
+) {
     if (healthPollingInterval) {
         return;
   }
@@ -117,7 +121,6 @@ export function startHealthPolling(baseUrl: string, onUpdate: (health: HealthRes
         }
     };
 
-    // Start polling immediately
     poll();
     healthPollingInterval = setInterval(poll, 2000);
 }
@@ -130,27 +133,27 @@ export function stopHealthPolling() {
 }
 
 export async function sendMessageToAgent(message: string): Promise<void> {
-    console.log('Sending message to agent:', message);
+    console.log("Sending message to agent:", message);
     // Implementation for sending message to agent
 }
 
-export function ask(question: string) {
+export function ask(question: string, extraContext?: any) {
   return fetch('/ask', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ question }),
+    body: JSON.stringify({ question, extra_context: extraContext }),
   });
 }
 
-export function overview(question: string) {
+export function overview(question: string, extraContext?: any) {
   return fetch('/overview', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ question }),
+    body: JSON.stringify({ question, extra_context: extraContext }),
   });
 }
 
-export function askWithOverride(question: string, modeOverride: string) {
+export function askWithOverride(question: string, modeOverride: string, extraContext?: any) {
   return fetch('/ask', {
     method: 'POST',
     headers: {
@@ -158,15 +161,16 @@ export function askWithOverride(question: string, modeOverride: string) {
     },
     body: JSON.stringify({
       question,
-      mode_override: modeOverride
+      mode_override: modeOverride,
+      extra_context: extraContext
     }),
   });
 }
 
-export function search(question: string) {
+export function search(question: string, extraContext?: any) {
   return fetch('/search', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ question }),
+    body: JSON.stringify({ question, extra_context: extraContext }),
   });
 }

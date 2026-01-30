@@ -12,6 +12,7 @@ def test_functional_markdown_chunking_flow(monkeypatch):
                 "chunk_id": "c1",
                 "line_start": 1,
                 "line_end": 4,
+                "line_count": 4,
                 "file_type": "markdown",
                 "mtime_epoch_ms": 5,
                 "sha256": "mno",

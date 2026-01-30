@@ -10,74 +10,6 @@ export type SlashCommandParseResult =
     | { success: true; command: SlashCommandInstruction }
     | { success: false; reason: "INVALID_COMMAND" };
 
-export function parseSlashCommand(input: string): SlashCommandParseResult {
-    const trimmed = input.trim();
-    if (!trimmed.startsWith("/")) {
-        return { success: false, reason: "INVALID_COMMAND" };
-    }
-
-    const payload = trimmed.slice(1).trim();
-    if (!payload) {
-        return { success: false, reason: "INVALID_COMMAND" };
-    }
-
-    const tokens = payload.split(/\s+/);
-    const command = tokens.shift()?.toLowerCase() ?? "";
-
-    switch (command) {
-        case "index": {
-            const mode = tokens.shift()?.toLowerCase();
-            if (!mode) {
-                return { success: false, reason: "INVALID_COMMAND" };
-            }
-
-            if (mode === "full" || mode === "incremental" || mode === "report") {
-                return {
-                    success: true,
-                    command: { kind: "index", mode },
-                };
-            }
-
-            return { success: false, reason: "INVALID_COMMAND" };
-        }
-        case "overview":
-            return { success: true, command: { kind: "overview" } };
-        case "search": {
-            const query = tokens.join(" ").trim();
-            if (!query) {
-                return { success: false, reason: "INVALID_COMMAND" };
-            }
-
-            return {
-                success: true,
-                command: { kind: "search", query },
-            };
-        }
-        case "doctor":
-            return { success: true, command: { kind: "doctor" } };
-        case "autoindex": {
-            const option = tokens.shift()?.toLowerCase();
-            if (option === "on") {
-                return { success: true, command: { kind: "autoindex", enabled: true } };
-            }
-            if (option === "off") {
-                return { success: true, command: { kind: "autoindex", enabled: false } };
-            }
-
-            return { success: false, reason: "INVALID_COMMAND" };
-        }
-        case "ask": {
-            const question = tokens.join(" ").trim();
-            if (!question) {
-                return { success: false, reason: "INVALID_COMMAND" };
-            }
-
-            return { success: true, command: { kind: "ask", question } };
-        }
-        default:
-            return { success: false, reason: "INVALID_COMMAND" };
-    }
-}
 /**
  * Deterministic registry of supported slash commands.
  * ONLY supported commands are included here.
@@ -111,3 +43,39 @@ export const slashCommandRegistry: { [key: string]: (args: string) => string } =
         return `Asking the system: ${args}`;
     }
 };
+
+export function parseSlashCommandInstruction(input: string): SlashCommandParseResult {
+    const trimmed = input.trim();
+    if (!trimmed.startsWith("/")) {
+        return { success: false, reason: "INVALID_COMMAND" };
+    }
+
+    const commandsWithArgs = ["/search", "/ask"];
+
+    for (const commandKey of Object.keys(slashCommandRegistry)) {
+        if (commandsWithArgs.includes(commandKey)) {
+            if (trimmed === commandKey || trimmed.startsWith(commandKey + " ")) {
+                const args = trimmed.slice(commandKey.length).trim();
+                if (commandKey === "/search" && !args) continue;
+                if (commandKey === "/ask" && !args) continue;
+                
+                return {
+                    success: true,
+                    command: commandKey === "/search" 
+                        ? { kind: "search", query: args } 
+                        : { kind: "ask", question: args }
+                };
+            }
+        } else if (trimmed === commandKey) {
+            if (commandKey === "/overview") return { success: true, command: { kind: "overview" } };
+            if (commandKey === "/doctor") return { success: true, command: { kind: "doctor" } };
+            if (commandKey === "/index full") return { success: true, command: { kind: "index", mode: "full" } };
+            if (commandKey === "/index incremental") return { success: true, command: { kind: "index", mode: "incremental" } };
+            if (commandKey === "/index report") return { success: true, command: { kind: "index", mode: "report" } };
+            if (commandKey === "/autoindex on") return { success: true, command: { kind: "autoindex", enabled: true } };
+            if (commandKey === "/autoindex off") return { success: true, command: { kind: "autoindex", enabled: false } };
+        }
+    }
+
+    return { success: false, reason: "INVALID_COMMAND" };
+}

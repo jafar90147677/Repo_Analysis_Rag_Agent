@@ -20,6 +20,7 @@ def test_functional_fallback_chunking_flow(monkeypatch):
                 "chunk_id": "c1",
                 "line_start": 1,
                 "line_end": 3,
+                "line_count": 3,
                 "file_type": "other",
                 "mtime_epoch_ms": 7,
                 "sha256": "stu",
