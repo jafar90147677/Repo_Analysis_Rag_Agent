@@ -73,115 +73,122 @@ export class ChatPanelViewProvider {
         });
 
         this.panel.webview.onDidReceiveMessage(async (message) => {
-            if (message.type === "dispatch") {
-                const { text, mode } = message;
-                const normalizedMode = isComposerMode(mode) ? mode : this.modeState.getMode();
-                
-                if (text.startsWith("/")) {
-                    const result = await parseSlashCommand(text, this.extensionContext);
-                    if (result.type === 'assistantResponse') {
-                        const html = renderAssistantResponse(result.payload);
-                        this.postMessage({ type: 'commandResult', payload: html, isHtml: true });
-                    } else {
-                        this.postMessage(result);
-                    }
-                } else {
-                    if (normalizedMode === "rag") {
-                        try {
-                            const response = await askWithOverride(text, "rag");
-                            const result = await response.json();
-                            let payload = result.answer || JSON.stringify(result);
-                            
-                            if (result.citations && Array.isArray(result.citations)) {
-                                const citationsHtml = result.citations.map((c: any) => this.renderCitation(c)).join('<br>');
-                                payload = `${payload}<br><br><b>Citations:</b><br>${citationsHtml}`;
-                            }
-
-                            this.postMessage({
-                                type: "commandResult",
-                                payload: payload,
-                                isHtml: true
-                            });
-                        } catch (error) {
-                            this.postMessage({
-                                type: "commandResult",
-                                payload: `Error: ${error instanceof Error ? error.message : String(error)}`,
-                            });
-                        }
-                    } else if (normalizedMode === "auto") {
-                        try {
-                            await this.router.autoRouteInput(text);
-                        } catch (error) {
-                            this.postMessage({
-                                type: "commandResult",
-                                payload: `Error: ${error instanceof Error ? error.message : String(error)}`,
-                            });
-                        }
-                    } else {
-                        await this.router.handleCommand(text);
-                    }
-                }
-            } else if (message.type === "indexAction") {
-                const workspaceFolders = vscode.workspace.workspaceFolders;
-                if (!workspaceFolders || workspaceFolders.length === 0) return;
-                const rootPath = workspaceFolders[0].uri.fsPath;
-
-                if (message.action === "full") {
-                    this.postMessage({ type: "dismissIndexModal" });
-                    setIndexing(rootPath);
-                    try {
-                        await triggerFullIndex(
-                            { storageRoot: this.extensionContext.globalStorageUri.fsPath },
-                            rootPath,
-                            (msg) => this.postMessage({ type: "commandResult", payload: msg })
-                        );
-                    } finally {
-                        clearIndexing(rootPath);
-                    }
-                } else if (message.action === "cancel") {
-                    this.postMessage({ type: "dismissIndexModal" });
-                    this.postMessage({ type: "commandResult", payload: "Index not available; cannot answer" });
-                }
-            } else if (message.type === "openCitation") {
-                const { path: filePath, start, end } = message;
-                const workspaceFolders = vscode.workspace.workspaceFolders;
-                if (workspaceFolders && workspaceFolders.length > 0) {
-                    const fullPath = vscode.Uri.joinPath(workspaceFolders[0].uri, filePath);
-                    const doc = await vscode.workspace.openTextDocument(fullPath);
-                    const editor = await vscode.window.showTextDocument(doc);
-                    const range = new vscode.Range(start - 1, 0, end - 1, 0);
-                    editor.selection = new vscode.Selection(range.start, range.end);
-                    editor.revealRange(range, vscode.TextEditorRevealType.InCenter);
-                }
-            } else if (message.type === "modeChange" && isComposerMode(message.mode)) {
-                this.modeState.setMode(message.mode);
-                this.postModeState();
-            } else if (message.type === "contextRequest") {
-                this.handleContextRequest(message.action);
-            } else if (message.type === "attachmentPick") {
-                await this.handleAttachmentRequest();
-            } else if (message.type === "localSelect" && typeof message.folder === "string") {
-                await writeRootPath(this.extensionContext, message.folder);
-                this.postLocalState();
-            } else if (message.type === "localPick") {
-                const folder = await vscode.window.showOpenDialog({
-                    canSelectMany: false,
-                    canSelectFolders: true,
-                    canSelectFiles: false,
-                    openLabel: "Select Folder",
-                });
-
-                if (folder && folder.length > 0) {
-                    await writeRootPath(this.extensionContext, folder[0].fsPath);
-                    this.postLocalState();
-                }
-            }
+            await this.handleWebviewMessage(message);
         });
 
         this.panel.webview.html = getChatPanelHtml(this.extensionUri, COMPOSER_PLACEHOLDER);
 
         this.postModeState();
         this.postLocalState();
+    }
+
+    private async handleWebviewMessage(message: any): Promise<void> {
+        if (message.type === "dispatch") {
+            const { text, mode } = message;
+            const normalizedMode = isComposerMode(mode) ? mode : this.modeState.getMode();
+            
+            if (text.startsWith("/")) {
+                const result = await parseSlashCommand(text, this.extensionContext);
+                if (result.type === 'assistantResponse') {
+                    const html = renderAssistantResponse(result.payload);
+                    this.postMessage({ type: 'commandResult', payload: html, isHtml: true });
+                } else {
+                    this.postMessage(result);
+                }
+            } else {
+                if (normalizedMode === "rag") {
+                    try {
+                        const response = await askWithOverride(text, "rag");
+                        const result = await response.json();
+                        let payload = result.answer || JSON.stringify(result);
+                        
+                        if (result.citations && Array.isArray(result.citations)) {
+                            const citationsHtml = result.citations.map((c: any) => this.renderCitation(c)).join('<br>');
+                            payload = `${payload}<br><br><b>Citations:</b><br>${citationsHtml}`;
+                        }
+
+                        this.postMessage({
+                            type: "commandResult",
+                            payload: payload,
+                            isHtml: true
+                        });
+                    } catch (error) {
+                        this.postMessage({
+                            type: "commandResult",
+                            payload: `Error: ${error instanceof Error ? error.message : String(error)}`,
+                        });
+                    }
+                } else if (normalizedMode === "auto") {
+                    try {
+                        await this.router.autoRouteInput(text);
+                    } catch (error) {
+                        this.postMessage({
+                            type: "commandResult",
+                            payload: `Error: ${error instanceof Error ? error.message : String(error)}`,
+                        });
+                    }
+                } else {
+                    await this.router.handleCommand(text);
+                }
+            }
+        } else if (message.type === "indexAction") {
+            const workspaceFolders = vscode.workspace.workspaceFolders;
+            if (!workspaceFolders || workspaceFolders.length === 0) return;
+            const rootPath = workspaceFolders[0].uri.fsPath;
+
+            if (message.action === "full") {
+                this.postMessage({ type: "dismissIndexModal" });
+                setIndexing(rootPath);
+                try {
+                    await triggerFullIndex(
+                        { storageRoot: this.extensionContext.globalStorageUri.fsPath },
+                        rootPath,
+                        (msg) => this.postMessage({ type: "commandResult", payload: msg })
+                    );
+                } finally {
+                    clearIndexing(rootPath);
+                }
+            } else if (message.action === "cancel") {
+                this.postMessage({ type: "dismissIndexModal" });
+                this.postMessage({ type: "commandResult", payload: "Index not available; cannot answer" });
+            }
+        } else if (message.type === "openCitation") {
+            const { path: filePath, start, end } = message;
+            const workspaceFolders = vscode.workspace.workspaceFolders;
+            if (workspaceFolders && workspaceFolders.length > 0) {
+                const fullPath = vscode.Uri.joinPath(workspaceFolders[0].uri, filePath);
+                const doc = await vscode.workspace.openTextDocument(fullPath);
+                const editor = await vscode.window.showTextDocument(doc);
+                const range = new vscode.Range(start - 1, 0, end - 1, 0);
+                editor.selection = new vscode.Selection(range.start, range.end);
+                editor.revealRange(range, vscode.TextEditorRevealType.InCenter);
+            }
+        } else if (message.type === "modeChange" && isComposerMode(message.mode)) {
+            this.modeState.setMode(message.mode);
+            this.postModeState();
+        } else if (message.type === "contextRequest") {
+            this.handleContextRequest(message.action);
+        } else if (message.type === "attachmentPick") {
+            await this.handleAttachmentRequest();
+        } else if (message.type === "localSelect" && typeof message.folder === "string") {
+            await writeRootPath(this.extensionContext, message.folder);
+            this.postLocalState();
+        } else if (message.type === "localPick") {
+            const folder = await vscode.window.showOpenDialog({
+                canSelectMany: false,
+                canSelectFolders: true,
+                canSelectFiles: false,
+                openLabel: "Select Folder",
+            });
+
+            if (folder && folder.length > 0) {
+                await writeRootPath(this.extensionContext, folder[0].fsPath);
+                this.postLocalState();
+            } else {
+                // Cancellation: post current state to ensure UI reflects unchanged rootPath
+                this.postLocalState();
+            }
+        }
     }
 
     private async handleAttachmentRequest(): Promise<void> {

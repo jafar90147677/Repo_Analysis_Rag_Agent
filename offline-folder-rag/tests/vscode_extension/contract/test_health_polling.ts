@@ -2,8 +2,10 @@ import * as assert from "assert";
 import * as path from "path";
 import { fileURLToPath, pathToFileURL } from "url";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __filename = "";
+const __dirname = "";
+// const __filename = fileURLToPath(import.meta.url);
+// const __dirname = path.dirname(__filename);
 
 const repoRoot = path.resolve(__dirname, "..", "..", "..");
 const serviceModulePath = path.join(

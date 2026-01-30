@@ -21,8 +21,8 @@
     "axios": "^1.13.4",
     "axios-mock-adapter": "^2.1.0",
     "chai": "^4.5.0",
-    "jest-mock-vscode": "^4.10.0",
     "expect": "^29.7.0",
+    "jest-mock-vscode": "^4.10.0",
     "mocha": "^10.8.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.0"
