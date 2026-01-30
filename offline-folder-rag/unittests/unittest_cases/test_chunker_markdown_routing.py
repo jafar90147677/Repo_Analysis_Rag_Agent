@@ -12,6 +12,7 @@ def test_markdown_classification_routes_to_markdown_chunker(monkeypatch):
                 "chunk_id": "c1",
                 "line_start": 1,
                 "line_end": 5,
+                "line_count": 5,
                 "file_type": "markdown",
                 "mtime_epoch_ms": 1,
                 "sha256": "abc",
