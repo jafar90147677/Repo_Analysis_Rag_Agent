@@ -4,20 +4,21 @@ const PLACEHOLDER_TEXT = "Plan, @ for context, / for commands";
 
 function getNonce(): string {
     const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    return Array.from({ length: 16 })
-        .map(() => possible.charAt(Math.floor(Math.random() * possible.length)))
-        .join("");
+    let text = "";
+    for (let i = 0; i < 16; i++) {
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+    }
+    return text;
 }
 
-export function getChatPanelHtml(_extensionUri: vscode.Uri, placeholderText: string = PLACEHOLDER_TEXT): string {
+export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: string = PLACEHOLDER_TEXT): string {
     const nonce = getNonce();
-
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'nonce-${nonce}'; style-src 'unsafe-inline';" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'nonce-\${nonce}'; style-src 'unsafe-inline';" />
     <title>Offline Folder RAG</title>
     <style>
         :root {
@@ -45,7 +46,6 @@ export function getChatPanelHtml(_extensionUri: vscode.Uri, placeholderText: str
 
         body {
             margin: 0;
-            padding: 0;
             background: var(--bg);
             font-family: "Segoe UI", system-ui, sans-serif;
             color: var(--text);
@@ -55,9 +55,9 @@ export function getChatPanelHtml(_extensionUri: vscode.Uri, placeholderText: str
             display: flex;
             flex-direction: column;
             height: 100vh;
-            padding: 20px;
-            gap: 16px;
+            padding: 16px;
             box-sizing: border-box;
+            gap: 16px;
         }
 
         #chat-panel-header {
@@ -178,10 +178,63 @@ export function getChatPanelHtml(_extensionUri: vscode.Uri, placeholderText: str
             color: var(--muted);
         }
 
+        .assistant-response {
+            border-left: 2px solid #0e639c;
+            padding-left: 12px;
+            margin-bottom: 16px;
+        }
+
+        .chips-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .chip {
+            font-size: 10px;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        .confidence-found { background: #28a745; color: white; }
+        .confidence-partial { background: #ffc107; color: black; }
+        .confidence-not_found { background: #dc3545; color: white; }
+
+        .mode-rag { background: #6f42c1; color: white; }
+        .mode-tools { background: #fd7e14; color: white; }
+        .mode-hybrid { background: #007bff; color: white; }
+
+        .answer-text {
+            line-height: 1.5;
+            margin-bottom: 12px;
+        }
+
+        .citations-list {
+            font-size: 12px;
+            color: #aaa;
+        }
+
+        .citations-list ul {
+            list-style: none;
+            padding: 0;
+            margin: 4px 0;
+        }
+
+        .citation-link {
+            color: #3794ff;
+            text-decoration: none;
+        }
+
+        .citation-link:hover {
+            text-decoration: underline;
+        }
+
         #composer-bottom-row {
             display: flex;
-            gap: 12px;
             align-items: center;
+            gap: 12px;
             flex-wrap: wrap;
         }
 
@@ -342,6 +395,58 @@ export function getChatPanelHtml(_extensionUri: vscode.Uri, placeholderText: str
             color: var(--text);
             font-size: 0.9rem;
         }
+
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .modal-backdrop.visible {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px;
+            width: min(320px, 80%);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .modal-actions button {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            cursor: pointer;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
     </style>
 </head>
 <body>
@@ -366,11 +471,11 @@ export function getChatPanelHtml(_extensionUri: vscode.Uri, placeholderText: str
                 <label for="composer-input">Message</label>
                 <textarea
                     id="composer-input"
-                    placeholder="${placeholderText}"
+                    placeholder="\${placeholderText}"
                     aria-label="Message input"
                     autocomplete="off"
                 ></textarea>
-                <p class="composer-hint">${placeholderText}</p>
+                <p class="composer-hint">\${placeholderText}</p>
 
                 <div id="context-attachments" class="context-attachments hidden" aria-live="polite"></div>
 
@@ -416,7 +521,18 @@ export function getChatPanelHtml(_extensionUri: vscode.Uri, placeholderText: str
         </div>
     </div>
 
-    <script nonce="${nonce}">
+    <div class="modal-backdrop" id="indexModal" role="dialog" aria-modal="true" aria-labelledby="indexModalTitle">
+        <div class="modal">
+            <p id="indexModalTitle"><strong>Index required</strong></p>
+            <p>Run a full index to use gated commands.</p>
+            <div class="modal-actions">
+                <button id="indexFull" type="button" aria-label="Index full workspace" title="Index full workspace">Index Full</button>
+                <button id="indexCancel" type="button" aria-label="Cancel indexing" title="Cancel indexing">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script nonce="\${nonce}">
         (function () {
             const vscode = acquireVsCodeApi();
             const composerForm = document.getElementById("composer-form");
@@ -428,6 +544,10 @@ export function getChatPanelHtml(_extensionUri: vscode.Uri, placeholderText: str
             const contextMenu = document.getElementById("context-menu");
             const infinityDropdown = document.getElementById("infinity-dropdown");
             const attachmentButton = document.getElementById("attachment-button");
+            const indexModal = document.getElementById("indexModal");
+            const indexFullButton = document.getElementById("indexFull");
+            const indexCancelButton = document.getElementById("indexCancel");
+            const localDropdown = document.getElementById("local-dropdown");
 
             const attachedContext = {
                 root_path: null,
@@ -458,7 +578,7 @@ export function getChatPanelHtml(_extensionUri: vscode.Uri, placeholderText: str
                 chip.className = "context-chip";
 
                 const text = document.createElement("span");
-                text.textContent = `${label}: ${value}`;
+                text.textContent = label + ": " + value;
                 chip.appendChild(text);
 
                 const remove = document.createElement("button");
@@ -471,20 +591,15 @@ export function getChatPanelHtml(_extensionUri: vscode.Uri, placeholderText: str
             }
 
             function renderAttachments() {
-                if (!contextAttachments) {
-                    return;
-                }
-
+                if (!contextAttachments) return;
                 contextAttachments.innerHTML = "";
 
                 if (attachedContext.root_path) {
                     contextAttachments.appendChild(createChip("Folder", attachedContext.root_path, "root_path"));
                 }
-
                 if (attachedContext.selection_text) {
                     contextAttachments.appendChild(createChip("Selection", attachedContext.selection_text, "selection_text"));
                 }
-
                 if (attachedContext.active_file_path) {
                     contextAttachments.appendChild(createChip("File", attachedContext.active_file_path, "active_file_path"));
                 }
@@ -494,19 +609,9 @@ export function getChatPanelHtml(_extensionUri: vscode.Uri, placeholderText: str
 
             function buildExtraContext() {
                 const extra = {};
-
-                if (attachedContext.root_path) {
-                    extra.root_path = attachedContext.root_path;
-                }
-
-                if (attachedContext.selection_text) {
-                    extra.selection_text = attachedContext.selection_text;
-                }
-
-                if (attachedContext.active_file_path) {
-                    extra.active_file_path = attachedContext.active_file_path;
-                }
-
+                if (attachedContext.root_path) extra.root_path = attachedContext.root_path;
+                if (attachedContext.selection_text) extra.selection_text = attachedContext.selection_text;
+                if (attachedContext.active_file_path) extra.active_file_path = attachedContext.active_file_path;
                 return Object.keys(extra).length ? extra : undefined;
             }
 
@@ -552,10 +657,7 @@ export function getChatPanelHtml(_extensionUri: vscode.Uri, placeholderText: str
             });
 
             composerInput?.addEventListener("keydown", (event) => {
-                if (event.key === "@") {
-                    showContextMenu();
-                }
-
+                if (event.key === "@") showContextMenu();
                 if (event.key === "Enter" && !event.shiftKey) {
                     event.preventDefault();
                     sendMessage();
@@ -563,21 +665,16 @@ export function getChatPanelHtml(_extensionUri: vscode.Uri, placeholderText: str
             });
 
             composerInput?.addEventListener("input", () => {
-                if (composerInput.value.endsWith("@")) {
-                    showContextMenu();
-                }
+                if (composerInput.value.endsWith("@")) showContextMenu();
             });
 
             modeSelect?.addEventListener("change", () => {
-                const mode = modeSelect.value;
-                vscode.postMessage({ type: "modeChange", mode });
+                vscode.postMessage({ type: "modeChange", mode: modeSelect.value });
             });
 
             if (infinityDropdown) {
                 infinityDropdown.addEventListener("change", () => {
-                    if (infinityDropdown.value !== "local") {
-                        infinityDropdown.value = "local";
-                    }
+                    if (infinityDropdown.value !== "local") infinityDropdown.value = "local";
                 });
             }
 
@@ -590,41 +687,34 @@ export function getChatPanelHtml(_extensionUri: vscode.Uri, placeholderText: str
                 if (!(target instanceof HTMLElement)) return;
                 const action = target.dataset.action;
                 if (!action) return;
-
                 vscode.postMessage({ type: "contextRequest", action });
                 hideContextMenu();
                 composerInput?.focus();
             });
 
             contextAttachments?.addEventListener("click", (event) => {
-                const button = (event.target instanceof HTMLElement) ? event.target.closest("button[data-key]") : null;
-                if (!(button instanceof HTMLElement)) {
-                    return;
-                }
-
+                const button = event.target.closest("button[data-key]");
+                if (!(button instanceof HTMLElement)) return;
                 const key = button.dataset.key;
-                if (!key) {
-                    return;
+                if (key) {
+                    attachedContext[key] = null;
+                    renderAttachments();
                 }
-
-                attachedContext[key] = null;
-                renderAttachments();
             });
 
             document.addEventListener("click", (event) => {
-                if (!contextMenu || !composerInput) {
-                    return;
+                if (!contextMenu || !composerInput) return;
+                if (!contextMenu.contains(event.target) && event.target !== composerInput) {
+                    hideContextMenu();
                 }
+            });
 
-                if (contextMenu.contains(event.target)) {
-                    return;
-                }
+            indexFullButton?.addEventListener("click", () => {
+                vscode.postMessage({ type: "indexAction", action: "full" });
+            });
 
-                if (event.target === composerInput) {
-                    return;
-                }
-
-                hideContextMenu();
+            indexCancelButton?.addEventListener("click", () => {
+                vscode.postMessage({ type: "indexAction", action: "cancel" });
             });
 
             window.addEventListener("message", (event) => {
@@ -633,44 +723,38 @@ export function getChatPanelHtml(_extensionUri: vscode.Uri, placeholderText: str
 
                 if (message.type === "insertText" && typeof message.payload === "string") {
                     if (composerInput) {
-                        const addition = composerInput.value ? " " + message.payload : message.payload;
-                        composerInput.value += addition;
+                        composerInput.value += (composerInput.value ? " " : "") + message.payload;
                         composerInput.focus();
                     }
-                    return;
-                }
-
-                if (message.type === "commandResult" && message.payload) {
+                } else if (message.type === "commandResult" && message.payload) {
                     appendMessage(message.payload, "assistant", Boolean(message.isHtml));
-                    return;
-                }
-
-                if (message.type === "modeState" && typeof message.mode === "string") {
-                    if (modeSelect) {
-                        modeSelect.value = message.mode;
-                    }
-                    return;
-                }
-
-                if (message.type === "contextResponse") {
+                } else if (message.type === "modeState" && typeof message.mode === "string") {
+                    if (modeSelect) modeSelect.value = message.mode;
+                } else if (message.type === "contextResponse") {
                     if (message.error) {
                         appendMessage(message.error, "assistant");
-                        return;
+                    } else {
+                        const ctx = message.context ?? {};
+                        if (message.action === "folder") attachedContext.root_path = ctx.root_path;
+                        if (message.action === "selection") attachedContext.selection_text = ctx.selection_text;
+                        if (message.action === "file") attachedContext.active_file_path = ctx.active_file_path;
+                        renderAttachments();
                     }
+                } else if (message.type === "showIndexModal") {
+                    indexModal?.classList.add("visible");
+                } else if (message.type === "dismissIndexModal") {
+                    indexModal?.classList.remove("visible");
+                }
+            });
 
-                    const ctx = message.context ?? {};
-                    if (message.action === "folder" && ctx.root_path) {
-                        attachedContext.root_path = ctx.root_path;
-                    }
-                    if (message.action === "selection" && ctx.selection_text) {
-                        attachedContext.selection_text = ctx.selection_text;
-                    }
-                    if (message.action === "file" && ctx.active_file_path) {
-                        attachedContext.active_file_path = ctx.active_file_path;
-                    }
-
-                    renderAttachments();
-                    return;
+            document.addEventListener('click', (event) => {
+                const target = event.target;
+                if (target && target instanceof HTMLElement && target.classList.contains('citation-link')) {
+                    event.preventDefault();
+                    const path = target.getAttribute('data-path');
+                    const start = parseInt(target.getAttribute('data-start') || "0");
+                    const end = parseInt(target.getAttribute('data-end') || "0");
+                    vscode.postMessage({ type: 'openCitation', path, start, end });
                 }
             });
 
@@ -678,5 +762,5 @@ export function getChatPanelHtml(_extensionUri: vscode.Uri, placeholderText: str
         })();
     </script>
 </body>
-</html>`;
+</html>\`;
 }

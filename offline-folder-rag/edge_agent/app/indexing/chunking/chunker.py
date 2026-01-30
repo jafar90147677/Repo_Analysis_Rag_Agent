@@ -12,6 +12,7 @@ REQUIRED_METADATA_KEYS = (
     "chunk_id",
     "line_start",
     "line_end",
+    "line_count",
     "file_type",
     "mtime_epoch_ms",
     "sha256",

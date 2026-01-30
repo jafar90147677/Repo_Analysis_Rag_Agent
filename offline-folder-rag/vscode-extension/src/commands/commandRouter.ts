@@ -1,82 +1,157 @@
-import * as vscode from "vscode";
-import { parseSlashCommandInstruction, SlashCommandInstruction } from "./slashCommands";
+import * as vscode from 'vscode';
+import { slashCommandRegistry } from './slashCommands';
+import { overview, search, ask } from '../services/agentClient';
+import { checkIndexExists, isIndexing } from '../services/indexGate';
 
 export interface CommandResultMessage {
-    type: "commandResult" | "showIndexModal" | "dismissIndexModal";
-    payload?: string;
+    type: 'commandResult' | 'showIndexModal' | 'dismissIndexModal' | 'assistantResponse';
+    payload?: any;
+    isHtml?: boolean;
 }
 
-function describeCommand(command: SlashCommandInstruction): string {
-    switch (command.kind) {
-        case "index":
-            return `Indexing started: ${command.mode} scan`;
-        case "overview":
-            return "Overview: Folder structure and key files...";
-        case "search":
-            return `Searching for ${command.query}`;
-        case "doctor":
-            return "Running system checks...";
-        case "autoindex":
-            return command.enabled ? "Auto-indexing enabled" : "Auto-indexing disabled";
-        case "ask":
-            return `Asking the system: ${command.question}`;
-        default:
-            return "INVALID_COMMAND";
-    }
-}
-
+/**
+ * Parses and executes a slash command from the user input.
+ * Uses a deterministic, registry-based approach.
+ * @param input The raw input string starting with /
+ * @param context VSCode extension context
+ * @returns The result message or modal trigger
+ */
 export async function parseSlashCommand(
     input: string,
-    _context: vscode.ExtensionContext
+    context: vscode.ExtensionContext
 ): Promise<CommandResultMessage> {
-    const parsed = parseSlashCommandInstruction(input);
-    if (!parsed.success) {
-        return { type: "commandResult", payload: "INVALID_COMMAND" };
+    const trimmedInput = input.trim();
+    if (!trimmedInput.startsWith('/')) {
+        return { type: 'commandResult', payload: 'INVALID_COMMAND' };
     }
 
-    return { type: "commandResult", payload: describeCommand(parsed.command) };
+    const gatedCommands = ['/ask', '/overview', '/search', '/index report'];
+    const isGated = gatedCommands.some(cmd => trimmedInput === cmd || trimmedInput.startsWith(cmd + ' '));
+
+    if (isGated) {
+        const workspaceFolders = vscode.workspace.workspaceFolders;
+        if (workspaceFolders && workspaceFolders.length > 0) {
+            const rootPath = workspaceFolders[0].uri.fsPath;
+            const storageRoot = context.globalStorageUri.fsPath;
+            
+            if (isIndexing(rootPath)) {
+                return { type: 'commandResult', payload: 'Indexing in progress...' };
+            }
+
+            const exists = await checkIndexExists({ storageRoot }, rootPath);
+            if (!exists) {
+                return { type: 'showIndexModal' };
+            }
+        }
+    }
+
+    // Commands that support arguments
+    const commandsWithArgs = ['/search', '/ask'];
+
+    for (const commandKey of Object.keys(slashCommandRegistry)) {
+        if (commandsWithArgs.includes(commandKey)) {
+            // For /search and /ask, we match the prefix and treat the rest as args
+            if (trimmedInput === commandKey || trimmedInput.startsWith(commandKey + ' ')) {
+                const args = trimmedInput.slice(commandKey.length).trim();
+                const result = slashCommandRegistry[commandKey](args);
+                
+                // For /ask and /search, wrap in assistantResponse envelope for rendering
+                if (commandKey === '/ask' || commandKey === '/search') {
+                    return {
+                        type: 'assistantResponse',
+                        payload: {
+                            mode: 'rag',
+                            confidence: 'found',
+                            answer: result,
+                            citations: []
+                        }
+                    };
+                }
+                return { type: 'commandResult', payload: result };
+            }
+        } else {
+            // For all other commands, we require an exact match
+            if (trimmedInput === commandKey) {
+                const result = slashCommandRegistry[commandKey]('');
+                
+                // For /overview and /index report, wrap in assistantResponse envelope
+                if (commandKey === '/overview' || commandKey === '/index report' || commandKey === '/doctor') {
+                    return {
+                        type: 'assistantResponse',
+                        payload: {
+                            mode: commandKey === '/doctor' ? 'tools' : 'rag',
+                            confidence: 'found',
+                            answer: result,
+                            citations: []
+                        }
+                    };
+                }
+                return { type: 'commandResult', payload: result };
+            }
+        }
+    }
+
+    return { type: 'commandResult', payload: 'INVALID_COMMAND' };
 }
 
 export class CommandRouter {
     constructor(
-        _context: vscode.ExtensionContext,
+        private readonly context: vscode.ExtensionContext,
         private readonly onResult: (message: CommandResultMessage) => void
     ) {}
 
-    private postResult(payload: string) {
-        this.onResult({ type: "commandResult", payload });
-    }
-
-    public async handleCommand(input: string, _extraContext?: Record<string, unknown>): Promise<void> {
+    public async handleCommand(input: string): Promise<void> {
         const trimmed = input.trim();
-        if (!trimmed.startsWith("/")) {
-            this.postResult("INVALID_COMMAND");
-            return;
+        if (trimmed.startsWith('/')) {
+            const result = await parseSlashCommand(trimmed, this.context);
+            this.onResult(result);
+        } else {
+            await this.autoRouteInput(trimmed);
         }
-
-        const parsed = parseSlashCommandInstruction(trimmed);
-        if (!parsed.success) {
-            this.postResult("INVALID_COMMAND");
-            return;
-        }
-
-        this.postResult(describeCommand(parsed.command));
     }
 
-    public async autoRouteInput(input: string, _extraContext?: Record<string, unknown>): Promise<void> {
-        this.postResult(`Auto route not implemented: ${input.trim()}`);
-    }
+    public async autoRouteInput(input: string): Promise<void> {
+        const trimmed = input.trim();
+        const overviewKeywords = ['overview', 'structure', 'languages'];
+        const searchKeywords = ['search', 'find', 'where', 'locate'];
 
-    public async handleIndexAction(action: string): Promise<void> {
-        this.postResult(`Index action: ${action}`);
+        let response: any;
+        if (overviewKeywords.some(k => trimmed.toLowerCase().includes(k))) {
+            response = await overview(trimmed);
+        } else if (searchKeywords.some(k => trimmed.toLowerCase().includes(k))) {
+            response = await search(trimmed);
+        } else {
+            response = await ask(trimmed);
+        }
+
+        const result = await response.json() as any;
+        this.onResult({
+            type: "commandResult",
+            payload: result.answer || JSON.stringify(result)
+        });
     }
 
     public handleToolsSlashCommand(input: string): string {
-        const parsed = parseSlashCommandInstruction(input);
-        if (!parsed.success) {
-            return "INVALID_COMMAND";
+        const trimmed = input.trim();
+        if (!trimmed.startsWith('/')) {
+            return 'INVALID_COMMAND';
         }
 
-        return describeCommand(parsed.command);
+        const parts = trimmed.split(' ');
+        // Try two-word command first (e.g., "/index full")
+        const twoWordCmd = parts[0] + (parts[1] ? ' ' + parts[1] : '');
+        if (slashCommandRegistry[twoWordCmd]) {
+            const args = trimmed.slice(twoWordCmd.length).trim();
+            return slashCommandRegistry[twoWordCmd](args);
+        }
+
+        // Try one-word command (e.g., "/overview")
+        const oneWordCmd = parts[0];
+        if (slashCommandRegistry[oneWordCmd]) {
+            const args = trimmed.slice(oneWordCmd.length).trim();
+            return slashCommandRegistry[oneWordCmd](args);
+        }
+
+        return 'INVALID_COMMAND';
     }
 }
