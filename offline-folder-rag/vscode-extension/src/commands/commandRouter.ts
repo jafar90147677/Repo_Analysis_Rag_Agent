@@ -58,16 +58,75 @@ export class CommandRouter {
             type: "commandResult",
             payload: result
         });
-=======
-        private readonly sendMessage: (message: CommandResultMessage) => void
-    ) {
-        const storageRoot =
-            context.globalStorageUri?.fsPath ??
-            path.join(context.extensionUri.fsPath, ".offline-folder-rag");
-        this.config = { storageRoot };
->>>>>>> bdbd261 (47)
+import { checkIndexExists, isIndexing } from '../services/indexGate';
+import * as vscode from 'vscode';
+
+export interface CommandResultMessage {
+    type: 'commandResult' | 'showIndexModal' | 'dismissIndexModal' | 'assistantResponse';
+    payload?: any;
+    isHtml?: boolean;
+}
+
+/**
+ * Parses and executes a slash command from the user input.
+ * Uses a deterministic, registry-based approach.
+ * @param input The raw input string starting with /
+ * @param context VSCode extension context
+ * @returns The result message or modal trigger
+ */
+export async function parseSlashCommand(
+    input: string,
+    context: vscode.ExtensionContext
+): Promise<CommandResultMessage> {
+    const trimmedInput = input.trim();
+    if (!trimmedInput.startsWith('/')) {
+        return { type: 'commandResult', payload: 'INVALID_COMMAND' };
     }
 
+    const gatedCommands = ['/ask', '/overview', '/search', '/index report'];
+    const isGated = gatedCommands.some(cmd => trimmedInput === cmd || trimmedInput.startsWith(cmd + ' '));
+
+    if (isGated) {
+        const workspaceFolders = vscode.workspace.workspaceFolders;
+        if (workspaceFolders && workspaceFolders.length > 0) {
+            const rootPath = workspaceFolders[0].uri.fsPath;
+            const storageRoot = context.globalStorageUri.fsPath;
+            
+            if (isIndexing(rootPath)) {
+                return { type: 'commandResult', payload: 'Indexing in progress...' };
+            }
+
+            const exists = await checkIndexExists({ storageRoot }, rootPath);
+            if (!exists) {
+                return { type: 'showIndexModal' };
+            }
+        }
+    }
+
+    // Commands that support arguments
+    const commandsWithArgs = ['/search', '/ask'];
+
+    for (const commandKey of Object.keys(slashCommandRegistry)) {
+        if (commandsWithArgs.includes(commandKey)) {
+            // For /search and /ask, we match the prefix and treat the rest as args
+            if (trimmedInput === commandKey || trimmedInput.startsWith(commandKey + ' ')) {
+                const args = trimmedInput.slice(commandKey.length).trim();
+                const result = slashCommandRegistry[commandKey](args);
+                
+                // For /ask and /search, wrap in assistantResponse envelope for rendering
+                if (commandKey === '/ask' || commandKey === '/search') {
+                    return {
+                        type: 'assistantResponse',
+                        payload: {
+                            mode: 'rag',
+                            confidence: 'found',
+                            answer: result,
+                            citations: []
+                        }
+                    };
+                }
+                return { type: 'commandResult', payload: result };
+            }
     public async autoRouteInput(input: string): Promise<void> {
         const trimmed = input.trim();
         const overviewKeywords = ['overview', 'structure', 'languages'];
@@ -163,163 +222,5 @@ export class CommandRouter {
 
 <<<<<<< HEAD
         return 'INVALID_COMMAND';
-=======
-        setIndexing(normalizedRoot);
-        this.postResult("Running /index full ...");
-
-        try {
-            await triggerFullIndex(this.config, rootPath, (message) => {
-                this.postResult(message);
-            });
-            this.postResult("Full index completed.");
-        } catch (error) {
-            this.postResult(`Indexing failed: ${String(error)}`);
-        } finally {
-            clearIndexing(normalizedRoot);
-            this.postMessage({ type: "dismissIndexModal" });
-        }
-    }
-
-    private normalizeMode(mode: unknown): ComposerMode {
-        return isComposerMode(mode) ? mode : "auto";
-    }
-
-    private async ensureIndexForCommand(command: SlashCommandInstruction): Promise<boolean> {
-        if (!this.commandRequiresIndex(command)) {
-            return true;
-        }
-
-        const rootPath = this.getEffectiveRootPath();
-        if (!rootPath) {
-            this.postResult("Workspace root not found; command cannot run.");
-            return false;
-        }
-
-        const normalizedRoot = normalizeRootPath(rootPath);
-        if (isIndexing(normalizedRoot)) {
-            this.postResult("Indexing already in progress.");
-            return false;
-        }
-
-        if (!(await checkIndexExists(this.config, rootPath))) {
-            this.postMessage({ type: "showIndexModal" });
-            return false;
-        }
-
-        return true;
-    }
-
-    private commandRequiresIndex(command: SlashCommandInstruction): boolean {
-        switch (command.kind) {
-            case "ask":
-            case "overview":
-            case "search":
-                return true;
-            case "index":
-                return command.mode === "report";
-            default:
-                return false;
-        }
-    }
-
-    private async handleSlashCommand(
-        command: SlashCommandInstruction,
-        extraContext?: ExtraContext
-    ): Promise<void> {
-        const contextSummary = this.formatContextSummary(extraContext);
-
-        switch (command.kind) {
-            case "index":
-                if (command.mode === "full") {
-                    await this.handleIndexAction("full");
-                    return;
-                }
-
-                if (command.mode === "incremental") {
-                    this.postResult(`Incremental index requested.${contextSummary}`);
-                    return;
-                }
-
-                this.postResult(`Index report requested.${contextSummary}`);
-                return;
-            case "overview":
-                this.postResult(`Overview requested.${contextSummary}`);
-                return;
-            case "search":
-                this.postResult(`Searching for "${command.query}".${contextSummary}`);
-                return;
-            case "doctor":
-                this.postResult(`Doctor command requested.${contextSummary}`);
-                return;
-            case "autoindex":
-                await this.setAutoIndex(command.enabled);
-                this.postResult(
-                    `Auto-index ${this.isAutoIndexEnabled() ? "enabled" : "disabled"}.${contextSummary}`
-                );
-                return;
-            case "ask": {
-                const overrideNote = command.modeOverride ? ` mode_override="${command.modeOverride}"` : "";
-                this.postResult(`Asking${overrideNote}: "${command.question}".${contextSummary}`);
-                return;
-            }
-        }
-    }
-
-    private formatContextSummary(extraContext?: ExtraContext): string {
-        if (!extraContext) {
-            return "";
-        }
-
-        const parts: string[] = [];
-
-        if (extraContext.root_path) {
-            parts.push(`root_path=${extraContext.root_path}`);
-        }
-
-        if (extraContext.selection_text) {
-            parts.push(`selection_text="${extraContext.selection_text}"`);
-        }
-
-        if (extraContext.active_file_paths?.length) {
-            parts.push(`active_file_paths=[${extraContext.active_file_paths.join(", ")}]`);
-        }
-
-        return parts.length ? ` [context: ${parts.join("; ")}]` : "";
-    }
-
-    private async setAutoIndex(enabled: boolean): Promise<void> {
-        await writeAutoIndex(this.context, enabled);
-    }
-
-    private isAutoIndexEnabled(): boolean {
-        return readAutoIndex(this.context);
-    }
-
-    private getEffectiveRootPath(): string | undefined {
-        return readRootPath(this.context) ?? this.getWorkspaceRootPath();
-    }
-
-    private getWorkspaceRootPath(): string | undefined {
-        const folders = vscode.workspace.workspaceFolders;
-        if (folders && folders.length > 0) {
-            return folders[0].uri.fsPath;
-        }
-
-        if (vscode.workspace.workspaceFile) {
-            return path.dirname(vscode.workspace.workspaceFile.fsPath);
-        }
-
-        return undefined;
-    }
-
-    private postResult(payload: string): void {
-        this.postMessage({ type: "commandResult", payload });
-    }
-
-    private postMessage(message: CommandResultMessage): void {
-        this.sendMessage(message);
->>>>>>> bdbd261 (47)
     }
 }
-
-export { parseSlashCommand } from "./slashCommands";
