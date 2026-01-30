@@ -41,25 +41,6 @@ def _load_app(tmp_path):
     _log("H1", "test_token_enforcement.py:_load_app", "imported main", {"main": str(app_module)})
 
     os.environ["RAG_INDEX_DIR"] = str(tmp_path)
-<<<<<<< HEAD
-    return main.create_app()
-
-
-def test_health_endpoint_invalid_token(tmp_path):
-    app = _get_app(tmp_path)
-    client = TestClient(app)
-    response = client.get("/health")
-    assert response.status_code == 401
-    assert response.json()["error_code"] == "INVALID_TOKEN"
-
-
-def test_ask_endpoint_invalid_token(tmp_path):
-    app = _get_app(tmp_path)
-    client = TestClient(app)
-    response = client.post("/ask", json={"query": "What is the repo status?"})
-    assert response.status_code == 401
-    assert response.json()["error_code"] == "INVALID_TOKEN"
-=======
     return app_module.app
 
 
@@ -85,4 +66,3 @@ def test_ask_endpoint_invalid_token(client):
     response = client.post("/ask", json={"query": "What is the repo status?"})
     assert response.status_code == 401
     assert response.json() == _EXPECTED_ERROR
->>>>>>> d7185ab7aa61d493040ef2c72cd06f2600905d2b

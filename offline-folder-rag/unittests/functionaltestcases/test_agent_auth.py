@@ -5,22 +5,15 @@ from pathlib import Path
 from unittest.mock import patch
 
 from fastapi.testclient import TestClient
+from edge_agent.app.main import app  # type: ignore
+from edge_agent.app.security.token_store import get_or_create_token  # type: ignore
+from edge_agent.app.indexing.indexer import reset_indexing_stats
 
 repo_root = Path(__file__).resolve().parents[3]
 project_root = repo_root / "offline-folder-rag"
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
-<<<<<<< HEAD
-from fastapi.testclient import TestClient
-from edge_agent.app.main import app  # type: ignore
-from edge_agent.app.security.token_store import get_or_create_token  # type: ignore
-from edge_agent.app.indexing.indexer import reset_indexing_stats
-from unittest.mock import patch
-=======
-from edge_agent.app.indexing.indexer import reset_indexing_stats
-
->>>>>>> d7185ab7aa61d493040ef2c72cd06f2600905d2b
 _DEBUG_LOG = Path(r"c:\Users\FAZLEEN ANEESA\Desktop\Rag_Agent\.cursor\debug.log")
 _SESSION = "debug-session"
 _RUN = "run2"
@@ -58,12 +51,10 @@ def _fresh_client(tmp_path):
     app = main.create_app()
     return TestClient(app), token_store.get_or_create_token()
 
+
 def test_health_endpoint_auth(tmp_path):
     client, auth_token = _fresh_client(tmp_path)
-<<<<<<< HEAD
-=======
 
->>>>>>> d7185ab7aa61d493040ef2c72cd06f2600905d2b
     # Reset state to ensure clean test
     reset_indexing_stats()
 
@@ -82,14 +73,12 @@ def test_health_endpoint_auth(tmp_path):
             "ripgrep_ok": True,
             "chroma_ok": True,
         }
-<<<<<<< HEAD
+
     response = client.get("/health", headers={"X-LOCAL-TOKEN": auth_token})
     assert response.status_code == 200
     body = response.json()
     assert body["indexing"] is False
     assert body["ollama_ok"] is True
-=======
->>>>>>> d7185ab7aa61d493040ef2c72cd06f2600905d2b
 
     # Invalid token
     response = client.get("/health", headers={"X-LOCAL-TOKEN": "wrong_token"})
@@ -101,18 +90,11 @@ def test_health_endpoint_auth(tmp_path):
     assert response.status_code == 401
     assert response.json()["error_code"] == "INVALID_TOKEN"
 
-<<<<<<< HEAD
-def test_index_endpoint_auth(tmp_path):
-    client, auth_token = _fresh_client(tmp_path)
-    # Valid token
-    root_path = "/path/to/repo"
-=======
 
 def test_index_endpoint_auth(tmp_path):
     client, auth_token = _fresh_client(tmp_path)
     root_path = tmp_path / "repo"
     root_path.mkdir(parents=True, exist_ok=True)
->>>>>>> d7185ab7aa61d493040ef2c72cd06f2600905d2b
 
     response = client.post(
         "/index",
@@ -131,6 +113,7 @@ def test_index_endpoint_auth(tmp_path):
     response = client.post("/index", headers={"X-LOCAL-TOKEN": "wrong_token"})
     assert response.status_code == 401
     assert response.json()["error_code"] == "INVALID_TOKEN"
+
 
 def test_ask_endpoint_auth(tmp_path):
     client, auth_token = _fresh_client(tmp_path)
