@@ -126,6 +126,18 @@ export async function triggerIndex(baseUrl: string, mode: 'full' | 'incremental'
     return await getIndexReport(baseUrl);
 }
 
+export async function fetchHealth(baseUrl: string): Promise<HealthResponse | null> {
+    try {
+        const response = await authenticatedFetch(`${baseUrl}/health`);
+        if (!response.ok) {
+            return null;
+        }
+        return await response.json() as HealthResponse;
+    } catch {
+        return null;
+    }
+}
+
 let healthPollingInterval: NodeJS.Timeout | undefined;
 
 export function startHealthPolling(
