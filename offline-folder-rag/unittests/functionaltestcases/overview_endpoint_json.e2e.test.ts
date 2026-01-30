@@ -1,4 +1,5 @@
 import axios from 'axios';
+import expect from 'expect';
 
 const API_URL = 'http://localhost:8000';
 const TOKEN = 'placeholder-token';

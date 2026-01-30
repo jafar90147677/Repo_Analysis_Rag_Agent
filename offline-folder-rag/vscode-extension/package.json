@@ -9,14 +9,16 @@
   "main": "./out/extension.js",
   "scripts": {
     "compile": "tsc -p .",
-    "test": "mocha -r ts-node/register"
+    "test": "mocha -r ts-node/register \"../tests/vscode_extension/**/test_*.ts\" \"../tests/vscode_extension/**/*.test.ts\" \"../unittests/**/*.test.ts\""
   },
   "devDependencies": {
     "@types/chai": "^4.3.20",
     "@types/mocha": "^10.0.10",
-    "@types/node": "^20.16.0",
+    "@types/node": "^20.19.30",
     "@types/vscode": "^1.85.0",
+    "axios": "^1.13.4",
     "chai": "^4.5.0",
+    "expect": "^29.7.0",
     "mocha": "^10.8.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.0"
@@ -27,11 +29,10 @@
         "command": "offlineFolderRag.openChat",
         "title": "Offline Folder RAG: Open Chat"
       }
-    ],
-    "devDependencies": {
-      "@types/node": "^20.16.0",
-      "typescript": "^5.7.0",
-      "vscode": "^1.94.0"
-    }
+    ]
+  },
+  "dependencies": {
+    "@types/axios": "^0.9.36",
+    "@types/expect": "^1.20.4"
   }
 }
