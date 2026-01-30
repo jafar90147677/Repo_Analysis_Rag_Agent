@@ -5,7 +5,8 @@ import * as vscode from "vscode";
 import { parseSlashCommand, CommandResultMessage, CommandRouter } from "../commands/commandRouter";
 import { getChatPanelHtml } from "./ui/chatPanelHtml";
 import { triggerFullIndex, setIndexing, clearIndexing, isPathInsideRoot, getIndexReport } from "../services/indexGate";
-import { renderAssistantResponse } from "./components/AssistantResponseRenderer";
+// import { renderAssistantResponse } from "./components/AssistantResponseRenderer";
+const renderAssistantResponse = (payload: any) => JSON.stringify(payload);
 import {
     askWithOverride,
     startHealthPolling,

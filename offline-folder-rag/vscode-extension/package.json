@@ -9,7 +9,7 @@
   "main": "./out/extension.js",
   "scripts": {
     "compile": "tsc -p .",
-    "test": "mocha --node-option import=ts-node/register --require jest-mock-vscode --extension ts \"../tests/vscode_extension/contract/token_reader.test.ts\" \"../tests/vscode_extension/contract/test_health_polling.ts\" \"../tests/vscode_extension/contract/test_path_normalize.ts\""
+    "test": "mocha --node-option import=ts-node/register --require ./tests/mockVscode.js --require jest-mock-vscode --extension ts \"../tests/vscode_extension/contract/token_reader.test.ts\" \"../tests/vscode_extension/contract/test_health_polling.ts\" \"../tests/vscode_extension/contract/test_path_normalize.ts\" \"../tests/vscode_extension/contract/test_slash_commands.ts\" \"../unittests/functionaltestcases/test_local_dropdown_selection_and_cancel.ts\" \"../unittests/functionaltestcases/test_microphone_icon_disabled_state.ts\""
   },
   "devDependencies": {
     "@types/axios": "^0.9.36",
