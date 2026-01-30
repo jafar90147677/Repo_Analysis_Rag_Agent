@@ -2,26 +2,30 @@
 import * as path from "path";
 import * as vscode from "vscode";
 
-import { parseSlashCommand, CommandResultMessage } from "../commands/commandRouter";
+import { parseSlashCommand, CommandResultMessage, CommandRouter } from "../commands/commandRouter";
 import { getChatPanelHtml } from "./ui/chatPanelHtml";
 import { triggerFullIndex, setIndexing, clearIndexing } from "../services/indexGate";
 import { renderAssistantResponse } from "./components/AssistantResponseRenderer";
-
-export class ChatPanelViewProvider {
-    private panel: vscode.WebviewPanel | undefined;
-import { askWithOverride } from "../services/agentClient";
-import { startHealthPolling, stopHealthPolling, HealthResponse } from "../services/agentClient";
+import { askWithOverride, startHealthPolling, stopHealthPolling, HealthResponse, isComposerMode } from "../services/agentClient";
+import { readRootPath, writeRootPath, readRecentFolders } from "../services/storage";
 
 export class ChatPanelViewProvider {
     private panel: vscode.WebviewPanel | undefined;
     private readonly router: CommandRouter;
-    private readonly modeState = new ComposerModeState();
+    private readonly modeState: any; // Simplified for this fix
     private readonly agentBaseUrl = "http://localhost:8000"; // Default agent URL
 
     constructor(
         private readonly extensionContext: vscode.ExtensionContext,
         private readonly extensionUri: vscode.Uri
-    ) {}
+    ) {
+        this.router = new CommandRouter(extensionContext, (msg) => this.postMessage(msg));
+        this.modeState = {
+            mode: "auto",
+            getMode: () => this.modeState.mode,
+            setMode: (m: string) => { this.modeState.mode = m; }
+        };
+    }
 
     public show(): void {
         if (this.panel) {
@@ -35,6 +39,7 @@ export class ChatPanelViewProvider {
             vscode.ViewColumn.One,
             {
                 enableScripts: true,
+                enableCommandUris: true,
             }
         );
 
@@ -45,12 +50,50 @@ export class ChatPanelViewProvider {
 
         this.panel.webview.onDidReceiveMessage(async (message) => {
             if (message.type === "command") {
-                const result = await parseSlashCommand(message.text, this.extensionContext);
-                if (result.type === 'assistantResponse') {
-                    const html = renderAssistantResponse(result.payload);
-                    this.postMessage({ type: 'commandResult', payload: html, isHtml: true });
+                const { text, mode } = message;
+                if (text.startsWith("/")) {
+                    const result = await parseSlashCommand(text, this.extensionContext);
+                    if (result.type === 'assistantResponse') {
+                        const html = renderAssistantResponse(result.payload);
+                        this.postMessage({ type: 'commandResult', payload: html, isHtml: true });
+                    } else {
+                        this.postMessage(result);
+                    }
                 } else {
-                    this.postMessage(result);
+                    if (mode === "RAG") {
+                        try {
+                            const response = await askWithOverride(text, "rag");
+                            const result = await response.json();
+                            let payload = result.answer || JSON.stringify(result);
+                            
+                            if (result.citations && Array.isArray(result.citations)) {
+                                const citationsHtml = result.citations.map((c: any) => this.renderCitation(c)).join('<br>');
+                                payload = `${payload}<br><br><b>Citations:</b><br>${citationsHtml}`;
+                            }
+
+                            this.postMessage({
+                                type: "commandResult",
+                                payload: payload,
+                                isHtml: true
+                            });
+                        } catch (error) {
+                            this.postMessage({
+                                type: "commandResult",
+                                payload: `Error: ${error instanceof Error ? error.message : String(error)}`,
+                            });
+                        }
+                    } else if (mode === "Auto") {
+                        try {
+                            await this.router.autoRouteInput(text);
+                        } catch (error) {
+                            this.postMessage({
+                                type: "commandResult",
+                                payload: `Error: ${error instanceof Error ? error.message : String(error)}`,
+                            });
+                        }
+                    } else {
+                        await this.router.handleCommand(text);
+                    }
                 }
             } else if (message.type === "indexAction") {
                 const workspaceFolders = vscode.workspace.workspaceFolders;
@@ -84,59 +127,9 @@ export class ChatPanelViewProvider {
                     editor.selection = new vscode.Selection(range.start, range.end);
                     editor.revealRange(range, vscode.TextEditorRevealType.InCenter);
                 }
-            }
-        });
-
-                const { text, mode } = message;
-                if (mode === "RAG" && !text.startsWith("/")) {
-                    try {
-                        const response = await askWithOverride(text, "rag");
-                        const result = await response.json();
-                        this.postMessage({
-                            type: "commandResult",
-                            payload: result.answer || JSON.stringify(result),
-                        });
-                    } catch (error) {
-                        this.postMessage({
-                            type: "commandResult",
-                            payload: `Error: ${error instanceof Error ? error.message : String(error)}`,
-                        });
-                    }
-                } else if (mode === "Auto" && !text.startsWith("/")) {
-                    try {
-                        await this.router.autoRouteInput(text);
-                    } catch (error) {
-                        this.postMessage({
-                            type: "commandResult",
-                            payload: `Error: ${error instanceof Error ? error.message : String(error)}`,
-                        });
-                    }
-                } else {
-                    await this.router.handleCommand(text);
-                }
-            }
-        });
-
-        this.panel.webview.html = getChatPanelHtml();
-        const composerPlaceholder = "Plan, @ for context, / for commands";
-        this.panel.webview.html = getChatPanelHtml(this.extensionUri, composerPlaceholder);
-
-        this.panel.webview.onDidReceiveMessage(async (message: { type: string; [key: string]: any }) => {
-            if (message.type === "command") {
-                const mode = isComposerMode(message.mode) ? message.mode : this.modeState.getMode();
-                await this.router.route({
-                    text: message.text ?? "",
-                    mode,
-                    extraContext: message.extraContext,
-                });
             } else if (message.type === "setMode" && isComposerMode(message.mode)) {
                 this.modeState.setMode(message.mode);
                 this.postModeState();
-            } else if (message.type === "indexAction") {
-                if (message.action === "full") {
-                    this.startPolling();
-                }
-                await this.router.handleIndexAction(message.action);
             } else if (message.type === "contextRequest") {
                 this.handleContextRequest(message.action);
             } else if (message.type === "localSelect" && typeof message.folder === "string") {
@@ -156,6 +149,9 @@ export class ChatPanelViewProvider {
                 }
             }
         });
+
+        const composerPlaceholder = "Plan, @ for context, / for commands";
+        this.panel.webview.html = getChatPanelHtml(this.extensionUri, composerPlaceholder);
 
         this.postModeState();
         this.postLocalState();
@@ -187,11 +183,22 @@ export class ChatPanelViewProvider {
         );
     }
 
-    private postMessage(message: CommandResultMessage): void {
+    private renderCitation(citation: {path: string, start_line: number, end_line: number}) {
+        const commandUri = vscode.Uri.parse(
+            `command:citation.open?${encodeURIComponent(JSON.stringify({
+                path: citation.path,
+                startLine: citation.start_line,
+                endLine: citation.end_line
+            }))}`
+        );
+        
+        return `<a href="${commandUri}">${citation.path} : ${citation.start_line}–${citation.end_line}</a>`;
+    }
+
+    private postMessage(message: CommandResultMessage | any): void {
         if (!this.panel) {
             return;
         }
-
         this.panel.webview.postMessage(message);
     }
 
@@ -296,13 +303,5 @@ export class ChatPanelViewProvider {
         }
 
         return undefined;
-    }
-
-    private postMessage(message: any): void {
-        this.panel?.webview.postMessage(message);
-    }
-
-    private postMessage(message: any): void {
-        this.panel?.webview.postMessage(message);
     }
 }

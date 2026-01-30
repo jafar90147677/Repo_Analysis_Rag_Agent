@@ -1,26 +1,7 @@
-import * as vscode from "vscode";
+import * as vscode from 'vscode';
 import { slashCommandRegistry } from './slashCommands';
 import { overview, search, ask } from '../services/agentClient';
-
-export interface CommandResultMessage {
-    type: "commandResult";
-    payload: string;
-}
-
-export class CommandRouter {
-    constructor(
-        private readonly context: vscode.ExtensionContext,
-        private readonly onResult: (message: CommandResultMessage) => void
-    ) {}
-
-    public async handleCommand(input: string): Promise<void> {
-        const result = this.handleToolsSlashCommand(input);
-        this.onResult({
-            type: "commandResult",
-            payload: result
-        });
 import { checkIndexExists, isIndexing } from '../services/indexGate';
-import * as vscode from 'vscode';
 
 export interface CommandResultMessage {
     type: 'commandResult' | 'showIndexModal' | 'dismissIndexModal' | 'assistantResponse';
@@ -88,12 +69,53 @@ export async function parseSlashCommand(
                 }
                 return { type: 'commandResult', payload: result };
             }
+        } else {
+            // For all other commands, we require an exact match
+            if (trimmedInput === commandKey) {
+                const result = slashCommandRegistry[commandKey]('');
+                
+                // For /overview and /index report, wrap in assistantResponse envelope
+                if (commandKey === '/overview' || commandKey === '/index report' || commandKey === '/doctor') {
+                    return {
+                        type: 'assistantResponse',
+                        payload: {
+                            mode: commandKey === '/doctor' ? 'tools' : 'rag',
+                            confidence: 'found',
+                            answer: result,
+                            citations: []
+                        }
+                    };
+                }
+                return { type: 'commandResult', payload: result };
+            }
+        }
+    }
+
+    return { type: 'commandResult', payload: 'INVALID_COMMAND' };
+}
+
+export class CommandRouter {
+    constructor(
+        private readonly context: vscode.ExtensionContext,
+        private readonly onResult: (message: CommandResultMessage) => void
+    ) {}
+
+    public async handleCommand(input: string): Promise<void> {
+        const trimmed = input.trim();
+        if (trimmed.startsWith('/')) {
+            const result = await parseSlashCommand(trimmed, this.context);
+            this.onResult(result);
+        } else {
+            await this.autoRouteInput(trimmed);
+        }
+    }
+
     public async autoRouteInput(input: string): Promise<void> {
         const trimmed = input.trim();
         const overviewKeywords = ['overview', 'structure', 'languages'];
         const searchKeywords = ['search', 'find', 'where', 'locate'];
 
-        let response: Response;
+        let response: any;
         if (overviewKeywords.some(k => trimmed.toLowerCase().includes(k))) {
             response = await overview(trimmed);
         } else if (searchKeywords.some(k => trimmed.toLowerCase().includes(k))) {
@@ -132,26 +154,4 @@ export async function parseSlashCommand(
 
         return 'INVALID_COMMAND';
     }
-            // For all other commands, we require an exact match
-            if (trimmedInput === commandKey) {
-                const result = slashCommandRegistry[commandKey]('');
-                
-                // For /overview and /index report, wrap in assistantResponse envelope
-                if (commandKey === '/overview' || commandKey === '/index report' || commandKey === '/doctor') {
-                    return {
-                        type: 'assistantResponse',
-                        payload: {
-                            mode: commandKey === '/doctor' ? 'tools' : 'rag',
-                            confidence: 'found',
-                            answer: result,
-                            citations: []
-                        }
-                    };
-                }
-                return { type: 'commandResult', payload: result };
-            }
-        }
-    }
-
-    return { type: 'commandResult', payload: 'INVALID_COMMAND' };
 }
