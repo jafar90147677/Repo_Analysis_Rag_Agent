@@ -11,6 +11,7 @@ from pydantic import BaseModel
 
 from ..indexing import indexer
 from ..security import TOKEN_HEADER, verify_token, require_token
+from ..tools.doctor import check_ollama, check_ripgrep, check_chroma
 from .schemas import (
     ErrorResponse,
     IndexRequest,
@@ -77,15 +78,20 @@ async def index_route(request: IndexRequest):
 
 @router.get("/health", response_model=HealthResponse)
 async def health():
+    # In a real implementation, we would need a repo_id to check indexing status.
+    # However, the /health endpoint per PRD doesn't take a repo_id.
+    # We return a global status or 0/False if unknown.
+    stats = indexer.get_health_stats()
     return {
-        "indexing": False,
-        "indexed_files_so_far": 0,
+        "indexing": stats["indexing"],
+        "indexed_files_so_far": stats["indexed_files_so_far"],
         "estimated_total_files": 0,
-        "last_index_completed_epoch_ms": 0,
-        "ollama_ok": True,
-        "ripgrep_ok": True,
-        "chroma_ok": True,
+        "last_index_completed_epoch_ms": stats["last_index_completed_epoch_ms"],
+        "ollama_ok": check_ollama(),
+        "ripgrep_ok": check_ripgrep(),
+        "chroma_ok": check_chroma(),
     }
+
 
 @router.post("/ask", response_model=ToolResponse)
 async def ask(request: AskRequest):

@@ -47,19 +47,6 @@ def create_app() -> FastAPI:
 
     app.include_router(api_router)
 
-    @app.get("/health")
-    async def health(x_local_token: str | None = Header(default=None, alias=TOKEN_HEADER)):
-        verify_token(x_local_token)
-        return {
-            "indexing": False,
-            "indexed_files_so_far": 0,
-            "estimated_total_files": 0,
-            "last_index_completed_epoch_ms": 0,
-            "ollama_ok": True,
-            "ripgrep_ok": True,
-            "chroma_ok": True,
-        }
-
     return app
 
 

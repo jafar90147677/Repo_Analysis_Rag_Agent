@@ -4,39 +4,16 @@ import * as vscode from "vscode";
 
 import { CommandRouter, CommandResultMessage } from "../commands/commandRouter";
 import { getChatPanelHtml } from "./ui/chatPanelHtml";
-import {
-    ComposerMode,
-    isComposerMode,
-    readComposerMode,
-    writeComposerMode,
-} from "../services/agentClient";
-import {
-    readRootPath,
-    readRecentFolders,
-    writeRootPath,
-} from "../services/storage";
-
-class ComposerModeState {
-    constructor(private mode: ComposerMode = readComposerMode() ?? "auto") {}
-
-    public getMode(): ComposerMode {
-        return this.mode;
-    }
-
-    public setMode(mode: ComposerMode): void {
-        if (this.mode === mode) {
-            return;
-        }
-
-        this.mode = mode;
-        writeComposerMode(mode);
-    }
-}
+import { startHealthPolling, stopHealthPolling, HealthResponse } from "../services/agentClient";
 
 export class ChatPanelViewProvider {
     private panel: vscode.WebviewPanel | undefined;
     private readonly router: CommandRouter;
+<<<<<<< HEAD
     private readonly modeState = new ComposerModeState();
+=======
+    private readonly agentBaseUrl = "http://localhost:8000"; // Default agent URL
+>>>>>>> 31ecd6f019cdef3270a68e61b1c6464827aa0ee7
 
     constructor(
         private readonly extensionContext: vscode.ExtensionContext,
@@ -62,9 +39,15 @@ export class ChatPanelViewProvider {
 
         this.panel.onDidDispose(() => {
             this.panel = undefined;
+            stopHealthPolling();
         });
 
+<<<<<<< HEAD
         this.panel.webview.html = getChatPanelHtml();
+=======
+        const composerPlaceholder = "Plan, @ for context, / for commands";
+        this.panel.webview.html = getChatPanelHtml(this.extensionUri, composerPlaceholder);
+>>>>>>> 31ecd6f019cdef3270a68e61b1c6464827aa0ee7
 
         this.panel.webview.onDidReceiveMessage(async (message: { type: string; [key: string]: any }) => {
             if (message.type === "command") {
@@ -78,6 +61,9 @@ export class ChatPanelViewProvider {
                 this.modeState.setMode(message.mode);
                 this.postModeState();
             } else if (message.type === "indexAction") {
+                if (message.action === "full") {
+                    this.startPolling();
+                }
                 await this.router.handleIndexAction(message.action);
             } else if (message.type === "contextRequest") {
                 this.handleContextRequest(message.action);
@@ -103,12 +89,39 @@ export class ChatPanelViewProvider {
         this.postLocalState();
     }
 
+    private startPolling(): void {
+        startHealthPolling(
+            this.agentBaseUrl,
+            (health: HealthResponse) => {
+                let progressText = "";
+                if (health.indexing) {
+                    if (health.indexed_files_so_far > 0) {
+                        progressText = `Indexing: ${health.indexed_files_so_far} files processed`;
+                    } else {
+                        progressText = "Scanning...";
+                    }
+                    this.postMessage({
+                        type: "commandResult",
+                        payload: progressText
+                    });
+                }
+            },
+            (error) => {
+                this.postMessage({
+                    type: "commandResult",
+                    payload: `Polling error: ${error.message}`
+                });
+            }
+        );
+    }
+
     private postMessage(message: CommandResultMessage): void {
         if (!this.panel) {
             return;
         }
 
         this.panel.webview.postMessage(message);
+<<<<<<< HEAD
     }
 
     private postModeState(): void {
@@ -212,5 +225,7 @@ export class ChatPanelViewProvider {
         }
 
         return undefined;
+=======
+>>>>>>> 31ecd6f019cdef3270a68e61b1c6464827aa0ee7
     }
 }

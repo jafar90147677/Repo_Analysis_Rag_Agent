@@ -44,6 +44,7 @@ export function readAgentToken(): string | null {
     }
 }
 
+<<<<<<< HEAD
 export function readComposerMode(): ComposerMode | null {
     const statePath = getModeStateFilePath();
     try {
@@ -67,6 +68,16 @@ export function writeComposerMode(mode: ComposerMode): void {
     } catch {
         // best effort persistence only
     }
+=======
+export interface HealthResponse {
+    indexing: boolean;
+    indexed_files_so_far: number;
+    estimated_total_files: number;
+    last_index_completed_epoch_ms: number;
+    ollama_ok: boolean;
+    ripgrep_ok: boolean;
+    chroma_ok: boolean;
+>>>>>>> 31ecd6f019cdef3270a68e61b1c6464827aa0ee7
 }
 
 export async function authenticatedFetch(url: string, options: RequestInit = {}): Promise<Response> {
@@ -81,4 +92,45 @@ export async function authenticatedFetch(url: string, options: RequestInit = {})
         ...options,
         headers,
     });
+}
+
+let healthPollingInterval: NodeJS.Timeout | undefined;
+
+export function startHealthPolling(baseUrl: string, onUpdate: (health: HealthResponse) => void, onError: (error: any) => void) {
+    if (healthPollingInterval) {
+        return;
+    }
+
+    const poll = async () => {
+        try {
+            const response = await authenticatedFetch(`${baseUrl}/health`);
+            if (!response.ok) {
+                throw new Error(`Health check failed: ${response.statusText}`);
+            }
+            const health: HealthResponse = await response.json();
+            onUpdate(health);
+            if (!health.indexing) {
+                stopHealthPolling();
+            }
+        } catch (error) {
+            onError(error);
+            stopHealthPolling();
+        }
+    };
+
+    // Start polling immediately
+    poll();
+    healthPollingInterval = setInterval(poll, 2000);
+}
+
+export function stopHealthPolling() {
+    if (healthPollingInterval) {
+        clearInterval(healthPollingInterval);
+        healthPollingInterval = undefined;
+    }
+}
+
+export async function sendMessageToAgent(message: string): Promise<void> {
+    console.log('Sending message to agent:', message);
+    // Implementation for sending message to agent
 }

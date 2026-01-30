@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import threading
+import time
 from typing import Dict
 
 
@@ -11,6 +12,10 @@ _repo_indexing_state_lock = threading.Lock()
 
 _repo_locks: Dict[str, threading.Lock] = {}
 _repo_locks_lock = threading.Lock()
+
+_indexed_files_so_far: int = 0
+_last_index_completed_epoch_ms: int = 0
+_health_tracking_lock = threading.Lock()
 
 
 def _get_repo_lock(repo_id: str) -> threading.Lock:
@@ -27,18 +32,43 @@ def mark_indexing_started(repo_id: str) -> None:
     """Record that indexing has started for `repo_id`."""
     with _repo_indexing_state_lock:
         _repo_indexing_state[repo_id] = True
+    with _health_tracking_lock:
+        global _indexed_files_so_far
+        _indexed_files_so_far = 0
 
 
 def mark_indexing_finished(repo_id: str) -> None:
     """Record that indexing has finished for `repo_id`."""
     with _repo_indexing_state_lock:
         _repo_indexing_state.pop(repo_id, None)
+    with _health_tracking_lock:
+        global _last_index_completed_epoch_ms
+        _last_index_completed_epoch_ms = int(time.time() * 1000)
+
+
+def increment_indexed_files() -> None:
+    """Increment the count of indexed files."""
+    with _health_tracking_lock:
+        global _indexed_files_so_far
+        _indexed_files_so_far += 1
 
 
 def is_indexing_in_progress(repo_id: str) -> bool:
     """Return whether indexing is currently in progress for `repo_id`."""
     with _repo_indexing_state_lock:
         return _repo_indexing_state.get(repo_id, False)
+
+
+def get_health_stats() -> dict:
+    """Return the current indexing health statistics."""
+    with _repo_indexing_state_lock:
+        is_indexing = any(_repo_indexing_state.values())
+    with _health_tracking_lock:
+        return {
+            "indexing": is_indexing,
+            "indexed_files_so_far": _indexed_files_so_far,
+            "last_index_completed_epoch_ms": _last_index_completed_epoch_ms,
+        }
 
 
 class RepoIndexingLock:

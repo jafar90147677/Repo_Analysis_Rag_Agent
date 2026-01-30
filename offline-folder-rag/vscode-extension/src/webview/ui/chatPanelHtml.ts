@@ -1,4 +1,10 @@
+<<<<<<< HEAD
 const COMMAND_PLACEHOLDER = "Plan · @ for context · / for commands";
+=======
+import * as vscode from "vscode";
+
+const PLACEHOLDER_TEXT = "Plan, @ for context, / for commands";
+>>>>>>> 31ecd6f019cdef3270a68e61b1c6464827aa0ee7
 
 function getNonce(): string {
     const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -7,9 +13,14 @@ function getNonce(): string {
         .join("");
 }
 
+<<<<<<< HEAD
 export function getChatPanelHtml(): string {
     const nonce = getNonce();
 
+=======
+export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: string = PLACEHOLDER_TEXT): string {
+    const nonce = getNonce();
+>>>>>>> 31ecd6f019cdef3270a68e61b1c6464827aa0ee7
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -42,10 +53,18 @@ export function getChatPanelHtml(): string {
         }
 
         body {
+<<<<<<< HEAD
             margin: 0;
             background: var(--bg);
             font-family: "Segoe UI", system-ui, sans-serif;
             color: var(--text);
+=======
+            font-family: system-ui, sans-serif;
+            padding: 0;
+            margin: 0;
+            background: #111;
+            color: #eee;
+>>>>>>> 31ecd6f019cdef3270a68e61b1c6464827aa0ee7
         }
 
         #chat-panel-container {
@@ -54,6 +73,7 @@ export function getChatPanelHtml(): string {
             height: 100vh;
             padding: 16px;
             box-sizing: border-box;
+<<<<<<< HEAD
             gap: 16px;
         }
 
@@ -98,11 +118,15 @@ export function getChatPanelHtml(): string {
             border-color: var(--accent);
             outline: none;
             box-shadow: 0 0 0 2px rgba(14, 99, 156, 0.2);
+=======
+            gap: 12px;
+>>>>>>> 31ecd6f019cdef3270a68e61b1c6464827aa0ee7
         }
 
         #conversation {
             flex: 1;
             overflow-y: auto;
+<<<<<<< HEAD
             background: var(--panel-bg);
             border: 1px solid var(--border);
             border-radius: 12px;
@@ -182,17 +206,44 @@ export function getChatPanelHtml(): string {
             margin: 0;
             font-size: 0.85rem;
             color: var(--muted);
+=======
+            border: 1px solid #333;
+            padding: 12px;
+            background: #1b1b1b;
+        }
+
+        #chat-panel-composer {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        textarea {
+            width: 100%;
+            background: #222;
+            border: 1px solid #333;
+            color: #eee;
+            padding: 8px;
+            resize: vertical;
+            min-height: 60px;
+>>>>>>> 31ecd6f019cdef3270a68e61b1c6464827aa0ee7
         }
 
         #composer-bottom-row {
             display: flex;
+<<<<<<< HEAD
             align-items: center;
             gap: 12px;
             flex-wrap: wrap;
+=======
+            gap: 8px;
+            align-items: center;
+>>>>>>> 31ecd6f019cdef3270a68e61b1c6464827aa0ee7
         }
 
         .composer-dropdown {
             display: flex;
+<<<<<<< HEAD
             flex-direction: column;
             font-size: 0.75rem;
             color: var(--muted);
@@ -369,10 +420,45 @@ export function getChatPanelHtml(): string {
             border-radius: 14px;
             padding: 20px;
             width: min(320px, 80%);
+=======
+            align-items: center;
+            gap: 4px;
+        }
+
+        select {
+            background: #222;
+            color: #eee;
+            border: 1px solid #333;
+        }
+
+        button {
+            padding: 4px 8px;
+            background: #0e639c;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal {
+            background: #222;
+            border: 1px solid #444;
+            padding: 20px;
+            max-width: 320px;
+>>>>>>> 31ecd6f019cdef3270a68e61b1c6464827aa0ee7
             text-align: center;
             display: flex;
             flex-direction: column;
             gap: 12px;
+<<<<<<< HEAD
         }
 
         .modal-actions {
@@ -399,6 +485,8 @@ export function getChatPanelHtml(): string {
             clip: rect(0, 0, 0, 0);
             white-space: nowrap;
             border: 0;
+=======
+>>>>>>> 31ecd6f019cdef3270a68e61b1c6464827aa0ee7
         }
     </style>
 </head>
@@ -409,6 +497,7 @@ export function getChatPanelHtml(): string {
                 <h1>Chat</h1>
                 <p>Offline Folder RAG</p>
             </div>
+<<<<<<< HEAD
             <div id="header-actions" role="toolbar" aria-label="Chat header actions">
                 <button type="button" aria-label="Start a new conversation" title="Start new chat">+</button>
                 <button type="button" aria-label="View more options" title="More options">…</button>
@@ -489,10 +578,46 @@ export function getChatPanelHtml(): string {
                 <button id="indexFull" type="button" aria-label="Index full workspace" title="Index full workspace">Index Full</button>
                 <button id="indexCancel" type="button" aria-label="Cancel indexing" title="Cancel indexing">Cancel</button>
             </div>
+=======
+        </header>
+
+        <section id="conversation" role="log" aria-live="polite">
+            <p>No conversation yet.</p>
+        </section>
+
+        <section id="chat-panel-composer">
+            <label for="composer">Message</label>
+            <textarea id="composer" placeholder="${placeholderText}"></textarea>
+            <div id="composer-bottom-row">
+                <div class="composer-dropdown">
+                    <label for="infinity-dropdown">∞</label>
+                    <select id="infinity-dropdown">
+                        <option value="1">∞ option</option>
+                    </select>
+                </div>
+                <div class="composer-dropdown">
+                    <label for="auto-dropdown">Auto</label>
+                    <select id="auto-dropdown">
+                        <option value="auto">Auto</option>
+                    </select>
+                </div>
+                <button id="attachment-button" type="button">📎</button>
+                <button id="microphone-button" type="button">🎤</button>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal-backdrop" id="indexModal">
+        <div class="modal">
+            <p><strong>Index required. Run Full Index now?</strong></p>
+            <button id="indexFull">Index Full</button>
+            <button id="indexCancel">Cancel</button>
+>>>>>>> 31ecd6f019cdef3270a68e61b1c6464827aa0ee7
         </div>
     </div>
 
     <script nonce="${nonce}">
+<<<<<<< HEAD
         (function () {
             const vscode = acquireVsCodeApi();
             const conversation = document.getElementById("conversation");
@@ -887,6 +1012,65 @@ export function getChatPanelHtml(): string {
 
             renderAttachments();
         })();
+=======
+        const vscode = acquireVsCodeApi();
+        const conversation = document.getElementById("conversation");
+        const composer = document.getElementById("composer");
+        const modal = document.getElementById("indexModal");
+        const indexFullButton = document.getElementById("indexFull");
+        const indexCancelButton = document.getElementById("indexCancel");
+
+        function appendLog(text) {
+            const entry = document.createElement("p");
+            entry.textContent = text;
+            conversation.appendChild(entry);
+            conversation.scrollTop = conversation.scrollHeight;
+        }
+
+        function showModal() {
+            modal.style.display = "flex";
+        }
+
+        function hideModal() {
+            modal.style.display = "none";
+        }
+
+        composer.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") {
+                if (event.shiftKey) {
+                    return;
+                }
+                event.preventDefault();
+                const text = composer.value.trim();
+                if (text) {
+                    appendLog("> " + text);
+                    vscode.postMessage({ type: "command", text: text });
+                    composer.value = "";
+                }
+            }
+        });
+
+        indexFullButton.addEventListener("click", () => {
+            vscode.postMessage({ type: "indexAction", action: "full" });
+        });
+
+        indexCancelButton.addEventListener("click", () => {
+            vscode.postMessage({ type: "indexAction", action: "cancel" });
+        });
+
+        window.addEventListener("message", (event) => {
+            const message = event.data;
+            if (!message) return;
+
+            if (message.type === "showIndexModal") {
+                showModal();
+            } else if (message.type === "dismissIndexModal") {
+                hideModal();
+            } else if (message.type === "commandResult" && message.payload) {
+                appendLog(message.payload);
+            }
+        });
+>>>>>>> 31ecd6f019cdef3270a68e61b1c6464827aa0ee7
     </script>
 </body>
 </html>`;
