@@ -1,10 +1,6 @@
-<<<<<<< HEAD
-const COMMAND_PLACEHOLDER = "Plan · @ for context · / for commands";
-=======
 import * as vscode from "vscode";
 
 const PLACEHOLDER_TEXT = "Plan, @ for context, / for commands";
->>>>>>> 31ecd6f019cdef3270a68e61b1c6464827aa0ee7
 
 function getNonce(): string {
     const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -13,14 +9,9 @@ function getNonce(): string {
         .join("");
 }
 
-<<<<<<< HEAD
-export function getChatPanelHtml(): string {
+export function getChatPanelHtml(_extensionUri: vscode.Uri, placeholderText: string = PLACEHOLDER_TEXT): string {
     const nonce = getNonce();
 
-=======
-export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: string = PLACEHOLDER_TEXT): string {
-    const nonce = getNonce();
->>>>>>> 31ecd6f019cdef3270a68e61b1c6464827aa0ee7
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -53,28 +44,20 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
         }
 
         body {
-<<<<<<< HEAD
             margin: 0;
+            padding: 0;
             background: var(--bg);
             font-family: "Segoe UI", system-ui, sans-serif;
             color: var(--text);
-=======
-            font-family: system-ui, sans-serif;
-            padding: 0;
-            margin: 0;
-            background: #111;
-            color: #eee;
->>>>>>> 31ecd6f019cdef3270a68e61b1c6464827aa0ee7
         }
 
         #chat-panel-container {
             display: flex;
             flex-direction: column;
             height: 100vh;
-            padding: 16px;
-            box-sizing: border-box;
-<<<<<<< HEAD
+            padding: 20px;
             gap: 16px;
+            box-sizing: border-box;
         }
 
         #chat-panel-header {
@@ -118,15 +101,11 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
             border-color: var(--accent);
             outline: none;
             box-shadow: 0 0 0 2px rgba(14, 99, 156, 0.2);
-=======
-            gap: 12px;
->>>>>>> 31ecd6f019cdef3270a68e61b1c6464827aa0ee7
         }
 
         #conversation {
             flex: 1;
             overflow-y: auto;
-<<<<<<< HEAD
             background: var(--panel-bg);
             border: 1px solid var(--border);
             border-radius: 12px;
@@ -206,62 +185,10 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
             margin: 0;
             font-size: 0.85rem;
             color: var(--muted);
-=======
-            border: 1px solid #333;
-            padding: 12px;
-            background: #1b1b1b;
         }
 
-        #chat-panel-composer {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        textarea {
-            width: 100%;
-            background: #222;
-            border: 1px solid #333;
-            color: #eee;
-            padding: 8px;
-            resize: vertical;
-            min-height: 60px;
->>>>>>> 31ecd6f019cdef3270a68e61b1c6464827aa0ee7
-        }
-
-        #composer-bottom-row {
-            display: flex;
-<<<<<<< HEAD
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-=======
-            gap: 8px;
-            align-items: center;
->>>>>>> 31ecd6f019cdef3270a68e61b1c6464827aa0ee7
-        }
-
-        .composer-dropdown {
-            display: flex;
-<<<<<<< HEAD
-            flex-direction: column;
-            font-size: 0.75rem;
-            color: var(--muted);
-        }
-
-        .composer-dropdown label {
-            font-size: 0.9rem;
-            margin-bottom: 4px;
-        }
-
-        .composer-dropdown select {
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            background: var(--surface);
-            padding: 6px 10px;
-            font-size: 0.9rem;
-            color: var(--text);
-            min-width: 120px;
+        .composer-hint strong {
+            font-weight: 600;
         }
 
         .context-attachments {
@@ -326,9 +253,33 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
             outline: none;
         }
 
-        .composer-dropdown select option[disabled] {
+        .composer-dropdown {
+            display: flex;
+            flex-direction: column;
+            font-size: 0.75rem;
             color: var(--muted);
-            opacity: 0.6;
+        }
+
+        .composer-dropdown label {
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+        }
+
+        .composer-dropdown select {
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            padding: 6px 10px;
+            font-size: 0.9rem;
+            color: var(--text);
+            min-width: 120px;
+        }
+
+        #composer-bottom-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
         }
 
         #composer-bottom-row button {
@@ -420,45 +371,10 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
             border-radius: 14px;
             padding: 20px;
             width: min(320px, 80%);
-=======
-            align-items: center;
-            gap: 4px;
-        }
-
-        select {
-            background: #222;
-            color: #eee;
-            border: 1px solid #333;
-        }
-
-        button {
-            padding: 4px 8px;
-            background: #0e639c;
-            border: none;
-            color: #fff;
-            cursor: pointer;
-        }
-
-        .modal-backdrop {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.75);
-            display: none;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal {
-            background: #222;
-            border: 1px solid #444;
-            padding: 20px;
-            max-width: 320px;
->>>>>>> 31ecd6f019cdef3270a68e61b1c6464827aa0ee7
             text-align: center;
             display: flex;
             flex-direction: column;
             gap: 12px;
-<<<<<<< HEAD
         }
 
         .modal-actions {
@@ -485,8 +401,6 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
             clip: rect(0, 0, 0, 0);
             white-space: nowrap;
             border: 0;
-=======
->>>>>>> 31ecd6f019cdef3270a68e61b1c6464827aa0ee7
         }
     </style>
 </head>
@@ -497,7 +411,6 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
                 <h1>Chat</h1>
                 <p>Offline Folder RAG</p>
             </div>
-<<<<<<< HEAD
             <div id="header-actions" role="toolbar" aria-label="Chat header actions">
                 <button type="button" aria-label="Start a new conversation" title="Start new chat">+</button>
                 <button type="button" aria-label="View more options" title="More options">…</button>
@@ -513,12 +426,12 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
                 <label for="composer-input">Message</label>
                 <textarea
                     id="composer-input"
-                    placeholder="${COMMAND_PLACEHOLDER}"
+                    placeholder="${placeholderText}"
                     aria-label="Message input"
                     aria-describedby="composer-hint"
                     autocomplete="off"
                 ></textarea>
-                <p id="composer-hint" class="composer-hint">Plan · @ for context · / for commands</p>
+                <p id="composer-hint" class="composer-hint">${placeholderText}</p>
 
                 <div id="context-attachments" class="context-attachments" aria-live="polite" hidden></div>
 
@@ -530,12 +443,16 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
 
                 <div id="composer-bottom-row" aria-label="Composer quick controls">
                     <div class="composer-dropdown">
-                        <label for="infinity-dropdown">∞</label>
-                        <select id="infinity-dropdown" aria-label="Infinity dropdown" title="Infinity options">
-                            <option value="local">Local</option>
-                            <option disabled class="dropdown-future">Future entry 1 (coming soon)</option>
-                            <option disabled class="dropdown-future">Future entry 2 (coming soon)</option>
-                        </select>
+                    <label for="infinity-dropdown">∞</label>
+                    <select id="infinity-dropdown" aria-label="Infinity dropdown" title="Infinity options">
+                        <option value="local" selected>Local</option>
+                        <option value="future-1" disabled class="dropdown-future" aria-disabled="true">
+                            Future entry 1 (coming soon)
+                        </option>
+                        <option value="future-2" disabled class="dropdown-future" aria-disabled="true">
+                            Future entry 2 (coming soon)
+                        </option>
+                    </select>
                     </div>
                     <div class="composer-dropdown">
                         <label for="mode-select">Mode</label>
@@ -578,6 +495,7 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
                 <button id="indexFull" type="button" aria-label="Index full workspace" title="Index full workspace">Index Full</button>
                 <button id="indexCancel" type="button" aria-label="Cancel indexing" title="Cancel indexing">Cancel</button>
             </div>
+<<<<<<< HEAD
 =======
         </header>
 
@@ -618,11 +536,12 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
             <button id="indexFull">Index Full</button>
             <button id="indexCancel">Cancel</button>
 >>>>>>> 31ecd6f019cdef3270a68e61b1c6464827aa0ee7
+=======
+>>>>>>> bdbd261 (47)
         </div>
     </div>
 
     <script nonce="${nonce}">
-<<<<<<< HEAD
         (function () {
             const vscode = acquireVsCodeApi();
             const conversation = document.getElementById("conversation");
@@ -631,23 +550,26 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
             const contextAttachments = document.getElementById("context-attachments");
             const contextMenu = document.getElementById("context-menu");
             const modeSelect = document.getElementById("mode-select");
+            const infinityDropdown = document.getElementById("infinity-dropdown");
             const indexModal = document.getElementById("indexModal");
             const indexFullButton = document.getElementById("indexFull");
             const indexCancelButton = document.getElementById("indexCancel");
-            const COMPOSER_MODES = ["auto", "rag", "tools"];
             const LOCAL_SELECT_VALUE = "__select_folder__";
             const localDropdown = document.getElementById("local-dropdown");
 
-            let currentMode = "auto";
-            let lastLocalSelection = LOCAL_SELECT_VALUE;
+            const COMPOSER_MODES = ["auto", "rag", "tools"];
+
             const attachedContext = {
                 root_path: null,
                 selection_text: null,
                 active_file_paths: [],
             };
 
+            let currentMode = "auto";
+            let lastLocalSelection = LOCAL_SELECT_VALUE;
+
             function generateContextId() {
-                return `ctx-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+                return "ctx-" + Date.now() + "-" + Math.random().toString(16).slice(2);
             }
 
             function applyMode(newMode, notify = false) {
@@ -669,12 +591,21 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
                 modeSelect.addEventListener("change", () => applyMode(modeSelect.value, true));
             }
 
+            if (infinityDropdown) {
+                infinityDropdown.value = "local";
+                infinityDropdown.addEventListener("change", () => {
+                    if (infinityDropdown.value !== "local") {
+                        infinityDropdown.value = "local";
+                    }
+                });
+            }
+
             function renderLocalOptions(state) {
                 if (!localDropdown) {
                     return;
                 }
 
-                localDropdown.innerHTML = `<option value="${LOCAL_SELECT_VALUE}">Select Folder…</option>`;
+                localDropdown.innerHTML = "<option value=\"" + LOCAL_SELECT_VALUE + "\">Select Folder…</option>";
 
                 const seen = new Set();
                 const rootPath = state?.rootPath;
@@ -743,7 +674,7 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
                 }
 
                 const entry = document.createElement("div");
-                entry.className = `conversation-message ${role}`;
+                entry.className = "conversation-message " + role;
                 entry.textContent = text;
                 conversation.appendChild(entry);
                 conversation.scrollTop = conversation.scrollHeight;
@@ -754,7 +685,7 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
                 chip.className = "context-chip";
 
                 const text = document.createElement("span");
-                text.textContent = `${label}: ${value}`;
+                text.textContent = label + ": " + value;
                 text.title = value;
                 chip.appendChild(text);
 
@@ -765,7 +696,7 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
                     removeButton.dataset.removeId = id;
                 }
                 removeButton.textContent = "×";
-                removeButton.ariaLabel = `Remove ${label} context`;
+                removeButton.ariaLabel = "Remove " + label + " context";
                 chip.appendChild(removeButton);
 
                 return chip;
@@ -1017,6 +948,7 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
 
             renderAttachments();
         })();
+<<<<<<< HEAD
 =======
         const vscode = acquireVsCodeApi();
         const conversation = document.getElementById("conversation");
@@ -1078,6 +1010,8 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
             }
         });
 >>>>>>> 31ecd6f019cdef3270a68e61b1c6464827aa0ee7
+=======
+>>>>>>> bdbd261 (47)
     </script>
 </body>
 </html>`;

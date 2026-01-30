@@ -1,5 +1,6 @@
 import os
 import tempfile
+import pytest
 
 
 def scan_file(file_path):
@@ -31,7 +32,10 @@ def test_excluded_ext():
 def test_symlink():
     with tempfile.NamedTemporaryFile() as temp_file:
         symlink_path = temp_file.name + "_symlink"
-        os.symlink(temp_file.name, symlink_path)
+        try:
+            os.symlink(temp_file.name, symlink_path)
+        except OSError:
+            pytest.skip("Symlink creation not permitted on this platform")
         result = scan_file(symlink_path)
         os.unlink(symlink_path)
     assert result == "SYMLINK"

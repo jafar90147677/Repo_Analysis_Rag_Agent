@@ -1,25 +1,65 @@
-import pytest
-import sys
 import os
+import sys
+import importlib
 from pathlib import Path
+
+import pytest
+from fastapi.testclient import TestClient
 
 repo_root = Path(__file__).resolve().parents[3]
 project_root = repo_root / "offline-folder-rag"
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
+<<<<<<< HEAD
 from fastapi.testclient import TestClient
 from edge_agent.app.main import app  # type: ignore
 from edge_agent.app.security.token_store import get_or_create_token  # type: ignore
 from edge_agent.app.indexing.indexer import reset_indexing_stats
 from unittest.mock import patch
+=======
+_DEBUG_LOG = Path(r"c:\Users\FAZLEEN ANEESA\Desktop\Rag_Agent\.cursor\debug.log")
+_SESSION = "debug-session"
+_RUN = "run2"
+>>>>>>> bdbd261 (47)
 
-client = TestClient(app)
 
-@pytest.fixture
-def auth_token():
-    return get_or_create_token()
+def _log(hypothesis_id: str, location: str, message: str, data: dict):
+    try:
+        _DEBUG_LOG.parent.mkdir(parents=True, exist_ok=True)
+        payload = {
+            "sessionId": _SESSION,
+            "runId": _RUN,
+            "hypothesisId": hypothesis_id,
+            "location": location,
+            "message": message,
+            "data": data,
+            "timestamp": __import__("time").time(),
+        }
+        with _DEBUG_LOG.open("a", encoding="utf-8") as f:
+            import json
 
+            f.write(json.dumps(payload) + "\n")
+    except Exception:
+        pass
+
+
+def _fresh_client(tmp_path):
+    os.environ["RAG_INDEX_DIR"] = str(tmp_path)
+    _log("H1", "test_agent_auth.py:_fresh_client", "env set", {"RAG_INDEX_DIR": str(tmp_path), "sys_path": sys.path})
+    import edge_agent.app.main as main
+    import edge_agent.app.security.token_store as token_store
+
+    importlib.reload(token_store)
+    importlib.reload(main)
+    _log("H1", "test_agent_auth.py:_fresh_client", "modules reloaded", {"main": str(main), "token_store": str(token_store)})
+    app = main.create_app()
+    return TestClient(app), token_store.get_or_create_token()
+
+def test_health_endpoint_auth(tmp_path):
+    client, auth_token = _fresh_client(tmp_path)
+
+<<<<<<< HEAD
 def test_health_endpoint_auth(auth_token):
     # Reset state to ensure clean test
     reset_indexing_stats()
@@ -39,6 +79,13 @@ def test_health_endpoint_auth(auth_token):
             "ripgrep_ok": True,
             "chroma_ok": True
         }
+=======
+    response = client.get("/health", headers={"X-LOCAL-TOKEN": auth_token})
+    assert response.status_code == 200
+    body = response.json()
+    assert body["indexing"] is False
+    assert body["ollama_ok"] is True
+>>>>>>> bdbd261 (47)
 
     # Invalid token
     response = client.get("/health", headers={"X-LOCAL-TOKEN": "wrong_token"})
@@ -50,9 +97,15 @@ def test_health_endpoint_auth(auth_token):
     assert response.status_code == 401
     assert response.json()["error_code"] == "INVALID_TOKEN"
 
+<<<<<<< HEAD
 def test_index_endpoint_auth(auth_token):
     # Valid token
     root_path = "/path/to/repo"
+=======
+def test_index_endpoint_auth(tmp_path):
+    client, auth_token = _fresh_client(tmp_path)
+
+>>>>>>> bdbd261 (47)
     response = client.post(
         "/index", 
         headers={"X-LOCAL-TOKEN": auth_token},
@@ -73,8 +126,9 @@ def test_index_endpoint_auth(auth_token):
     assert response.status_code == 401
     assert response.json()["error_code"] == "INVALID_TOKEN"
 
-def test_ask_endpoint_auth(auth_token):
-    # Valid token
+def test_ask_endpoint_auth(tmp_path):
+    client, auth_token = _fresh_client(tmp_path)
+
     response = client.post(
         "/ask", 
         headers={"X-LOCAL-TOKEN": auth_token},

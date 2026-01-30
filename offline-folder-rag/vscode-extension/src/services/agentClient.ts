@@ -95,7 +95,11 @@ export async function authenticatedFetch(url: string, options: RequestInit = {})
 
 let healthPollingInterval: NodeJS.Timeout | undefined;
 
-export function startHealthPolling(baseUrl: string, onUpdate: (health: HealthResponse) => void, onError: (error: any) => void) {
+export function startHealthPolling(
+    baseUrl: string,
+    onUpdate: (health: HealthResponse) => void,
+    onError: (error: any) => void
+) {
     if (healthPollingInterval) {
         return;
   }
@@ -117,7 +121,6 @@ export function startHealthPolling(baseUrl: string, onUpdate: (health: HealthRes
         }
     };
 
-    // Start polling immediately
     poll();
     healthPollingInterval = setInterval(poll, 2000);
 }
@@ -130,7 +133,7 @@ export function stopHealthPolling() {
 }
 
 export async function sendMessageToAgent(message: string): Promise<void> {
-    console.log('Sending message to agent:', message);
+    console.log("Sending message to agent:", message);
     // Implementation for sending message to agent
 }
 

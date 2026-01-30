@@ -1,23 +1,60 @@
-// @ts-nocheck
 import * as path from "path";
 import * as vscode from "vscode";
 
 import { CommandRouter, CommandResultMessage } from "../commands/commandRouter";
 import { getChatPanelHtml } from "./ui/chatPanelHtml";
+<<<<<<< HEAD
 import { askWithOverride } from "../services/agentClient";
 import { startHealthPolling, stopHealthPolling, HealthResponse } from "../services/agentClient";
+=======
+import {
+    ComposerMode,
+    HealthResponse,
+    isComposerMode,
+    readComposerMode,
+    startHealthPolling,
+    stopHealthPolling,
+    writeComposerMode,
+} from "../services/agentClient";
+import { readRecentFolders, readRootPath, writeRootPath } from "../services/storage";
+
+const COMPOSER_PLACEHOLDER = "Plan, @ for context, / for commands";
+
+class ModeState {
+    private mode: ComposerMode;
+
+    constructor() {
+        this.mode = readComposerMode() ?? "auto";
+    }
+
+    public getMode(): ComposerMode {
+        return this.mode;
+    }
+
+    public setMode(mode: ComposerMode): void {
+        this.mode = mode;
+        writeComposerMode(mode);
+    }
+}
+>>>>>>> bdbd261 (47)
 
 export class ChatPanelViewProvider {
-    private panel: vscode.WebviewPanel | undefined;
+    private panel?: vscode.WebviewPanel;
     private readonly router: CommandRouter;
+<<<<<<< HEAD
     private readonly modeState = new ComposerModeState();
     private readonly agentBaseUrl = "http://localhost:8000"; // Default agent URL
+=======
+    private readonly modeState: ModeState;
+    private readonly agentBaseUrl = "http://localhost:8000";
+>>>>>>> bdbd261 (47)
 
     constructor(
         private readonly extensionContext: vscode.ExtensionContext,
         private readonly extensionUri: vscode.Uri
     ) {
         this.router = new CommandRouter(extensionContext, (message) => this.postMessage(message));
+        this.modeState = new ModeState();
     }
 
     public show(): void {
@@ -40,6 +77,7 @@ export class ChatPanelViewProvider {
             stopHealthPolling();
         });
 
+<<<<<<< HEAD
         this.panel.webview.onDidReceiveMessage(async (message) => {
             if (message.type === "command") {
                 const { text, mode } = message;
@@ -75,10 +113,18 @@ export class ChatPanelViewProvider {
         this.panel.webview.html = getChatPanelHtml();
         const composerPlaceholder = "Plan, @ for context, / for commands";
         this.panel.webview.html = getChatPanelHtml(this.extensionUri, composerPlaceholder);
+=======
+        this.panel.webview.html = getChatPanelHtml(
+            this.extensionUri,
+            COMPOSER_PLACEHOLDER
+        );
+>>>>>>> bdbd261 (47)
 
         this.panel.webview.onDidReceiveMessage(async (message: { type: string; [key: string]: any }) => {
             if (message.type === "command") {
-                const mode = isComposerMode(message.mode) ? message.mode : this.modeState.getMode();
+                const mode = isComposerMode(message.mode)
+                    ? message.mode
+                    : this.modeState.getMode();
                 await this.router.route({
                     text: message.text ?? "",
                     mode,
@@ -129,14 +175,14 @@ export class ChatPanelViewProvider {
                     }
                     this.postMessage({
                         type: "commandResult",
-                        payload: progressText
+                        payload: progressText,
                     });
                 }
             },
             (error) => {
                 this.postMessage({
                     type: "commandResult",
-                    payload: `Polling error: ${error.message}`
+                    payload: `Polling error: ${error.message}`,
                 });
             }
         );
@@ -251,9 +297,12 @@ export class ChatPanelViewProvider {
         }
 
         return undefined;
+<<<<<<< HEAD
     }
 
     private postMessage(message: any): void {
         this.panel?.webview.postMessage(message);
+=======
+>>>>>>> bdbd261 (47)
     }
 }

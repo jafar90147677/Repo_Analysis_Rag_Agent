@@ -10,7 +10,7 @@ export type SlashCommandParseResult =
     | { success: true; command: SlashCommandInstruction }
     | { success: false; reason: "INVALID_COMMAND" };
 
-export function parseSlashCommand(input: string): SlashCommandParseResult {
+export function parseSlashCommandInstruction(input: string): SlashCommandParseResult {
     const trimmed = input.trim();
     if (!trimmed.startsWith("/")) {
         return { success: false, reason: "INVALID_COMMAND" };
@@ -78,6 +78,7 @@ export function parseSlashCommand(input: string): SlashCommandParseResult {
             return { success: false, reason: "INVALID_COMMAND" };
     }
 }
+<<<<<<< HEAD
 /**
  * Deterministic registry of supported slash commands.
  * ONLY supported commands are included here.
@@ -111,3 +112,41 @@ export const slashCommandRegistry: { [key: string]: (args: string) => string } =
         return `Asking the system: ${args}`;
     }
 };
+=======
+
+const slashCommandRegistry: { [key: string]: (args: string) => string } = {
+    "/index full": () => "Indexing started: full scan",
+    "/index incremental": () => "Indexing started: incremental scan",
+    "/index report": () => "Generating index report...",
+    "/overview": () => "Overview: Folder structure and key files...",
+    "/search": (args) => `Searching for ${args}`,
+    "/doctor": () => "Running system checks...",
+    "/autoindex on": () => "Auto-indexing enabled",
+    "/autoindex off": () => "Auto-indexing disabled",
+    "/ask": (args) => `Asking the system: ${args}`,
+};
+
+export function parseSlashCommand(input: string): string {
+    const trimmedInput = input.trim();
+    if (!trimmedInput.startsWith("/")) {
+        return "INVALID_COMMAND";
+    }
+
+    const commandsWithArgs = ["/search", "/ask"];
+
+    for (const commandKey of Object.keys(slashCommandRegistry)) {
+        if (commandsWithArgs.includes(commandKey)) {
+            if (trimmedInput === commandKey || trimmedInput.startsWith(commandKey + " ")) {
+                const args = trimmedInput.slice(commandKey.length).trim();
+                return slashCommandRegistry[commandKey](args);
+            }
+        } else {
+            if (trimmedInput === commandKey) {
+                return slashCommandRegistry[commandKey]("");
+            }
+        }
+    }
+
+    return "INVALID_COMMAND";
+}
+>>>>>>> bdbd261 (47)
