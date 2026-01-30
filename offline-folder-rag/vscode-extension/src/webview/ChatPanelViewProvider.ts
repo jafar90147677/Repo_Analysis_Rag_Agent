@@ -4,7 +4,7 @@ import * as vscode from "vscode";
 
 import { parseSlashCommand, CommandResultMessage, CommandRouter } from "../commands/commandRouter";
 import { getChatPanelHtml } from "./ui/chatPanelHtml";
-import { triggerFullIndex, setIndexing, clearIndexing, isPathInsideRoot } from "../services/indexGate";
+import { triggerFullIndex, setIndexing, clearIndexing, isPathInsideRoot, getIndexReport } from "../services/indexGate";
 import { renderAssistantResponse } from "./components/AssistantResponseRenderer";
 import {
     askWithOverride,
@@ -16,7 +16,8 @@ import {
     writeComposerMode,
     ComposerMode
 } from "../services/agentClient";
-import { readRecentFolders, readRootPath, writeRootPath } from "../services/storage";
+import { readRecentFolders, readRootPath, writeRootPath, readAutoIndex, writeAutoIndex } from "../services/storage";
+import { AutoIndexScheduler } from "../services/autoIndexScheduler";
 
 const COMPOSER_PLACEHOLDER = "Plan · @ for context · / for commands";
 
@@ -42,6 +43,7 @@ export class ChatPanelViewProvider {
     private readonly router: CommandRouter;
     private readonly modeState: ModeState;
     private readonly agentBaseUrl = "http://localhost:8000"; // Default agent URL
+    private readonly scheduler: AutoIndexScheduler;
 
     constructor(
         private readonly extensionContext: vscode.ExtensionContext,
@@ -49,6 +51,21 @@ export class ChatPanelViewProvider {
     ) {
         this.router = new CommandRouter(extensionContext, (message) => this.postMessage(message));
         this.modeState = new ModeState();
+        this.scheduler = new AutoIndexScheduler({
+            triggerIndex: () => this.handleIndexAndReport('incremental'),
+            getRootPath: () => this.getEffectiveRootPath(),
+            agentBaseUrl: this.agentBaseUrl
+        });
+        
+        // Listen for file saves to trigger auto-indexing
+        vscode.workspace.onDidSaveTextDocument((doc) => {
+            const rootPath = this.getEffectiveRootPath();
+            if (rootPath && isPathInsideRoot(rootPath, doc.uri.fsPath)) {
+                if (readAutoIndex(this.extensionContext)) {
+                    this.scheduler.requestIndex();
+                }
+            }
+        });
     }
 
     public show(): void {
@@ -74,6 +91,117 @@ export class ChatPanelViewProvider {
 
         this.panel.webview.onDidReceiveMessage(async (message) => {
             await this.handleWebviewMessage(message);
+            if (message.type === "dispatch") {
+                const { text, mode } = message;
+                const normalizedMode = isComposerMode(mode) ? mode : this.modeState.getMode();
+                
+                if (text.startsWith("/")) {
+                    const result = await parseSlashCommand(text, this.extensionContext);
+                    if (result.type === 'assistantResponse') {
+                        const html = renderAssistantResponse(result.payload);
+                        this.postMessage({ type: 'commandResult', payload: html, isHtml: true });
+                    } else if (result.type === 'commandResult' && result.payload === 'Indexing started: full scan') {
+                        this.postMessage(result);
+                        this.handleIndexAndReport('full');
+                    } else if (result.type === 'commandResult' && result.payload === 'Indexing started: incremental scan') {
+                        this.postMessage(result);
+                        this.handleIndexAndReport('incremental');
+                    } else if (result.type === 'commandResult' && result.payload === 'Auto-index disabled.') {
+                        this.scheduler.stop();
+                        this.postMessage(result);
+                    } else {
+                        this.postMessage(result);
+                    }
+                } else {
+                    if (normalizedMode === "rag") {
+                        try {
+                            const response = await askWithOverride(text, "rag");
+                            const result = await response.json();
+                            
+                            if (result.error === "INVALID_TOKEN") {
+                                this.postMessage({ type: "commandResult", payload: "Error: INVALID_TOKEN. Please check your agent token." });
+                                return;
+                            }
+
+                            let payload = result.answer || JSON.stringify(result);
+                            
+                            const assistantResponseHtml = renderAssistantResponse({
+                                mode: "rag",
+                                confidence: result.confidence || "found",
+                                answer: payload,
+                                citations: result.citations || []
+                            });
+
+                            this.postMessage({
+                                type: "commandResult",
+                                payload: assistantResponseHtml,
+                                isHtml: true
+                            });
+                        } catch (error) {
+                            this.postMessage({
+                                type: "commandResult",
+                                payload: `Error: ${error instanceof Error ? error.message : String(error)}`,
+                            });
+                        }
+                    } else if (normalizedMode === "auto") {
+                        try {
+                            await this.router.autoRouteInput(text);
+                        } catch (error) {
+                            this.postMessage({
+                                type: "commandResult",
+                                payload: `Error: ${error instanceof Error ? error.message : String(error)}`,
+                            });
+                        }
+                    } else {
+                        await this.router.handleCommand(text);
+                    }
+                }
+            } else if (message.type === "indexAction") {
+                const workspaceFolders = vscode.workspace.workspaceFolders;
+                if (!workspaceFolders || workspaceFolders.length === 0) return;
+                const rootPath = workspaceFolders[0].uri.fsPath;
+
+                if (message.action === "full") {
+                    this.postMessage({ type: "dismissIndexModal" });
+                    this.handleIndexAndReport('full');
+                } else if (message.action === "cancel") {
+                    this.postMessage({ type: "dismissIndexModal" });
+                    this.postMessage({ type: "commandResult", payload: "Index not available; cannot answer" });
+                }
+            } else if (message.type === "openCitation") {
+                const { path: filePath, start, end } = message;
+                const workspaceFolders = vscode.workspace.workspaceFolders;
+                if (workspaceFolders && workspaceFolders.length > 0) {
+                    const fullPath = vscode.Uri.joinPath(workspaceFolders[0].uri, filePath);
+                    const doc = await vscode.workspace.openTextDocument(fullPath);
+                    const editor = await vscode.window.showTextDocument(doc);
+                    const range = new vscode.Range(start - 1, 0, end - 1, 0);
+                    editor.selection = new vscode.Selection(range.start, range.end);
+                    editor.revealRange(range, vscode.TextEditorRevealType.InCenter);
+                }
+            } else if (message.type === "modeChange" && isComposerMode(message.mode)) {
+                this.modeState.setMode(message.mode);
+                this.postModeState();
+            } else if (message.type === "contextRequest") {
+                this.handleContextRequest(message.action);
+            } else if (message.type === "attachmentPick") {
+                await this.handleAttachmentRequest();
+            } else if (message.type === "localSelect" && typeof message.folder === "string") {
+                await writeRootPath(this.extensionContext, message.folder);
+                this.postLocalState();
+            } else if (message.type === "localPick") {
+                const folder = await vscode.window.showOpenDialog({
+                    canSelectMany: false,
+                    canSelectFolders: true,
+                    canSelectFiles: false,
+                    openLabel: "Select Folder",
+                });
+
+                if (folder && folder.length > 0) {
+                    await writeRootPath(this.extensionContext, folder[0].fsPath);
+                    this.postLocalState();
+                }
+            }
         });
 
         this.panel.webview.html = getChatPanelHtml(this.extensionUri, COMPOSER_PLACEHOLDER);
@@ -189,6 +317,53 @@ export class ChatPanelViewProvider {
                 this.postLocalState();
             }
         }
+    }
+
+    private async handleIndexAndReport(mode: 'full' | 'incremental') {
+        const workspaceFolders = vscode.workspace.workspaceFolders;
+        if (!workspaceFolders || workspaceFolders.length === 0) return;
+        const rootPath = workspaceFolders[0].uri.fsPath;
+
+        setIndexing(rootPath);
+        try {
+            await triggerFullIndex(
+                { storageRoot: this.extensionContext.globalStorageUri.fsPath },
+                rootPath,
+                (msg) => this.postMessage({ type: "commandResult", payload: msg })
+            );
+            
+            const report = await getIndexReport(this.agentBaseUrl);
+            const reportHtml = this.renderIndexReport(report);
+            this.postMessage({
+                type: "commandResult",
+                payload: reportHtml,
+                isHtml: true
+            });
+        } catch (error) {
+            this.postMessage({
+                type: "commandResult",
+                payload: `Indexing failed: ${error instanceof Error ? error.message : String(error)}`
+            });
+        } finally {
+            clearIndexing(rootPath);
+        }
+    }
+
+    private renderIndexReport(report: any): string {
+        const indexedCount = report.indexed_files?.length || 0;
+        const skippedCount = report.skipped_files?.length || 0;
+        const topReasons = report.top_skip_reasons?.slice(0, 3)
+            .map((r: any) => `${r.reason} (${r.count})`)
+            .join(', ') || 'None';
+
+        return `
+            <div class="index-report">
+                <h3>Index Summary</h3>
+                <p><b>Indexed:</b> ${indexedCount} files</p>
+                <p><b>Skipped:</b> ${skippedCount} files</p>
+                <p><b>Top Skip Reasons:</b> ${topReasons}</p>
+            </div>
+        `;
     }
 
     private async handleAttachmentRequest(): Promise<void> {

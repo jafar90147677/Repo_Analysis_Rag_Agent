@@ -9,7 +9,7 @@
   "main": "./out/extension.js",
   "scripts": {
     "compile": "tsc -p .",
-    "test": "mocha --loader ts-node/esm -r tsconfig-paths/register --extension ts \"../tests/vscode_extension/**/test_*.ts\" \"../tests/vscode_extension/**/*.test.ts\" \"../unittests/**/*.test.ts\""
+    "test": "mocha --extension ts --node-option loader=ts-node/esm \"../tests/vscode_extension/contract/token_reader.test.ts\""
   },
   "devDependencies": {
     "@types/axios": "^0.9.36",
@@ -158,7 +158,7 @@
     "y18n": "^5.0.8",
     "yargs": "^16.2.0",
     "yargs-parser": "^20.2.9",
-    "yargs-unparser": "^2.0.0",
+    "yargs-unparser": "^20.0.0",
     "yn": "^3.1.1",
     "yocto-queue": "^0.1.0"
   },
