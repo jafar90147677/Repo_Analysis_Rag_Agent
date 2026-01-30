@@ -50,13 +50,19 @@ def _load_edge_agent_app_modules():
     app_main = importlib.import_module("edge_agent.app.main")
     routes_module = importlib.import_module("edge_agent.app.api.routes")
     security_module = importlib.import_module("edge_agent.app.security")
-<<<<<<< HEAD
     scan_rules_module = importlib.import_module("edge_agent.app.indexing.scan_rules")
+    _log(
+        "H1",
+        "test_indexer_state.py:_load_edge_agent_app_modules",
+        "imports loaded",
+        {
+            "app_main": str(app_main),
+            "routes_module": str(routes_module),
+            "security_module": str(security_module),
+            "scan_rules_module": str(scan_rules_module),
+        },
+    )
     return app_main, routes_module, security_module, scan_rules_module
-=======
-    _log("H1", "test_indexer_state.py:_load_edge_agent_app_modules", "imports loaded", {"app_main": str(app_main), "routes_module": str(routes_module), "security_module": str(security_module)})
-    return app_main, routes_module, security_module
->>>>>>> bdbd261 (47)
 
 
 def test_indexer_state_transitions_isolated():

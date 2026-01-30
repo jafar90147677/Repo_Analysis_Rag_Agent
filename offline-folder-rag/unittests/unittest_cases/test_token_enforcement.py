@@ -1,5 +1,9 @@
+import importlib
+import os
+import sys
 from pathlib import Path
 
+import pytest
 from fastapi.testclient import TestClient
 
 _DEBUG_LOG = Path(r"c:\Users\FAZLEEN ANEESA\Desktop\Rag_Agent\.cursor\debug.log")
@@ -26,72 +30,39 @@ def _log(hypothesis_id: str, location: str, message: str, data: dict):
     except Exception:
         pass
 
-def _get_app(tmp_path):
-    repo_root = Path(__file__).resolve().parents[3]
-    import sys
-    import os
 
+def _load_app(tmp_path):
+    repo_root = Path(__file__).resolve().parents[3]
     if str(repo_root) not in sys.path:
         sys.path.insert(0, str(repo_root))
-    _log("H1", "test_token_enforcement.py:_get_app", "sys.path updated", {"repo_root": str(repo_root), "sys_path": sys.path})
+    _log("H1", "test_token_enforcement.py:_load_app", "sys.path updated", {"repo_root": str(repo_root), "sys_path": sys.path})
 
-    import edge_agent.app.main as main
-    _log("H1", "test_token_enforcement.py:_get_app", "imported main", {"main": str(main)})
+    app_module = importlib.import_module("edge_agent.app.main")
+    _log("H1", "test_token_enforcement.py:_load_app", "imported main", {"main": str(app_module)})
 
     os.environ["RAG_INDEX_DIR"] = str(tmp_path)
-    return main.create_app()
-
-
-def test_health_endpoint_invalid_token(tmp_path):
-    app = _get_app(tmp_path)
-    client = TestClient(app)
-    response = client.get("/health")
-    assert response.status_code == 401
-    assert response.json()["error_code"] == "INVALID_TOKEN"
-
-
-def test_ask_endpoint_invalid_token(tmp_path):
-    app = _get_app(tmp_path)
-    client = TestClient(app)
-    response = client.post("/ask", json={"query": "What is the repo status?"})
-    assert response.status_code == 401
-<<<<<<< HEAD
-    assert response.json() == {"detail": "INVALID_TOKEN"}
-import pytest
-from fastapi.testclient import TestClient
-import importlib
-import sys
-from pathlib import Path
-
-def _load_app():
-    repo_root = Path(__file__).resolve().parents[2]
-    if str(repo_root) not in sys.path:
-        sys.path.insert(0, str(repo_root))
-    app_module = importlib.import_module("edge_agent.app.main")
     return app_module.app
 
+
 @pytest.fixture
-def client():
-    return TestClient(_load_app())
+def client(tmp_path):
+    return TestClient(_load_app(tmp_path))
+
+
+_EXPECTED_ERROR = {
+    "error_code": "INVALID_TOKEN",
+    "message": "The provided token is missing or invalid.",
+    "remediation": "Please provide a valid X-LOCAL-TOKEN in the request headers.",
+}
+
 
 def test_health_endpoint_invalid_token(client):
     response = client.get("/health")
     assert response.status_code == 401
-    assert response.json() == {
-        "error_code": "INVALID_TOKEN",
-        "message": "The provided token is missing or invalid.",
-        "remediation": "Please provide a valid X-LOCAL-TOKEN in the request headers.",
-    }
+    assert response.json() == _EXPECTED_ERROR
+
 
 def test_ask_endpoint_invalid_token(client):
-    data = {"query": "What is the repo status?"}
-    response = client.post("/ask", json=data)
+    response = client.post("/ask", json={"query": "What is the repo status?"})
     assert response.status_code == 401
-    assert response.json() == {
-        "error_code": "INVALID_TOKEN",
-        "message": "The provided token is missing or invalid.",
-        "remediation": "Please provide a valid X-LOCAL-TOKEN in the request headers.",
-    }
-=======
-    assert response.json()["error_code"] == "INVALID_TOKEN"
->>>>>>> bdbd261 (47)
+    assert response.json() == _EXPECTED_ERROR
