@@ -17,7 +17,10 @@ const serviceModulePath = path.join(
 async function loadService() {
   // Use dynamic import with file:// URL for ESM compatibility on Windows
   const module = await import(pathToFileURL(serviceModulePath).href);
-  return module.default || module;
+  if (module.default && typeof module.default === 'object') {
+    return module.default;
+  }
+  return module;
 }
 
 describe("Health Polling Contract Test", () => {

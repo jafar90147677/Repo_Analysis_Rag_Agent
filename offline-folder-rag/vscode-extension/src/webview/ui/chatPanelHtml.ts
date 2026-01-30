@@ -2,22 +2,23 @@ const PLACEHOLDER_TEXT = "Plan · @ for context · / for commands";
 
 function getNonce(): string {
     const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    return Array.from({ length: 16 })
-        .map(() => possible.charAt(Math.floor(Math.random() * possible.length)))
-        .join("");
+    let text = "";
+    for (let i = 0; i < 16; i++) {
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+    }
+    return text;
 }
 
 import * as vscode from "vscode";
 
 export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: string = PLACEHOLDER_TEXT): string {
     const nonce = getNonce();
-
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'nonce-${nonce}'; style-src 'unsafe-inline';" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'nonce-\${nonce}'; style-src 'unsafe-inline';" />
     <title>Offline Folder RAG</title>
     <style>
         :root {
@@ -45,7 +46,6 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
 
         body {
             margin: 0;
-            padding: 0;
             background: var(--bg);
             font-family: "Segoe UI", system-ui, sans-serif;
             color: var(--text);
@@ -56,8 +56,8 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
             flex-direction: column;
             height: 100vh;
             padding: 16px;
-            gap: 16px;
             box-sizing: border-box;
+            gap: 16px;
         }
 
         #chat-panel-header {
@@ -183,6 +183,59 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
             margin: 0;
             font-size: 0.85rem;
             color: var(--muted);
+        }
+
+        .assistant-response {
+            border-left: 2px solid #0e639c;
+            padding-left: 12px;
+            margin-bottom: 16px;
+        }
+
+        .chips-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .chip {
+            font-size: 10px;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        .confidence-found { background: #28a745; color: white; }
+        .confidence-partial { background: #ffc107; color: black; }
+        .confidence-not_found { background: #dc3545; color: white; }
+
+        .mode-rag { background: #6f42c1; color: white; }
+        .mode-tools { background: #fd7e14; color: white; }
+        .mode-hybrid { background: #007bff; color: white; }
+
+        .answer-text {
+            line-height: 1.5;
+            margin-bottom: 12px;
+        }
+
+        .citations-list {
+            font-size: 12px;
+            color: #aaa;
+        }
+
+        .citations-list ul {
+            list-style: none;
+            padding: 0;
+            margin: 4px 0;
+        }
+
+        .citation-link {
+            color: #3794ff;
+            text-decoration: none;
+        }
+
+        .citation-link:hover {
+            text-decoration: underline;
         }
 
         #composer-bottom-row {
@@ -426,11 +479,11 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
                 <label for="composer-input">Message</label>
                 <textarea
                     id="composer-input"
-                    placeholder="${placeholderText}"
+                    placeholder="\${placeholderText}"
                     aria-label="Message input"
                     autocomplete="off"
                 ></textarea>
-                <p class="composer-hint">${placeholderText}</p>
+                <p class="composer-hint">\${placeholderText}</p>
 
                 <div id="context-attachments" class="context-attachments hidden" aria-live="polite"></div>
 
@@ -487,7 +540,7 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
         </div>
     </div>
 
-    <script nonce="${nonce}">
+    <script nonce="\${nonce}">
         (function () {
             const vscode = acquireVsCodeApi();
             const composerForm = document.getElementById("composer-form");
@@ -816,6 +869,17 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
                     vscode.postMessage({ type: "attachmentPick" });
                 });
             }
+
+            document.addEventListener('click', (event) => {
+                const target = event.target;
+                if (target && target instanceof HTMLElement && target.classList.contains('citation-link')) {
+                    event.preventDefault();
+                    const path = target.getAttribute('data-path');
+                    const start = parseInt(target.getAttribute('data-start') || "0");
+                    const end = parseInt(target.getAttribute('data-end') || "0");
+                    vscode.postMessage({ type: 'openCitation', path, start, end });
+                }
+            });
 
             window.addEventListener("message", (event) => {
                 const message = event.data;

@@ -10,60 +10,39 @@ export type SlashCommandParseResult =
     | { success: true; command: SlashCommandInstruction }
     | { success: false; reason: "INVALID_COMMAND" };
 
-type SlashCommandHandler = {
-    key: string;
-    requiresArgs: boolean;
-    build: (args?: string) => SlashCommandInstruction;
+/**
+ * Deterministic registry of supported slash commands.
+ * ONLY supported commands are included here.
+ */
+export const slashCommandRegistry: { [key: string]: (args: string) => string } = {
+    '/index full': (args) => {
+        return 'Indexing started: full scan';
+    },
+    '/index incremental': (args) => {
+        return 'Indexing started: incremental scan';
+    },
+    '/index report': (args) => {
+        return 'Generating index report...';
+    },
+    '/overview': (args) => {
+        return 'Overview: Folder structure and key files...';
+    },
+    '/search': (args) => {
+        return `Searching for ${args}`;
+    },
+    '/doctor': (args) => {
+        return 'Running system checks...';
+    },
+    '/autoindex on': (args) => {
+        return 'Auto-indexing enabled';
+    },
+    '/autoindex off': (args) => {
+        return 'Auto-indexing disabled';
+    },
+    '/ask': (args) => {
+        return `Asking the system: ${args}`;
+    }
 };
-
-const slashCommandRegistry: SlashCommandHandler[] = [
-    {
-        key: "/index full",
-        requiresArgs: false,
-        build: () => ({ kind: "index", mode: "full" }),
-    },
-    {
-        key: "/index incremental",
-        requiresArgs: false,
-        build: () => ({ kind: "index", mode: "incremental" }),
-    },
-    {
-        key: "/index report",
-        requiresArgs: false,
-        build: () => ({ kind: "index", mode: "report" }),
-    },
-    {
-        key: "/overview",
-        requiresArgs: false,
-        build: () => ({ kind: "overview" }),
-    },
-    {
-        key: "/search",
-        requiresArgs: true,
-        build: (args = "") => ({ kind: "search", query: args }),
-    },
-    {
-        key: "/doctor",
-        requiresArgs: false,
-        build: () => ({ kind: "doctor" }),
-    },
-    {
-        key: "/autoindex on",
-        requiresArgs: false,
-        build: () => ({ kind: "autoindex", enabled: true }),
-    },
-    {
-        key: "/autoindex off",
-        requiresArgs: false,
-        build: () => ({ kind: "autoindex", enabled: false }),
-    },
-    {
-        key: "/ask",
-        requiresArgs: true,
-        build: (args = "") => ({ kind: "ask", question: args }),
-    },
-];
-
 
 export function parseSlashCommandInstruction(input: string): SlashCommandParseResult {
     const trimmed = input.trim();
@@ -71,22 +50,30 @@ export function parseSlashCommandInstruction(input: string): SlashCommandParseRe
         return { success: false, reason: "INVALID_COMMAND" };
     }
 
-    for (const handler of slashCommandRegistry) {
-        if (handler.requiresArgs) {
-            if (trimmed === handler.key) {
-                return { success: false, reason: "INVALID_COMMAND" };
-            }
+    const commandsWithArgs = ["/search", "/ask"];
 
-            const prefix = handler.key + " ";
-            if (trimmed.startsWith(prefix)) {
-                const args = trimmed.slice(prefix.length).trim();
-                if (!args) {
-                    return { success: false, reason: "INVALID_COMMAND" };
-                }
-                return { success: true, command: handler.build(args) };
+    for (const commandKey of Object.keys(slashCommandRegistry)) {
+        if (commandsWithArgs.includes(commandKey)) {
+            if (trimmed === commandKey || trimmed.startsWith(commandKey + " ")) {
+                const args = trimmed.slice(commandKey.length).trim();
+                if (commandKey === "/search" && !args) continue;
+                if (commandKey === "/ask" && !args) continue;
+                
+                return {
+                    success: true,
+                    command: commandKey === "/search" 
+                        ? { kind: "search", query: args } 
+                        : { kind: "ask", question: args }
+                };
             }
-        } else if (trimmed === handler.key) {
-            return { success: true, command: handler.build() };
+        } else if (trimmed === commandKey) {
+            if (commandKey === "/overview") return { success: true, command: { kind: "overview" } };
+            if (commandKey === "/doctor") return { success: true, command: { kind: "doctor" } };
+            if (commandKey === "/index full") return { success: true, command: { kind: "index", mode: "full" } };
+            if (commandKey === "/index incremental") return { success: true, command: { kind: "index", mode: "incremental" } };
+            if (commandKey === "/index report") return { success: true, command: { kind: "index", mode: "report" } };
+            if (commandKey === "/autoindex on") return { success: true, command: { kind: "autoindex", enabled: true } };
+            if (commandKey === "/autoindex off") return { success: true, command: { kind: "autoindex", enabled: false } };
         }
     }
 

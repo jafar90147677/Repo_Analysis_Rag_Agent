@@ -2,52 +2,53 @@
 import * as path from "path";
 import * as vscode from "vscode";
 
-import { CommandRouter, CommandResultMessage } from "../commands/commandRouter";
+import { parseSlashCommand, CommandResultMessage, CommandRouter } from "../commands/commandRouter";
 import { getChatPanelHtml } from "./ui/chatPanelHtml";
-import { readRootPath, writeRootPath, readRecentFolders } from "../services/storage";
-import { isPathInsideRoot } from "../services/indexGate";
+import { triggerFullIndex, setIndexing, clearIndexing, isPathInsideRoot } from "../services/indexGate";
+import { renderAssistantResponse } from "./components/AssistantResponseRenderer";
 import {
     askWithOverride,
-    ComposerMode,
+    startHealthPolling,
+    stopHealthPolling,
+    HealthResponse,
     isComposerMode,
     readComposerMode,
     writeComposerMode,
+    ComposerMode
 } from "../services/agentClient";
+import { readRecentFolders, readRootPath, writeRootPath } from "../services/storage";
 
 const COMPOSER_PLACEHOLDER = "Plan · @ for context · / for commands";
 
 class ModeState {
-    private readonly defaultMode: ComposerMode = "auto";
     private mode: ComposerMode;
 
     constructor() {
-        this.mode = readComposerMode() ?? this.defaultMode;
+        this.mode = readComposerMode() ?? "auto";
     }
 
     public getMode(): ComposerMode {
         return this.mode;
     }
 
-    public setMode(newMode: ComposerMode): void {
-        if (this.mode === newMode) {
-            return;
-        }
-
-        this.mode = newMode;
-        writeComposerMode(newMode);
+    public setMode(mode: ComposerMode): void {
+        this.mode = mode;
+        writeComposerMode(mode);
     }
 }
 
 export class ChatPanelViewProvider {
-    private panel?: vscode.WebviewPanel;
+    private panel: vscode.WebviewPanel | undefined;
     private readonly router: CommandRouter;
-    private readonly modeState = new ModeState();
+    private readonly modeState: ModeState;
+    private readonly agentBaseUrl = "http://localhost:8000"; // Default agent URL
 
     constructor(
         private readonly extensionContext: vscode.ExtensionContext,
         private readonly extensionUri: vscode.Uri
     ) {
         this.router = new CommandRouter(extensionContext, (message) => this.postMessage(message));
+        this.modeState = new ModeState();
     }
 
     public show(): void {
@@ -62,28 +63,103 @@ export class ChatPanelViewProvider {
             vscode.ViewColumn.One,
             {
                 enableScripts: true,
+                enableCommandUris: true,
             }
         );
 
         this.panel.onDidDispose(() => {
             this.panel = undefined;
+            stopHealthPolling();
         });
 
-        this.panel.webview.onDidReceiveMessage(async (message: { type: string; [key: string]: any }) => {
+        this.panel.webview.onDidReceiveMessage(async (message) => {
             if (message.type === "dispatch") {
-                const text = String(message.text ?? "").trim();
-                const modeValue = message.mode;
-                const normalizedMode = isComposerMode(modeValue) ? modeValue : this.modeState.getMode();
-                await this.handleDispatch(text, normalizedMode, message.extraContext);
+                const { text, mode } = message;
+                const normalizedMode = isComposerMode(mode) ? mode : this.modeState.getMode();
+                
+                if (text.startsWith("/")) {
+                    const result = await parseSlashCommand(text, this.extensionContext);
+                    if (result.type === 'assistantResponse') {
+                        const html = renderAssistantResponse(result.payload);
+                        this.postMessage({ type: 'commandResult', payload: html, isHtml: true });
+                    } else {
+                        this.postMessage(result);
+                    }
+                } else {
+                    if (normalizedMode === "rag") {
+                        try {
+                            const response = await askWithOverride(text, "rag");
+                            const result = await response.json();
+                            let payload = result.answer || JSON.stringify(result);
+                            
+                            if (result.citations && Array.isArray(result.citations)) {
+                                const citationsHtml = result.citations.map((c: any) => this.renderCitation(c)).join('<br>');
+                                payload = `${payload}<br><br><b>Citations:</b><br>${citationsHtml}`;
+                            }
+
+                            this.postMessage({
+                                type: "commandResult",
+                                payload: payload,
+                                isHtml: true
+                            });
+                        } catch (error) {
+                            this.postMessage({
+                                type: "commandResult",
+                                payload: `Error: ${error instanceof Error ? error.message : String(error)}`,
+                            });
+                        }
+                    } else if (normalizedMode === "auto") {
+                        try {
+                            await this.router.autoRouteInput(text);
+                        } catch (error) {
+                            this.postMessage({
+                                type: "commandResult",
+                                payload: `Error: ${error instanceof Error ? error.message : String(error)}`,
+                            });
+                        }
+                    } else {
+                        await this.router.handleCommand(text);
+                    }
+                }
+            } else if (message.type === "indexAction") {
+                const workspaceFolders = vscode.workspace.workspaceFolders;
+                if (!workspaceFolders || workspaceFolders.length === 0) return;
+                const rootPath = workspaceFolders[0].uri.fsPath;
+
+                if (message.action === "full") {
+                    this.postMessage({ type: "dismissIndexModal" });
+                    setIndexing(rootPath);
+                    try {
+                        await triggerFullIndex(
+                            { storageRoot: this.extensionContext.globalStorageUri.fsPath },
+                            rootPath,
+                            (msg) => this.postMessage({ type: "commandResult", payload: msg })
+                        );
+                    } finally {
+                        clearIndexing(rootPath);
+                    }
+                } else if (message.action === "cancel") {
+                    this.postMessage({ type: "dismissIndexModal" });
+                    this.postMessage({ type: "commandResult", payload: "Index not available; cannot answer" });
+                }
+            } else if (message.type === "openCitation") {
+                const { path: filePath, start, end } = message;
+                const workspaceFolders = vscode.workspace.workspaceFolders;
+                if (workspaceFolders && workspaceFolders.length > 0) {
+                    const fullPath = vscode.Uri.joinPath(workspaceFolders[0].uri, filePath);
+                    const doc = await vscode.workspace.openTextDocument(fullPath);
+                    const editor = await vscode.window.showTextDocument(doc);
+                    const range = new vscode.Range(start - 1, 0, end - 1, 0);
+                    editor.selection = new vscode.Selection(range.start, range.end);
+                    editor.revealRange(range, vscode.TextEditorRevealType.InCenter);
+                }
             } else if (message.type === "modeChange" && isComposerMode(message.mode)) {
                 this.modeState.setMode(message.mode);
-                this.postModeState(message.mode);
-            } else if (message.type === "contextRequest" && typeof message.action === "string") {
+                this.postModeState();
+            } else if (message.type === "contextRequest") {
                 this.handleContextRequest(message.action);
             } else if (message.type === "attachmentPick") {
                 await this.handleAttachmentRequest();
-            } else if (message.type === "indexAction") {
-                await this.router.handleIndexAction(message.action);
             } else if (message.type === "localSelect" && typeof message.folder === "string") {
                 await writeRootPath(this.extensionContext, message.folder);
                 this.postLocalState();
@@ -104,91 +180,48 @@ export class ChatPanelViewProvider {
 
         this.panel.webview.html = getChatPanelHtml(this.extensionUri, COMPOSER_PLACEHOLDER);
 
-        this.postModeState(this.modeState.getMode());
+        this.postModeState();
         this.postLocalState();
     }
 
-    private async handleDispatch(
-        text: string,
-        mode: ComposerMode,
-        extraContext?: Record<string, unknown>
-    ): Promise<void> {
-        if (!text) {
-            return;
-        }
-
-        if (mode === "rag" && !text.startsWith("/")) {
-            try {
-                const response = await askWithOverride(text, "rag");
-                const payload = await response.json();
-                this.postMessage({
-                    type: "commandResult",
-                    payload: payload.answer || JSON.stringify(payload),
-                });
-            } catch (error) {
-                this.postMessage({
-                    type: "commandResult",
-                    payload: `Error: ${error instanceof Error ? error.message : String(error)}`,
-                });
-            }
-            return;
-        }
-
-        if (mode === "tools") {
-            if (!text.startsWith("/")) {
-                this.postMessage({ type: "commandResult", payload: "INVALID_COMMAND" });
-                return;
-            }
-            await this.router.handleCommand(text, extraContext);
-            return;
-        }
-
-        if (text.startsWith("/")) {
-            await this.router.handleCommand(text, extraContext);
-            return;
-        }
-
-        await this.router.autoRouteInput(text, extraContext);
-    }
-
     private async handleAttachmentRequest(): Promise<void> {
-        if (!this.panel) {
-            return;
-        }
-
-        const rootPath = this.getEffectiveRootPath() ?? this.getWorkspaceRootPath();
+        if (!this.panel) return;
         const options: vscode.OpenDialogOptions = {
             canSelectMany: false,
             canSelectFiles: true,
             openLabel: "Insert reference",
         };
-
-        if (rootPath) {
-            options.defaultUri = vscode.Uri.file(rootPath);
-        }
+        const rootPath = this.getEffectiveRootPath();
+        if (rootPath) options.defaultUri = vscode.Uri.file(rootPath);
 
         const selection = await vscode.window.showOpenDialog(options);
-        if (!selection || selection.length === 0) {
-            return;
+        if (selection && selection.length > 0) {
+            const filePath = selection[0].fsPath;
+            if (rootPath && !isPathInsideRoot(rootPath, filePath)) {
+                vscode.window.showErrorMessage("Select a file inside the chosen folder.");
+                return;
+            }
+            this.postMessage({
+                type: "insertText",
+                text: `@file:${filePath}`,
+            });
         }
+    }
 
-        const filePath = selection[0].fsPath;
-        if (rootPath && !isPathInsideRoot(rootPath, filePath)) {
-            vscode.window.showErrorMessage("Select a file inside the chosen folder.");
-            return;
-        }
-
-        this.postMessage({
-            type: "insertText",
-            text: `@file:${filePath}`,
-        });
+    private renderCitation(citation: {path: string, start_line: number, end_line: number}) {
+        const commandUri = vscode.Uri.parse(
+            `command:citation.open?${encodeURIComponent(JSON.stringify({
+                path: citation.path,
+                startLine: citation.start_line,
+                endLine: citation.end_line
+            }))}`
+        );
+        
+        return `<a href="${commandUri}">${citation.path} : ${citation.start_line}–${citation.end_line}</a>`;
     }
 
     private handleContextRequest(action: string): void {
-        if (!this.panel) {
-            return;
-        }
-
+        if (!this.panel) return;
         switch (action) {
             case "folder": {
                 const rootPath = this.getEffectiveRootPath();
@@ -197,7 +230,6 @@ export class ChatPanelViewProvider {
                     this.postContextResponse(action, undefined, "no_workspace");
                     return;
                 }
-
                 this.postContextResponse(action, { root_path: rootPath });
                 return;
             }
@@ -206,14 +238,10 @@ export class ChatPanelViewProvider {
                 const selection = editor?.selection;
                 const selectedText = selection ? editor.document.getText(selection).trim() : "";
                 if (!selectedText) {
-                    this.postMessage({
-                        type: "commandResult",
-                        payload: "INVALID_COMMAND: Select text in the editor and try again.",
-                    });
+                    this.postMessage({ type: "commandResult", payload: "INVALID_COMMAND: Select text in the editor and try again." });
                     this.postContextResponse(action, undefined, "no_selection");
                     return;
                 }
-
                 this.postContextResponse(action, { selection_text: selectedText });
                 return;
             }
@@ -224,7 +252,6 @@ export class ChatPanelViewProvider {
                     this.postContextResponse(action, undefined, "no_file");
                     return;
                 }
-
                 this.postContextResponse(action, { active_file_path: filePath });
                 return;
             }
@@ -234,10 +261,7 @@ export class ChatPanelViewProvider {
     }
 
     private postContextResponse(action: string, context?: any, error?: string): void {
-        if (!this.panel) {
-            return;
-        }
-
+        if (!this.panel) return;
         this.panel.webview.postMessage({
             type: "contextResponse",
             action,
@@ -252,41 +276,26 @@ export class ChatPanelViewProvider {
 
     private getWorkspaceRootPath(): string | undefined {
         const folders = vscode.workspace.workspaceFolders;
-        if (folders && folders.length > 0) {
-            return folders[0].uri.fsPath;
-        }
-
-        if (vscode.workspace.workspaceFile) {
-            return path.dirname(vscode.workspace.workspaceFile.fsPath);
-        }
-
+        if (folders && folders.length > 0) return folders[0].uri.fsPath;
+        if (vscode.workspace.workspaceFile) return path.dirname(vscode.workspace.workspaceFile.fsPath);
         return undefined;
     }
 
-    private postMessage(message: CommandResultMessage): void {
-        if (!this.panel) {
-            return;
-        }
-
+    private postMessage(message: any): void {
+        if (!this.panel) return;
         this.panel.webview.postMessage(message);
     }
 
-    private postModeState(mode: ComposerMode): void {
-        if (!this.panel) {
-            return;
-        }
-
+    private postModeState(): void {
+        if (!this.panel) return;
         this.panel.webview.postMessage({
             type: "modeState",
-            mode,
+            mode: this.modeState.getMode(),
         });
     }
 
     private postLocalState(): void {
-        if (!this.panel) {
-            return;
-        }
-
+        if (!this.panel) return;
         this.panel.webview.postMessage({
             type: "localState",
             rootPath: this.getEffectiveRootPath(),
