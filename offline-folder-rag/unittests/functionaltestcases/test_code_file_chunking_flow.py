@@ -16,6 +16,7 @@ def test_functional_code_chunking_flow(monkeypatch):
                 "chunk_id": "c1",
                 "line_start": 1,
                 "line_end": 6,
+                "line_count": 6,
                 "file_type": "code",
                 "mtime_epoch_ms": 6,
                 "sha256": "pqr",

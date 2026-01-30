@@ -16,6 +16,7 @@ def test_code_classification_routes_to_code_chunker(monkeypatch):
                 "chunk_id": "c1",
                 "line_start": 1,
                 "line_end": 10,
+                "line_count": 10,
                 "file_type": "code",
                 "mtime_epoch_ms": 2,
                 "sha256": "def",
