@@ -79,6 +79,12 @@ export interface HealthResponse {
     chroma_ok: boolean;
 }
 
+export interface IndexReport {
+    indexed_files: string[];
+    skipped_files: { path: string; reason: string }[];
+    top_skip_reasons: { reason: string; count: number }[];
+}
+
 export async function authenticatedFetch(url: string, options: RequestInit = {}): Promise<Response> {
     const token = readAgentToken();
     const headers = new Headers(options.headers);
@@ -91,6 +97,33 @@ export async function authenticatedFetch(url: string, options: RequestInit = {})
         ...options,
         headers,
     });
+}
+
+export async function getIndexReport(baseUrl: string): Promise<IndexReport> {
+    const response = await authenticatedFetch(`${baseUrl}/index_report`);
+    if (!response.ok) {
+        throw new Error(`Failed to fetch index report: ${response.statusText}`);
+    }
+    return await response.json() as IndexReport;
+}
+
+export async function triggerIndex(baseUrl: string, mode: 'full' | 'incremental'): Promise<IndexReport | { status: string }> {
+    const response = await authenticatedFetch(`${baseUrl}/index`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode }),
+    });
+    
+    if (!response.ok) {
+        throw new Error(`Indexing failed: ${response.statusText}`);
+    }
+
+    const result = await response.json();
+    if (result.status === 'started' || result.status === 'in_progress') {
+        return result;
+    }
+    
+    return await getIndexReport(baseUrl);
 }
 
 let healthPollingInterval: NodeJS.Timeout | undefined;

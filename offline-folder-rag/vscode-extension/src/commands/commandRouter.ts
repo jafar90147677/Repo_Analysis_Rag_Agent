@@ -3,6 +3,7 @@ import { slashCommandRegistry } from './slashCommands';
 import { overview, search, ask, askWithOverride } from '../services/agentClient';
 import { checkIndexExists, isIndexing } from '../services/indexGate';
 import { parseSlashCommandInstruction, SlashCommandInstruction } from "./slashCommands";
+import { readRootPath, writeAutoIndex } from '../services/storage';
 
 export interface CommandResultMessage {
     type: 'commandResult' | 'showIndexModal' | 'dismissIndexModal' | 'assistantResponse';
@@ -92,6 +93,16 @@ export async function parseSlashCommand(
         } else {
             // For all other commands, we require an exact match
             if (trimmedInput === commandKey) {
+                if (commandKey === '/autoindex on' || commandKey === '/autoindex off') {
+                    const rootPath = readRootPath(context);
+                    if (!rootPath) {
+                        return { type: 'commandResult', payload: 'Root path not selected.' };
+                    }
+                    const enabled = commandKey === '/autoindex on';
+                    await writeAutoIndex(context, enabled);
+                    return { type: 'commandResult', payload: enabled ? 'Auto-index enabled.' : 'Auto-index disabled.' };
+                }
+
                 const result = slashCommandRegistry[commandKey]('');
                 
                 // For /overview and /index report, wrap in assistantResponse envelope
@@ -128,6 +139,10 @@ export class CommandRouter {
         const trimmed = input.trim();
         if (trimmed.startsWith('/')) {
             const result = await parseSlashCommand(trimmed, this.context);
+            if (result.type === 'commandResult' && result.payload === 'INVALID_COMMAND') {
+                this.onResult({ type: 'commandResult', payload: 'INVALID_COMMAND' });
+                return;
+            }
             this.onResult(result);
         } else {
             await this.autoRouteInput(trimmed, extraContext);

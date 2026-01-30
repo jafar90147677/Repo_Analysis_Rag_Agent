@@ -34,10 +34,10 @@ export const slashCommandRegistry: { [key: string]: (args: string) => string } =
         return 'Running system checks...';
     },
     '/autoindex on': (args) => {
-        return 'Auto-indexing enabled';
+        return 'Auto-index enabled.';
     },
     '/autoindex off': (args) => {
-        return 'Auto-indexing disabled';
+        return 'Auto-index disabled.';
     },
     '/ask': (args) => {
         return `Asking the system: ${args}`;
