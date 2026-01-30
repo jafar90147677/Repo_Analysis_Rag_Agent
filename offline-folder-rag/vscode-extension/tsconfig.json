@@ -10,7 +10,11 @@
     "moduleResolution": "node",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "types": ["node", "vscode", "mocha"]
+    "types": ["node", "vscode", "mocha"],
+    "baseUrl": ".",
+    "paths": {
+      "*": ["node_modules/*"]
+    }
   },
   "include": ["src", "../tests", "../unittests"]
 }
