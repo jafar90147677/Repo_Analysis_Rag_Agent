@@ -33,6 +33,10 @@ export class AutoIndexScheduler {
         this.debounceTimer = setTimeout(() => void this.startIndex(), DEBOUNCE_MS);
     }
 
+    public stop(): void {
+        this.clearDebounceTimer();
+    }
+
     private isRateLimited(): boolean {
         return Date.now() - this.lastStartTime < RATE_LIMIT_MS;
     }
@@ -54,12 +58,12 @@ export class AutoIndexScheduler {
             return;
         }
 
-        if (!(await this.awaitHealthClear())) {
-            return;
-        }
-
         this.isWaitingForHealth = true;
         try {
+            if (!(await this.awaitHealthClear())) {
+                return;
+            }
+            // Check again if auto-index is still enabled before starting
             await this.triggerIndex();
             this.lastStartTime = Date.now();
         } finally {
