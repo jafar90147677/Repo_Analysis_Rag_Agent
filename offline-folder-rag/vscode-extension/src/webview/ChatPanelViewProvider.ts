@@ -4,6 +4,7 @@ import * as vscode from "vscode";
 import { parseSlashCommand, CommandResultMessage } from "../commands/commandRouter";
 import { getChatPanelHtml } from "./ui/chatPanelHtml";
 import { triggerFullIndex, setIndexing, clearIndexing } from "../services/indexGate";
+import { renderAssistantResponse } from "./components/AssistantResponseRenderer";
 
 export class ChatPanelViewProvider {
     private panel: vscode.WebviewPanel | undefined;
@@ -35,7 +36,12 @@ export class ChatPanelViewProvider {
         this.panel.webview.onDidReceiveMessage(async (message) => {
             if (message.type === "command") {
                 const result = await parseSlashCommand(message.text, this.extensionContext);
-                this.postMessage(result);
+                if (result.type === 'assistantResponse') {
+                    const html = renderAssistantResponse(result.payload);
+                    this.postMessage({ type: 'commandResult', payload: html, isHtml: true });
+                } else {
+                    this.postMessage(result);
+                }
             } else if (message.type === "indexAction") {
                 const workspaceFolders = vscode.workspace.workspaceFolders;
                 if (!workspaceFolders || workspaceFolders.length === 0) return;
@@ -57,6 +63,17 @@ export class ChatPanelViewProvider {
                     this.postMessage({ type: "dismissIndexModal" });
                     this.postMessage({ type: "commandResult", payload: "Index not available; cannot answer" });
                 }
+            } else if (message.type === "openCitation") {
+                const { path: filePath, start, end } = message;
+                const workspaceFolders = vscode.workspace.workspaceFolders;
+                if (workspaceFolders && workspaceFolders.length > 0) {
+                    const fullPath = vscode.Uri.joinPath(workspaceFolders[0].uri, filePath);
+                    const doc = await vscode.workspace.openTextDocument(fullPath);
+                    const editor = await vscode.window.showTextDocument(doc);
+                    const range = new vscode.Range(start - 1, 0, end - 1, 0);
+                    editor.selection = new vscode.Selection(range.start, range.end);
+                    editor.revealRange(range, vscode.TextEditorRevealType.InCenter);
+                }
             }
         });
 
@@ -64,7 +81,7 @@ export class ChatPanelViewProvider {
         this.panel.webview.html = getChatPanelHtml(this.extensionUri, composerPlaceholder);
     }
 
-    private postMessage(message: CommandResultMessage): void {
+    private postMessage(message: any): void {
         this.panel?.webview.postMessage(message);
     }
 }

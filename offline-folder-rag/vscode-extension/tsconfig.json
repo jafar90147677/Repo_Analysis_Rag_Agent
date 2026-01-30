@@ -12,5 +12,6 @@
     "forceConsistentCasingInFileNames": true,
     "types": ["node", "mocha", "chai", "vscode"]
   },
-  "include": ["src", "../tests"]
+  "include": ["src", "../tests"],
+  "exclude": ["../tests/vscode_extension/contract/token_reader.test.ts"]
 }

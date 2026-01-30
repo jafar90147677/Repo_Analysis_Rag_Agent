@@ -44,6 +44,59 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
             background: #1b1b1b;
         }
 
+        .assistant-response {
+            border-left: 2px solid #0e639c;
+            padding-left: 12px;
+            margin-bottom: 16px;
+        }
+
+        .chips-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .chip {
+            font-size: 10px;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        .confidence-found { background: #28a745; color: white; }
+        .confidence-partial { background: #ffc107; color: black; }
+        .confidence-not_found { background: #dc3545; color: white; }
+
+        .mode-rag { background: #6f42c1; color: white; }
+        .mode-tools { background: #fd7e14; color: white; }
+        .mode-hybrid { background: #007bff; color: white; }
+
+        .answer-text {
+            line-height: 1.5;
+            margin-bottom: 12px;
+        }
+
+        .citations-list {
+            font-size: 12px;
+            color: #aaa;
+        }
+
+        .citations-list ul {
+            list-style: none;
+            padding: 0;
+            margin: 4px 0;
+        }
+
+        .citation-link {
+            color: #3794ff;
+            text-decoration: none;
+        }
+
+        .citation-link:hover {
+            text-decoration: underline;
+        }
+
         #chat-panel-composer {
             display: flex;
             flex-direction: column;
@@ -158,9 +211,13 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
         const indexFullButton = document.getElementById("indexFull");
         const indexCancelButton = document.getElementById("indexCancel");
 
-        function appendLog(text) {
-            const entry = document.createElement("p");
-            entry.textContent = text;
+        function appendLog(text, isHtml = false) {
+            const entry = document.createElement("div");
+            if (isHtml) {
+                entry.innerHTML = text;
+            } else {
+                entry.textContent = text;
+            }
             conversation.appendChild(entry);
             conversation.scrollTop = conversation.scrollHeight;
         }
@@ -205,7 +262,18 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
             } else if (message.type === "dismissIndexModal") {
                 hideModal();
             } else if (message.type === "commandResult" && message.payload) {
-                appendLog(message.payload);
+                appendLog(message.payload, message.isHtml);
+            }
+        });
+
+        document.addEventListener('click', (event) => {
+            const target = event.target;
+            if (target && target.classList.contains('citation-link')) {
+                event.preventDefault();
+                const path = target.getAttribute('data-path');
+                const start = parseInt(target.getAttribute('data-start'));
+                const end = parseInt(target.getAttribute('data-end'));
+                vscode.postMessage({ type: 'openCitation', path, start, end });
             }
         });
     </script>

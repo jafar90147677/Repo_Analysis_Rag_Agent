@@ -3,8 +3,9 @@ import { checkIndexExists, isIndexing } from '../services/indexGate';
 import * as vscode from 'vscode';
 
 export interface CommandResultMessage {
-    type: 'commandResult' | 'showIndexModal' | 'dismissIndexModal';
-    payload?: string;
+    type: 'commandResult' | 'showIndexModal' | 'dismissIndexModal' | 'assistantResponse';
+    payload?: any;
+    isHtml?: boolean;
 }
 
 /**
@@ -51,12 +52,40 @@ export async function parseSlashCommand(
             // For /search and /ask, we match the prefix and treat the rest as args
             if (trimmedInput === commandKey || trimmedInput.startsWith(commandKey + ' ')) {
                 const args = trimmedInput.slice(commandKey.length).trim();
-                return { type: 'commandResult', payload: slashCommandRegistry[commandKey](args) };
+                const result = slashCommandRegistry[commandKey](args);
+                
+                // For /ask and /search, wrap in assistantResponse envelope for rendering
+                if (commandKey === '/ask' || commandKey === '/search') {
+                    return {
+                        type: 'assistantResponse',
+                        payload: {
+                            mode: 'rag',
+                            confidence: 'found',
+                            answer: result,
+                            citations: []
+                        }
+                    };
+                }
+                return { type: 'commandResult', payload: result };
             }
         } else {
             // For all other commands, we require an exact match
             if (trimmedInput === commandKey) {
-                return { type: 'commandResult', payload: slashCommandRegistry[commandKey]('') };
+                const result = slashCommandRegistry[commandKey]('');
+                
+                // For /overview and /index report, wrap in assistantResponse envelope
+                if (commandKey === '/overview' || commandKey === '/index report' || commandKey === '/doctor') {
+                    return {
+                        type: 'assistantResponse',
+                        payload: {
+                            mode: commandKey === '/doctor' ? 'tools' : 'rag',
+                            confidence: 'found',
+                            answer: result,
+                            citations: []
+                        }
+                    };
+                }
+                return { type: 'commandResult', payload: result };
             }
         }
     }
