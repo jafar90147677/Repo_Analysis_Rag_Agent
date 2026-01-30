@@ -11,6 +11,7 @@ import * as vscode from "vscode";
 
 export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: string = PLACEHOLDER_TEXT): string {
     const nonce = getNonce();
+
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -21,7 +22,7 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
     <style>
         :root {
             color-scheme: light dark;
-            --bg: #f5f6f7;
+            --bg: #f4f4f5;
             --panel-bg: #ffffff;
             --surface: #f0f0f3;
             --border: #d0d0db;
@@ -32,18 +33,19 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
 
         @media (prefers-color-scheme: dark) {
             :root {
-                --bg: #08090c;
-                --panel-bg: #1b1b1e;
-                --surface: #23242a;
-                --border: #3f4148;
-                --muted: #9aa1b4;
-                --text: #f4f4f5;
+                --bg: #0b0c10;
+                --panel-bg: #16181c;
+                --surface: #1e2027;
+                --border: #3a3d46;
+                --muted: #9ea4b9;
+                --text: #f5f6f8;
                 --accent: #2ea3ff;
             }
         }
 
         body {
             margin: 0;
+            padding: 0;
             background: var(--bg);
             font-family: "Segoe UI", system-ui, sans-serif;
             color: var(--text);
@@ -54,8 +56,8 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
             flex-direction: column;
             height: 100vh;
             padding: 16px;
-            box-sizing: border-box;
             gap: 16px;
+            box-sizing: border-box;
         }
 
         #chat-panel-header {
@@ -85,7 +87,7 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
 
         #header-actions button {
             border: 1px solid var(--border);
-            border-radius: 6px;
+            border-radius: 8px;
             width: 36px;
             height: 36px;
             font-size: 1.25rem;
@@ -123,24 +125,22 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
             border-radius: 10px;
             max-width: 80%;
             line-height: 1.4;
-            border: 1px solid transparent;
             word-break: break-word;
         }
 
         .conversation-message.user {
             align-self: flex-end;
             background: rgba(14, 99, 156, 0.12);
-            border-color: rgba(14, 99, 156, 0.3);
+            border: 1px solid rgba(14, 99, 156, 0.3);
         }
 
         .conversation-message.assistant {
             align-self: flex-start;
             background: var(--surface);
-            border-color: var(--border);
+            border: 1px solid var(--border);
         }
 
         #composer-card {
-            position: relative;
             background: var(--panel-bg);
             border: 1px solid var(--border);
             border-radius: 16px;
@@ -148,7 +148,7 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
         }
 
         #composer-form {
@@ -164,7 +164,7 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
 
         #composer-input {
             width: 100%;
-            min-height: 110px;
+            min-height: 120px;
             border-radius: 12px;
             border: 1px solid var(--border);
             padding: 12px;
@@ -202,6 +202,7 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
         .composer-dropdown label {
             font-size: 0.9rem;
             margin-bottom: 4px;
+            font-weight: 500;
         }
 
         .composer-dropdown select {
@@ -209,9 +210,55 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
             border: 1px solid var(--border);
             background: var(--surface);
             padding: 6px 10px;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             color: var(--text);
             min-width: 120px;
+        }
+
+        #composer-bottom-row button {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--surface);
+            width: 40px;
+            height: 40px;
+            font-size: 1.4rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #composer-bottom-row button:hover,
+        #composer-bottom-row button:focus-visible {
+            border-color: var(--accent);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(14, 99, 156, 0.2);
+        }
+
+        .composer-send-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .send-button {
+            border: none;
+            border-radius: 999px;
+            padding: 10px 26px;
+            background: var(--accent);
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .send-button:focus-visible {
+            outline: 2px solid rgba(46, 163, 255, 0.6);
+        }
+
+        .send-hint {
+            color: var(--muted);
+            font-size: 0.85rem;
         }
 
         .context-attachments {
@@ -219,6 +266,10 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
             flex-wrap: wrap;
             gap: 8px;
             min-height: 28px;
+        }
+
+        .context-attachments.hidden {
+            display: none;
         }
 
         .context-chip {
@@ -245,7 +296,7 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
             position: absolute;
             bottom: 100%;
             left: 16px;
-            width: 220px;
+            width: 180px;
             background: var(--panel-bg);
             border: 1px solid var(--border);
             border-radius: 12px;
@@ -275,57 +326,6 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
         #context-menu button:focus-visible {
             background: var(--surface);
             outline: none;
-        }
-
-        .composer-dropdown select option[disabled] {
-            color: var(--muted);
-            opacity: 0.6;
-        }
-
-        #composer-bottom-row button {
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            background: var(--surface);
-            width: 40px;
-            height: 40px;
-            font-size: 1.2rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        #composer-bottom-row button:hover,
-        #composer-bottom-row button:focus-visible {
-            border-color: var(--accent);
-            outline: none;
-            box-shadow: 0 0 0 2px rgba(14, 99, 156, 0.2);
-        }
-
-        .composer-send-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-        }
-
-        .send-button {
-            border: none;
-            border-radius: 999px;
-            padding: 8px 20px;
-            background: var(--accent);
-            color: #fff;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .send-button:focus-visible {
-            outline: 2px solid rgba(46, 163, 255, 0.6);
-        }
-
-        .send-hint {
-            color: var(--muted);
-            font-size: 0.85rem;
         }
 
         #local-row {
@@ -428,14 +428,13 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
                     id="composer-input"
                     placeholder="${placeholderText}"
                     aria-label="Message input"
-                    aria-describedby="composer-hint"
                     autocomplete="off"
                 ></textarea>
-                <p id="composer-hint" class="composer-hint">Plan · @ for context · / for commands</p>
+                <p class="composer-hint">${placeholderText}</p>
 
-                <div id="context-attachments" class="context-attachments" aria-live="polite" hidden></div>
+                <div id="context-attachments" class="context-attachments hidden" aria-live="polite"></div>
 
-                <div id="context-menu" class="context-menu" role="menu" aria-label="@ context menu">
+                <div id="context-menu" role="menu" aria-label="@ context menu">
                     <button type="button" data-action="folder">@folder</button>
                     <button type="button" data-action="selection">@selection</button>
                     <button type="button" data-action="file">@file</button>
@@ -444,32 +443,26 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
                 <div id="composer-bottom-row" aria-label="Composer quick controls">
                     <div class="composer-dropdown">
                         <label for="infinity-dropdown">∞</label>
-                        <select id="infinity-dropdown" aria-label="Infinity dropdown" title="Infinity options">
-                            <option value="local">Local</option>
-                            <option disabled class="dropdown-future">Future entry 1 (coming soon)</option>
-                            <option disabled class="dropdown-future">Future entry 2 (coming soon)</option>
+                        <select id="infinity-dropdown" aria-label="Infinity dropdown">
+                            <option value="local" selected>Local</option>
+                            <option value="future-1" disabled>Future entry 1</option>
+                            <option value="future-2" disabled>Future entry 2</option>
                         </select>
                     </div>
                     <div class="composer-dropdown">
                         <label for="mode-select">Mode</label>
-                        <select id="mode-select" aria-label="Composer mode" title="Composer mode selector">
+                        <select id="mode-select" aria-label="Composer mode">
                             <option value="auto">Auto</option>
                             <option value="rag">RAG</option>
                             <option value="tools">Tools</option>
                         </select>
                     </div>
-                    <button id="attachment-button" type="button" aria-label="Attach file" title="Attach file">
-                        📎
-                    </button>
-                    <button id="microphone-button" type="button" aria-label="Record voice" title="Record voice">
-                        🎤
-                    </button>
+                    <button id="attachment-button" type="button" aria-label="Attach file" title="Attach file">📎</button>
+                    <button id="microphone-button" type="button" aria-label="Record voice" title="Record voice">🎤</button>
                 </div>
 
                 <div class="composer-send-row">
-                    <button type="submit" class="send-button" aria-label="Send message" title="Send message">
-                        Send
-                    </button>
+                    <button type="submit" class="send-button" aria-label="Send message" title="Send message">Send</button>
                     <span class="send-hint">Press Ctrl+Enter to send</span>
                 </div>
             </form>
@@ -497,22 +490,27 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
     <script nonce="${nonce}">
         (function () {
             const vscode = acquireVsCodeApi();
-            const conversation = document.getElementById("conversation");
             const composerForm = document.getElementById("composer-form");
             const composerInput = document.getElementById("composer-input");
+            const conversation = document.getElementById("conversation");
+            const emptyState = document.getElementById("empty-state");
             const contextAttachments = document.getElementById("context-attachments");
             const contextMenu = document.getElementById("context-menu");
             const modeSelect = document.getElementById("mode-select");
             const indexModal = document.getElementById("indexModal");
             const indexFullButton = document.getElementById("indexFull");
             const indexCancelButton = document.getElementById("indexCancel");
-            const COMPOSER_MODES = ["auto", "rag", "tools"];
-            const LOCAL_SELECT_VALUE = "__select_folder__";
+            const infinityDropdown = document.getElementById("infinity-dropdown");
             const attachmentButton = document.getElementById("attachment-button");
             const microphoneButton = document.getElementById("microphone-button");
+            const localDropdown = document.getElementById("local-dropdown");
+
+            const COMPOSER_MODES = ["auto", "rag", "tools"];
+            const LOCAL_SELECT_VALUE = "__select_folder__";
 
             let currentMode = "auto";
             let lastLocalSelection = LOCAL_SELECT_VALUE;
+
             const attachedContext = {
                 root_path: null,
                 selection_text: null,
@@ -605,19 +603,20 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
                 });
             }
 
-            function appendMessage(text, role = "assistant") {
-                if (!conversation || !text) {
-                    return;
-                }
+            function appendMessage(text, role, isHtml = false) {
+                if (!conversation || !text) return;
 
-                const emptyState = document.getElementById("empty-state");
                 if (emptyState) {
                     emptyState.remove();
                 }
 
                 const entry = document.createElement("div");
                 entry.className = \`conversation-message \${role}\`;
-                entry.textContent = text;
+                if (isHtml) {
+                    entry.innerHTML = text;
+                } else {
+                    entry.textContent = text;
+                }
                 conversation.appendChild(entry);
                 conversation.scrollTop = conversation.scrollHeight;
             }
@@ -652,29 +651,20 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
                 contextAttachments.innerHTML = "";
 
                 if (attachedContext.root_path) {
-                    contextAttachments.appendChild(
-                        createChip("Folder", attachedContext.root_path, "folder")
-                    );
+                    contextAttachments.appendChild(createChip("Folder", attachedContext.root_path, "folder"));
                 }
 
                 if (attachedContext.selection_text) {
-                    contextAttachments.appendChild(
-                        createChip("Selection", attachedContext.selection_text, "selection")
-                    );
+                    contextAttachments.appendChild(createChip("Selection", attachedContext.selection_text, "selection"));
                 }
 
-                attachedContext.active_file_paths.forEach((file) => {
-                    contextAttachments.appendChild(createChip("File", file.path, "file", file.id));
-                });
+                if (attachedContext.active_file_paths && attachedContext.active_file_paths.length) {
+                    attachedContext.active_file_paths.forEach(file => {
+                        contextAttachments.appendChild(createChip("File", file.path, "file", file.id));
+                    });
+                }
 
-                contextAttachments.hidden = !contextAttachments.children.length;
-            }
-
-            function clearContext() {
-                attachedContext.root_path = null;
-                attachedContext.selection_text = null;
-                attachedContext.active_file_paths = [];
-                renderAttachments();
+                contextAttachments.classList.toggle("hidden", contextAttachments.children.length === 0);
             }
 
             function buildExtraContext() {
@@ -688,71 +678,63 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
                     extra.selection_text = attachedContext.selection_text;
                 }
 
-                if (attachedContext.active_file_paths.length) {
+                if (attachedContext.active_file_paths && attachedContext.active_file_paths.length) {
                     extra.active_file_path = attachedContext.active_file_paths[0].path;
                 }
 
                 return Object.keys(extra).length ? extra : undefined;
             }
 
-            function handleContextResponse(message) {
-                if (!message || message.error || !message.context) {
-                    return;
-                }
-
-                if (message.action === "folder" && message.context.root_path) {
-                    attachedContext.root_path = message.context.root_path;
-                } else if (message.action === "selection" && message.context.selection_text) {
-                    attachedContext.selection_text = message.context.selection_text;
-                } else if (message.action === "file" && message.context.active_file_path) {
-                    attachedContext.active_file_paths.push({
-                        id: generateContextId(),
-                        path: message.context.active_file_path,
-                    });
-                }
-
+            function clearContext() {
+                attachedContext.root_path = null;
+                attachedContext.selection_text = null;
+                attachedContext.active_file_paths = [];
                 renderAttachments();
             }
 
             function showContextMenu() {
-                if (contextMenu) {
-                    contextMenu.classList.add("visible");
-                }
+                contextMenu?.classList.add("visible");
             }
 
             function hideContextMenu() {
-                if (contextMenu) {
-                    contextMenu.classList.remove("visible");
-                }
+                contextMenu?.classList.remove("visible");
             }
 
-            function sendCommand() {
-                if (!composerInput) {
-                    return;
-                }
+            function sendMessage() {
+                if (!composerInput) return;
+                const text = composerInput.value.trim();
+                if (!text) return;
 
-                const trimmed = composerInput.value.trim();
-                if (!trimmed) {
-                    return;
-                }
-
-                appendMessage(trimmed, "user");
+                appendMessage(text, "user");
+                const mode = modeSelect?.value || "auto";
                 const extraContext = buildExtraContext();
+
                 vscode.postMessage({
-                    type: "command",
-                    text: trimmed,
-                    mode: currentMode,
+                    type: "dispatch",
+                    text,
+                    mode,
                     extraContext,
                 });
+
                 composerInput.value = "";
                 composerInput.focus();
                 clearContext();
-                hideContextMenu();
             }
 
             composerForm?.addEventListener("submit", (event) => {
                 event.preventDefault();
-                sendCommand();
+                sendMessage();
+            });
+
+            composerInput?.addEventListener("keydown", (event) => {
+                if (event.key === "@") {
+                    showContextMenu();
+                }
+
+                if (event.key === "Enter" && !event.shiftKey) {
+                    event.preventDefault();
+                    sendMessage();
+                }
             });
 
             composerInput?.addEventListener("input", () => {
@@ -761,37 +743,24 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
                 }
             });
 
-            composerInput?.addEventListener("keydown", (event) => {
-                if (event.key === "@") {
-                    showContextMenu();
-                }
-
-                if (event.key === "Escape") {
-                    hideContextMenu();
-                }
-
-                if (event.key !== "Enter") {
-                    return;
-                }
-
-                if (event.shiftKey) {
-                    return;
-                }
-
-                event.preventDefault();
-                sendCommand();
+            modeSelect?.addEventListener("change", () => {
+                const mode = modeSelect.value;
+                vscode.postMessage({ type: "modeChange", mode });
             });
+
+            if (infinityDropdown) {
+                infinityDropdown.addEventListener("change", () => {
+                    if (infinityDropdown.value !== "local") {
+                        infinityDropdown.value = "local";
+                    }
+                });
+            }
 
             contextMenu?.addEventListener("click", (event) => {
                 const target = event.target;
-                if (!(target instanceof HTMLElement)) {
-                    return;
-                }
-
+                if (!(target instanceof HTMLElement)) return;
                 const action = target.dataset.action;
-                if (!action) {
-                    return;
-                }
+                if (!action) return;
 
                 vscode.postMessage({ type: "contextRequest", action });
                 hideContextMenu();
@@ -799,34 +768,27 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
             });
 
             contextAttachments?.addEventListener("click", (event) => {
-                const target = event.target;
-                if (!(target instanceof HTMLElement)) {
-                    return;
-                }
-
-                const button = target.closest("button[data-remove-type]");
+                const button = (event.target instanceof HTMLElement) ? event.target.closest("button[data-remove-type]") : null;
                 if (!(button instanceof HTMLElement)) {
                     return;
                 }
 
                 const type = button.dataset.removeType;
-                const removeId = button.dataset.removeId;
+                const id = button.dataset.removeId;
 
                 if (type === "folder") {
                     attachedContext.root_path = null;
                 } else if (type === "selection") {
                     attachedContext.selection_text = null;
-                } else if (type === "file" && removeId) {
-                    attachedContext.active_file_paths = attachedContext.active_file_paths.filter(
-                        (entry) => entry.id !== removeId
-                    );
+                } else if (type === "file" && id) {
+                    attachedContext.active_file_paths = attachedContext.active_file_paths.filter(f => f.id !== id);
                 }
 
                 renderAttachments();
             });
 
             document.addEventListener("click", (event) => {
-                if (!contextMenu) {
+                if (!contextMenu || !composerInput) {
                     return;
                 }
 
@@ -857,9 +819,7 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
 
             window.addEventListener("message", (event) => {
                 const message = event.data;
-                if (!message) {
-                    return;
-                }
+                if (!message) return;
 
                 if (message.type === "insertText" && typeof message.text === "string") {
                     if (composerInput) {
@@ -887,7 +847,27 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
                 }
 
                 if (message.type === "contextResponse") {
-                    handleContextResponse(message);
+                    if (message.error) {
+                        appendMessage(message.error, "assistant");
+                        return;
+                    }
+
+                    const ctx = message.context ?? {};
+                    if (message.action === "folder" && ctx.root_path) {
+                        attachedContext.root_path = ctx.root_path;
+                    }
+                    if (message.action === "selection" && ctx.selection_text) {
+                        attachedContext.selection_text = ctx.selection_text;
+                    }
+                    if (message.action === "file" && ctx.active_file_path) {
+                        if (!attachedContext.active_file_paths) attachedContext.active_file_paths = [];
+                        attachedContext.active_file_paths.push({
+                            id: generateContextId(),
+                            path: ctx.active_file_path
+                        });
+                    }
+
+                    renderAttachments();
                     return;
                 }
 
@@ -902,7 +882,8 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
                 }
 
                 if (message.type === "commandResult" && message.payload) {
-                    appendMessage(message.payload, "assistant");
+                    appendMessage(message.payload, "assistant", Boolean(message.isHtml));
+                    return;
                 }
             });
 

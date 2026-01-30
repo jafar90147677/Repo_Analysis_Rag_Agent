@@ -1,10 +1,42 @@
 import * as vscode from "vscode";
-import { slashCommandRegistry } from './slashCommands';
 import { overview, search, ask, askWithOverride } from '../services/agentClient';
+import { parseSlashCommandInstruction, SlashCommandInstruction } from "./slashCommands";
 
 export interface CommandResultMessage {
-    type: "commandResult";
-    payload: string;
+    type: "commandResult" | "showIndexModal" | "dismissIndexModal";
+    payload?: string;
+    isHtml?: boolean;
+}
+
+function describeCommand(command: SlashCommandInstruction): string {
+    switch (command.kind) {
+        case "index":
+            return `Indexing started: ${command.mode} scan`;
+        case "overview":
+            return "Overview: Folder structure and key files...";
+        case "search":
+            return `Searching for ${command.query}`;
+        case "doctor":
+            return "Running system checks...";
+        case "autoindex":
+            return command.enabled ? "Auto-indexing enabled" : "Auto-indexing disabled";
+        case "ask":
+            return `Asking the system: ${command.question}`;
+        default:
+            return "INVALID_COMMAND";
+    }
+}
+
+export async function parseSlashCommand(
+    input: string,
+    _context: vscode.ExtensionContext
+): Promise<CommandResultMessage> {
+    const parsed = parseSlashCommandInstruction(input);
+    if (!parsed.success) {
+        return { type: "commandResult", payload: "INVALID_COMMAND" };
+    }
+
+    return { type: "commandResult", payload: describeCommand(parsed.command) };
 }
 
 export class CommandRouter {
@@ -13,12 +45,24 @@ export class CommandRouter {
         private readonly onResult: (message: CommandResultMessage) => void
     ) {}
 
-    public async handleCommand(input: string, extraContext?: any): Promise<void> {
-        const result = this.handleToolsSlashCommand(input);
-        this.onResult({
-            type: "commandResult",
-            payload: result
-        });
+    private postResult(payload: string, isHtml: boolean = false) {
+        this.onResult({ type: "commandResult", payload, isHtml });
+    }
+
+    public async handleCommand(input: string, _extraContext?: any): Promise<void> {
+        const trimmed = input.trim();
+        if (!trimmed.startsWith("/")) {
+            this.postResult("INVALID_COMMAND");
+            return;
+        }
+
+        const parsed = parseSlashCommandInstruction(trimmed);
+        if (!parsed.success) {
+            this.postResult("INVALID_COMMAND");
+            return;
+        }
+
+        this.postResult(describeCommand(parsed.command));
     }
 
     public async autoRouteInput(input: string, extraContext?: any): Promise<void> {
@@ -43,7 +87,9 @@ export class CommandRouter {
     }
 
     public async handleIndexAction(action: string): Promise<void> {
-        // ... implementation ...
+        if (action === "full" || action === "cancel") {
+            this.postResult(`Index action: ${action}`);
+        }
     }
 
     public async route(options: { text: string; mode: string; extraContext?: any }): Promise<void> {
@@ -59,7 +105,7 @@ export class CommandRouter {
             } catch (error) {
                 this.onResult({
                     type: "commandResult",
-                    payload: `Error: \${error instanceof Error ? error.message : String(error)}`,
+                    payload: `Error: ${error instanceof Error ? error.message : String(error)}`,
                 });
             }
         } else if (mode === "Auto" && !text.startsWith("/")) {
@@ -67,29 +113,5 @@ export class CommandRouter {
         } else {
             await this.handleCommand(text, extraContext);
         }
-    }
-
-    public handleToolsSlashCommand(input: string): string {
-        const trimmed = input.trim();
-        if (!trimmed.startsWith('/')) {
-            return 'INVALID_COMMAND';
-        }
-
-        const parts = trimmed.split(' ');
-        // Try two-word command first (e.g., "/index full")
-        const twoWordCmd = parts[0] + (parts[1] ? ' ' + parts[1] : '');
-        if (slashCommandRegistry[twoWordCmd]) {
-            const args = trimmed.slice(twoWordCmd.length).trim();
-            return slashCommandRegistry[twoWordCmd](args);
-        }
-
-        // Try one-word command (e.g., "/overview")
-        const oneWordCmd = parts[0];
-        if (slashCommandRegistry[oneWordCmd]) {
-            const args = trimmed.slice(oneWordCmd.length).trim();
-            return slashCommandRegistry[oneWordCmd](args);
-        }
-
-        return 'INVALID_COMMAND';
     }
 }
