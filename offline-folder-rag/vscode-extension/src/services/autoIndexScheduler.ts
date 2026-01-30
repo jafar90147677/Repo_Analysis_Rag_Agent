@@ -1,8 +1,8 @@
-import { authenticatedFetch } from "./agentClient";
+import { authenticatedFetch, fetchHealth } from "./agentClient";
 
 const DEBOUNCE_MS = 60_000;
 const RATE_LIMIT_MS = 5 * 60_000;
-const HEALTH_POLL_MS = 5_000;
+const HEALTH_POLL_MS = 2_000;
 
 type AutoIndexSchedulerOptions = {
     triggerIndex: () => Promise<void>;
@@ -33,6 +33,10 @@ export class AutoIndexScheduler {
         this.debounceTimer = setTimeout(() => void this.startIndex(), DEBOUNCE_MS);
     }
 
+    public stop(): void {
+        this.clearDebounceTimer();
+    }
+
     private isRateLimited(): boolean {
         return Date.now() - this.lastStartTime < RATE_LIMIT_MS;
     }
@@ -54,12 +58,13 @@ export class AutoIndexScheduler {
             return;
         }
 
-        if (!(await this.awaitHealthClear())) {
-            return;
-        }
-
         this.isWaitingForHealth = true;
         try {
+            // Wait for health to be clear (indexing: false) before starting
+            if (!(await this.awaitHealthClear())) {
+                return;
+            }
+            
             await this.triggerIndex();
             this.lastStartTime = Date.now();
         } finally {
@@ -71,28 +76,22 @@ export class AutoIndexScheduler {
         while (true) {
             const health = await this.fetchHealth();
             if (!health) {
-                return false;
+                // If we can't fetch health, assume it's busy or agent is down, 
+                // but for the sake of retrying as per Task 3, we wait.
+                await this.delay(2000);
+                continue;
             }
 
             if (!health.indexing) {
                 return true;
             }
 
-            await this.delay(HEALTH_POLL_MS);
+            await this.delay(2000); // 2 seconds delay as per Task 3
         }
     }
 
     private async fetchHealth(): Promise<{ indexing: boolean } | null> {
-        try {
-            const response = await authenticatedFetch(`${this.agentBaseUrl}/health`);
-            if (!response.ok) {
-                return null;
-            }
-
-            return (await response.json()) as { indexing: boolean };
-        } catch {
-            return null;
-        }
+        return fetchHealth(this.agentBaseUrl);
     }
 
     private async delay(ms: number): Promise<void> {
