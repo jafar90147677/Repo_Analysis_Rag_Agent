@@ -1,125 +1,34 @@
-import * as path from "path";
-import * as vscode from "vscode";
+import { slashCommandRegistry } from './slashCommands';
 
-import {
-    checkIndexExists,
-    clearIndexing,
-    IndexGateConfig,
-    setIndexing,
-    triggerFullIndex,
-    isIndexing,
-} from "../services/indexGate";
-import { normalizeRootPath } from "../utils/pathNormalize";
-
-export type CommandResultMessage = {
-    type: "showIndexModal" | "dismissIndexModal" | "commandResult";
-    payload?: string;
-};
-
-const gatedCommands = new Set(["/ask", "/overview", "/search", "/index report"]);
-
-export class CommandRouter {
-    private config: IndexGateConfig;
-    private toolsMode = false;
-
-    constructor(
-        private readonly context: vscode.ExtensionContext,
-        private readonly sendMessage: (message: CommandResultMessage) => void
-    ) {
-        const storageRoot =
-            context.globalStorageUri?.fsPath ?? path.join(context.extensionUri.fsPath, ".offline-folder-rag");
-        this.config = { storageRoot };
+/**
+ * Parses and executes a slash command from the user input.
+ * Uses a deterministic, registry-based approach.
+ * @param input The raw input string starting with /
+ * @returns The result of the command execution or 'INVALID_COMMAND'
+ */
+export function parseSlashCommand(input: string): string {
+    const trimmedInput = input.trim();
+    if (!trimmedInput.startsWith('/')) {
+        return 'INVALID_COMMAND';
     }
 
-    public async route(commandText: string): Promise<void> {
-        const trimmed = commandText.trim();
-        if (!trimmed) {
-            return;
-        }
+    // Commands that support arguments
+    const commandsWithArgs = ['/search', '/ask'];
 
-        if (trimmed === "/tools") {
-            this.toolsMode = !this.toolsMode;
-            this.postResult(`Tools mode ${this.toolsMode ? "enabled" : "disabled"}`);
-            return;
-        }
-
-        const rootPath = this.getWorkspaceRootPath();
-        const normalizedRoot = rootPath ? normalizeRootPath(rootPath) : "";
-
-        if (!rootPath) {
-            this.postResult("Workspace root not found; command cannot run.");
-            return;
-        }
-
-        if (gatedCommands.has(trimmed)) {
-            if (isIndexing(normalizedRoot)) {
-                this.postResult("Indexing already in progress.");
-                return;
+    for (const commandKey of Object.keys(slashCommandRegistry)) {
+        if (commandsWithArgs.includes(commandKey)) {
+            // For /search and /ask, we match the prefix and treat the rest as args
+            if (trimmedInput === commandKey || trimmedInput.startsWith(commandKey + ' ')) {
+                const args = trimmedInput.slice(commandKey.length).trim();
+                return slashCommandRegistry[commandKey](args);
             }
-
-            if (!(await checkIndexExists(this.config, rootPath))) {
-                this.postMessage({ type: "showIndexModal" });
-                return;
+        } else {
+            // For all other commands, we require an exact match
+            if (trimmedInput === commandKey) {
+                return slashCommandRegistry[commandKey]('');
             }
         }
-
-        this.postResult(`Executing ${trimmed}${this.toolsMode ? " (tools mode)" : ""}.`);
     }
 
-    public async handleIndexAction(action: "full" | "cancel"): Promise<void> {
-        const rootPath = this.getWorkspaceRootPath();
-        const normalizedRoot = rootPath ? normalizeRootPath(rootPath) : "";
-
-        if (!rootPath) {
-            this.postResult("Workspace root not available for indexing.");
-            return;
-        }
-
-        if (action === "cancel") {
-            this.postResult("Index not available; cannot answer.");
-            this.postMessage({ type: "dismissIndexModal" });
-            return;
-        }
-
-        if (isIndexing(normalizedRoot)) {
-            this.postResult("Indexing already in progress.");
-            return;
-        }
-
-        setIndexing(normalizedRoot);
-        this.postResult("Running /index full ...");
-
-        try {
-            await triggerFullIndex(this.config, rootPath, (message) => {
-                this.postResult(message);
-            });
-            this.postResult("Full index completed.");
-        } catch (error) {
-            this.postResult(`Indexing failed: ${String(error)}`);
-        } finally {
-            clearIndexing(normalizedRoot);
-            this.postMessage({ type: "dismissIndexModal" });
-        }
-    }
-
-    private getWorkspaceRootPath(): string | undefined {
-        const folders = vscode.workspace.workspaceFolders;
-        if (folders && folders.length > 0) {
-            return folders[0].uri.fsPath;
-        }
-
-        if (vscode.workspace.workspaceFile) {
-            return path.dirname(vscode.workspace.workspaceFile.fsPath);
-        }
-
-        return undefined;
-    }
-
-    private postResult(payload: string): void {
-        this.postMessage({ type: "commandResult", payload });
-    }
-
-    private postMessage(message: CommandResultMessage): void {
-        this.sendMessage(message);
-    }
+    return 'INVALID_COMMAND';
 }
