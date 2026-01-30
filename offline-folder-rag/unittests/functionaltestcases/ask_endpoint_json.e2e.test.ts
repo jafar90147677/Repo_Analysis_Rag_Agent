@@ -33,7 +33,7 @@ describe('POST /ask E2E', () => {
       expect(response.data).toHaveProperty('confidence');
       expect(response.data).toHaveProperty('answer');
       expect(response.data).toHaveProperty('citations');
-      expect(Array.isArray(response.data.citations)).toBe(true);
+      expect(Array.isArray((response.data as any).citations)).toBe(true);
     } catch (error: any) {
       if (error.response && error.response.status !== 200) throw error;
       if (!error.response) throw new Error(`Connection failed: ${error.message}`);

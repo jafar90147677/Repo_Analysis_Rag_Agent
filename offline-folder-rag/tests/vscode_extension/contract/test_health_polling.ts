@@ -24,6 +24,7 @@ async function loadService() {
   }
   return module;
 }
+import { startHealthPolling, stopHealthPolling } from "../../../vscode-extension/src/services/agentClient";
 
 describe("Health Polling Contract Test", () => {
     let originalFetch: typeof fetch;
@@ -38,7 +39,6 @@ describe("Health Polling Contract Test", () => {
 
     it("polls at ~2 second intervals and stops when indexing=false", async function() {
         this.timeout(10000);
-        const { startHealthPolling, stopHealthPolling } = await loadService();
 
         let callCount = 0;
         const callTimes: number[] = [];
@@ -98,7 +98,6 @@ describe("Health Polling Contract Test", () => {
 
     it("stops polling on error", async function() {
         this.timeout(5000);
-        const { startHealthPolling, stopHealthPolling } = await loadService();
 
         let callCount = 0;
         global.fetch = (async () => {

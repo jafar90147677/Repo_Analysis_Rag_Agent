@@ -9,6 +9,7 @@ from typing import Dict
 
 from . import scan_rules
 from .scan_rules import compute_repo_id
+from .manifest_store import ManifestStore
 from ..logging.logger import logger
 
 
@@ -197,28 +198,110 @@ def perform_indexing_scan(root_path: str, repo_id: str) -> dict:
     skipped_files = 0
     start_time = time.time()
 
+    # Initialize manifest store
+    manifest_path = scan_rules.index_dir() / repo_id / "manifest.json"
+    manifest = ManifestStore(str(manifest_path))
+
     # Use os.walk to traverse the directory tree
     for root, dirs, files in os.walk(root_path):
-        # 1. Directory Exclusion: Modify 'dirs' in-place to skip excluded directories
-        # We must iterate over a copy of 'dirs' to safely remove items
+        # 1. Symlink/Junction Detection (Precedence): Skip symlinks before any other rules
+        # For directories: Modify 'dirs' in-place to prevent traversal
         for d in list(dirs):
             dir_path = os.path.join(root, d)
-            if scan_rules.should_skip_path(root_path, dir_path, is_dir=True):
+            if scan_rules.is_symlink_entry(dir_path):
+                dirs.remove(d)
+                # Record symlink in manifest
+                manifest.add_symlink_entry(scan_rules.normalize_root_path(dir_path))
+                continue
+            
+            # 2. Directory Exclusion: Skip excluded directories
+            skip, reason = scan_rules.should_skip_path_with_reason(root_path, dir_path, is_dir=True)
+            if skip:
                 dirs.remove(d)
                 skipped_files += 1
 
-        # 2. File Exclusion: Process files in the current directory
+        # 3. File Exclusion: Process files in the current directory
         for f in files:
             file_path = os.path.join(root, f)
-            if scan_rules.should_skip_path(root_path, file_path, is_dir=False):
+            # Symlink check takes precedence
+            if scan_rules.is_symlink_entry(file_path):
+                # Record symlink in manifest
+                manifest.add_symlink_entry(scan_rules.normalize_root_path(file_path))
+                continue
+                
+            skip, reason = scan_rules.should_skip_path_with_reason(root_path, file_path, is_dir=False)
+            if skip:
+                manifest.add_entry(
+                    scan_rules.normalize_root_path(file_path),
+                    status="SKIPPED",
+                    skip_reason=reason
+                )
                 skipped_files += 1
             else:
+                # Binary detection: skip if first 4096 bytes contain a null byte
+                try:
+                    with open(file_path, "rb") as bf:
+                        chunk = bf.read(4096)
+                        if b"\x00" in chunk:
+                            mtime_ms = int(os.path.getmtime(file_path) * 1000)
+                            indexed_at_ms = int(time.time() * 1000)
+                            manifest.add_entry(
+                                scan_rules.normalize_root_path(file_path), 
+                                status="SKIPPED", 
+                                skip_reason=ManifestStore.BINARY,
+                                mtime_epoch_ms=mtime_ms,
+                                indexed_at_epoch_ms=indexed_at_ms
+                            )
+                            skipped_files += 1
+                            continue
+                except Exception as e:
+                    logger.warning("Error checking for binary file %s: %s", file_path, e)
+                    # If we can't read it, we might want to skip it or handle it as an error
+                    # For now, following the requirement to not crash
+                    manifest.add_entry(scan_rules.normalize_root_path(file_path), status="SKIPPED", skip_reason="READ_ERROR")
+                    skipped_files += 1
+                    continue
+
                 indexed_files += 1
                 increment_indexed_files(repo_id)
 
+                # UTF-8 decoding with fallback
+                try:
+                    with open(file_path, "rb") as f_bytes:
+                        content_bytes = f_bytes.read()
+                        mtime_ms = int(os.path.getmtime(file_path) * 1000)
+                        indexed_at_ms = int(time.time() * 1000)
+                        try:
+                            # Attempt normal UTF-8 decode
+                            content_bytes.decode("utf-8")
+                            manifest.add_entry(
+                                scan_rules.normalize_root_path(file_path), 
+                                status="INDEXED",
+                                mtime_epoch_ms=mtime_ms,
+                                indexed_at_epoch_ms=indexed_at_ms
+                            )
+                        except UnicodeDecodeError:
+                            # Fallback to replace on error
+                            content_bytes.decode("utf-8", errors="replace")
+                            manifest.add_entry(
+                                scan_rules.normalize_root_path(file_path), 
+                                status="INDEXED", 
+                                encoding="utf-8-replace",
+                                mtime_epoch_ms=mtime_ms,
+                                indexed_at_epoch_ms=indexed_at_ms
+                            )
+                except Exception as e:
+                    logger.warning("Error reading file content %s: %s", file_path, e)
+                    # If we already incremented indexed_files but now fail to read, 
+                    # we might want to adjust, but following the "must not crash" rule.
+                    continue
+
+    # Save manifest
+    manifest.save()
+
     duration_ms = int((time.time() - start_time) * 1000)
 
-    # Note: Integration with manifest_store.py for skipped items will be handled separately.
+    # Return results including manifest_path
     return {
         "repo_id": repo_id,
         "mode": "full",
@@ -226,4 +309,5 @@ def perform_indexing_scan(root_path: str, repo_id: str) -> dict:
         "skipped_files": skipped_files,
         "chunks_added": 0,  # Placeholder until chunking is integrated
         "duration_ms": duration_ms,
+        "manifest_path": str(manifest_path),
     }

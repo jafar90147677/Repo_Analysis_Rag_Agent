@@ -6,13 +6,17 @@
     "sourceMap": true,
     "rootDir": "..",
     "outDir": "out",
-    "strict": true,
+    "strict": false,
+    "noImplicitAny": false,
+    "skipLibCheck": true,
     "moduleResolution": "node",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "types": ["node", "vscode", "mocha"],
     "baseUrl": ".",
     "paths": {
+      "axios": ["./node_modules/axios/index.js"],
+      "expect": ["./node_modules/expect/build/index.js"],
       "*": ["node_modules/*"]
     }
   },

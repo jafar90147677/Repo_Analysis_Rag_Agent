@@ -90,7 +90,6 @@ def test_health_endpoint_auth(tmp_path):
     assert response.status_code == 401
     assert response.json()["error_code"] == "INVALID_TOKEN"
 
-
 def test_index_endpoint_auth(tmp_path):
     client, auth_token = _fresh_client(tmp_path)
     root_path = tmp_path / "repo"
@@ -113,6 +112,9 @@ def test_index_endpoint_auth(tmp_path):
     response = client.post("/index", headers={"X-LOCAL-TOKEN": "wrong_token"})
     assert response.status_code == 401
     assert response.json()["error_code"] == "INVALID_TOKEN"
+    
+    # Clean up env
+    del os.environ["RAG_INDEX_DIR"]
 
 
 def test_ask_endpoint_auth(tmp_path):

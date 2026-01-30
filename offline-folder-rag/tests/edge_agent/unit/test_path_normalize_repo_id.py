@@ -2,6 +2,8 @@ import unittest
 import os
 import sys
 import hashlib
+import tempfile
+import shutil
 
 # Add current directory to path to allow imports from edge_agent
 sys.path.append(os.getcwd())
@@ -9,6 +11,15 @@ sys.path.append(os.getcwd())
 from edge_agent.app.indexing.scan_rules import normalize_root_path, compute_repo_id, scan_repository
 
 class TestPathNormalizeRepoId(unittest.TestCase):
+    def setUp(self):
+        self.index_dir = tempfile.mkdtemp()
+        os.environ["RAG_INDEX_DIR"] = self.index_dir
+
+    def tearDown(self):
+        shutil.rmtree(self.index_dir)
+        if "RAG_INDEX_DIR" in os.environ:
+            del os.environ["RAG_INDEX_DIR"]
+
     def test_normalize_root_path_basic(self):
         # Basic normalization
         path = "C:/test/../test"
