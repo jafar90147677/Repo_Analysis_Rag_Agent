@@ -21,6 +21,7 @@ class ManifestStore:
     BINARY = "BINARY"
     ENCODING_ERROR = "ENCODING_ERROR"
     CHUNK_LIMIT = SKIP_REASON_CHUNK_LIMIT
+    OTHER = "OTHER"
 
     def __init__(self, manifest_path: str):
         self.manifest_path = Path(manifest_path)
@@ -41,6 +42,25 @@ class ManifestStore:
         if indexed_at_epoch_ms is not None:
             entry["indexed_at_epoch_ms"] = indexed_at_epoch_ms
         self.entries.append(entry)
+
+    def add_or_update_entry(self, path: str, status: str, skip_reason: str = None, encoding: str = None, mtime_epoch_ms: int = None, indexed_at_epoch_ms: int = None):
+        """Add or update a record in the manifest."""
+        for entry in self.entries:
+            if entry["path"] == path:
+                entry["status"] = status
+                if skip_reason:
+                    entry["skip_reason"] = skip_reason
+                else:
+                    entry.pop("skip_reason", None)
+                if encoding:
+                    entry["encoding"] = encoding
+                if mtime_epoch_ms is not None:
+                    entry["mtime_epoch_ms"] = mtime_epoch_ms
+                if indexed_at_epoch_ms is not None:
+                    entry["indexed_at_epoch_ms"] = indexed_at_epoch_ms
+                return
+        
+        self.add_entry(path, status, skip_reason, encoding, mtime_epoch_ms, indexed_at_epoch_ms)
 
     def add_symlink_entry(self, path: str):
         """Record a skipped symlink entry."""
