@@ -215,7 +215,8 @@ def perform_indexing_scan(root_path: str, repo_id: str) -> dict:
                 continue
             
             # 2. Directory Exclusion: Skip excluded directories
-            if scan_rules.should_skip_path(root_path, dir_path, is_dir=True):
+            skip, reason = scan_rules.should_skip_path_with_reason(root_path, dir_path, is_dir=True)
+            if skip:
                 dirs.remove(d)
                 skipped_files += 1
 
@@ -228,7 +229,13 @@ def perform_indexing_scan(root_path: str, repo_id: str) -> dict:
                 manifest.add_symlink_entry(scan_rules.normalize_root_path(file_path))
                 continue
                 
-            if scan_rules.should_skip_path(root_path, file_path, is_dir=False):
+            skip, reason = scan_rules.should_skip_path_with_reason(root_path, file_path, is_dir=False)
+            if skip:
+                manifest.add_entry(
+                    scan_rules.normalize_root_path(file_path),
+                    status="SKIPPED",
+                    skip_reason=reason
+                )
                 skipped_files += 1
             else:
                 # Binary detection: skip if first 4096 bytes contain a null byte
