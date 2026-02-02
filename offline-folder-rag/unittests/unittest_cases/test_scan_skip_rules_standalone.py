@@ -29,10 +29,10 @@ def test_excluded_ext():
     assert result == "EXCLUDED_EXT"
 
 
-def test_symlink(mocker):
-    # Mock os.path.islink to return True for a dummy path
+def test_symlink(monkeypatch):
+    # Treat the dummy path as a symlink for the duration of the test
     file_path = "/path/to/symlink"
-    mocker.patch("os.path.islink", return_value=True)
+    monkeypatch.setattr(os.path, "islink", lambda _: True)
     result = scan_file(file_path)
     assert result == "SYMLINK"
 

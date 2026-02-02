@@ -9,7 +9,7 @@
   "main": "./out/extension.js",
   "scripts": {
     "compile": "tsc -p .",
-    "test": "mocha -r ./tests/setup-vscode.js -r ts-node/register -r tsconfig-paths/register \"../tests/vscode_extension/**/test_*.ts\" \"../tests/vscode_extension/**/*.test.ts\" \"../unittests/**/*.test.ts\""
+    "test": "mocha -r ts-node/register -r ./tests/setup.ts \"../tests/vscode_extension/contract/**/*.ts\""
   },
   "devDependencies": {
     "@types/axios": "^0.9.36",
@@ -33,6 +33,14 @@
       {
         "command": "offlineFolderRag.openChat",
         "title": "Offline Folder RAG: Open Chat"
+      },
+      {
+        "command": "offlineFolderRag.confluencePublish",
+        "title": "Offline Folder RAG: Publish to Confluence"
+      },
+      {
+        "command": "offlineFolderRag.confluenceViewStatus",
+        "title": "Offline Folder RAG: View Confluence Status"
       }
     ]
   },

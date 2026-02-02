@@ -125,6 +125,14 @@ export async function parseSlashCommand(
     return { type: 'commandResult', payload: 'INVALID_COMMAND' };
 }
 
+export function handleToolsSlashCommand(input: string): string {
+    const parsed = parseSlashCommandInstruction(input);
+    if (!parsed.success) {
+        return "INVALID_COMMAND";
+    }
+    return describeCommand(parsed.command);
+}
+
 export class CommandRouter {
     constructor(
         private readonly context: vscode.ExtensionContext,
@@ -197,5 +205,9 @@ export class CommandRouter {
         } else {
             await this.handleCommand(text, extraContext);
         }
+    }
+
+    public handleToolsSlashCommand(input: string): string {
+        return handleToolsSlashCommand(input);
     }
 }

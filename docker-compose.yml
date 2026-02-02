@@ -1,0 +1,12 @@
+version: "3"
+services:
+  edge-agent:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.confluence
+    volumes:
+      - ./confluence_data:/app/confluence_data
+      - ./state_files:/app/state_files
+      - ./logs:/app/logs
+    ports:
+      - "8000:8000"

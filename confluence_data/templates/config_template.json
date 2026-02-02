@@ -1,0 +1,1 @@
+{"name": "config_template", "description": "Configuration docs", "sections": ["Settings", "Environment"], "rules": {"type": "config"}}

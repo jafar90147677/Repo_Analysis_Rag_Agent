@@ -1,0 +1,1 @@
+{"name": "library_template", "description": "Library/package", "sections": ["API", "Usage"], "rules": {"type": "library"}}

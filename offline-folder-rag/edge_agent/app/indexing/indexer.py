@@ -5,20 +5,96 @@ from __future__ import annotations
 import os
 import threading
 import time
-from typing import Dict
+from pathlib import Path
+from typing import Dict, Tuple
+
+try:
+    from chromadb import Client
+    from chromadb.config import Settings
+except ImportError:  # pragma: no cover - chromadb is optional at runtime
+    Client = None
+    Settings = None
 
 from . import scan_rules
 from .scan_rules import compute_repo_id
 from .manifest_store import ManifestStore
 from .config_store import RepoConfigStore
 from ..logging.logger import logger
+from .index_dir import resolve_index_dir
 
 
 _repo_indexing_state: Dict[str, bool] = {}
 _repo_indexed_files: Dict[str, int] = {}
 _repo_indexing_state_lock = threading.Lock()
 
+
 _config_store = RepoConfigStore()
+
+_chroma_client_cache: Dict[str, object] = {}
+_chroma_collection_cache: Dict[Tuple[str, str], object] = {}
+_chroma_lock = threading.Lock()
+
+def _get_persist_directory(repo_id: str) -> Path:
+    base = resolve_index_dir()
+    persist_dir = base / repo_id
+    persist_dir.mkdir(parents=True, exist_ok=True)
+    return persist_dir
+
+
+def _build_chroma_client(persist_directory: Path | str) -> object:
+    if Client is None or Settings is None:
+        raise RuntimeError("chromadb dependency is missing")
+    key = str(persist_directory)
+    with _chroma_lock:
+        client = _chroma_client_cache.get(key)
+        if client is None:
+            client = Client(
+                Settings(
+                    persist_directory=key,
+                    chroma_db_impl="duckdb+parquet",
+                    anonymized_telemetry=False,
+                )
+            )
+            _chroma_client_cache[key] = client
+        return client
+
+
+def _collection_name(repo_id: str, chunk_type: str) -> str:
+    suffix = "code_chunks" if chunk_type == "code" else "doc_chunks"
+    return f"{repo_id}_{suffix}"
+
+
+def _get_or_create_collection(repo_id: str, chunk_type: str) -> object:
+    persist_dir = _get_persist_directory(repo_id)
+    client = _build_chroma_client(persist_dir)
+    name = _collection_name(repo_id, chunk_type)
+    key = (repo_id, chunk_type)
+    with _chroma_lock:
+        cached = _chroma_collection_cache.get(key)
+        if cached is not None:
+            return cached
+    try:
+        collection = client.get_collection(name)
+    except Exception:
+        collection = client.create_collection(name)
+    with _chroma_lock:
+        _chroma_collection_cache[key] = collection
+    return collection
+
+
+def ensure_repo_collections(repo_id: str) -> dict[str, object]:
+    """Ensure code/doc collections exist for repo_id, reusing existing ones."""
+    return {
+        "code": _get_or_create_collection(repo_id, "code"),
+        "doc": _get_or_create_collection(repo_id, "doc"),
+    }
+
+
+def reset_chroma_state() -> None:
+    """Clear cached chroma clients/collections (used by tests to simulate restart)."""
+    with _chroma_lock:
+        _chroma_client_cache.clear()
+        _chroma_collection_cache.clear()
 
 class _RepoIndexingState:
     """Process-global, repo-keyed state for in-progress indexing."""
@@ -204,6 +280,10 @@ def perform_indexing_scan(root_path: str, repo_id: str) -> dict:
     # Initialize manifest store
     manifest_path = scan_rules.index_dir() / repo_id / "manifest.json"
     manifest = ManifestStore(str(manifest_path))
+    try:
+        ensure_repo_collections(repo_id)
+    except Exception as exc:
+        logger.warning("chroma_init_failed repo_id=%s err=%s", repo_id, exc)
 
     # Use os.walk to traverse the directory tree
     for root, dirs, files in os.walk(root_path):

@@ -28,6 +28,7 @@ from .schemas import (
     DoctorRequest,
     IndexReportRequest,
 )
+from .confluence_routes import router as confluence_router
 
 router = APIRouter(
     dependencies=[Depends(require_token)],
@@ -38,6 +39,7 @@ router = APIRouter(
         500: {"model": ErrorResponse},
     },
 )
+router.include_router(confluence_router)
 
 
 _INDEX_IN_PROGRESS_ERROR = {

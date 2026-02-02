@@ -18,7 +18,7 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'nonce-\${nonce}'; style-src 'unsafe-inline';" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'nonce-${nonce}'; style-src 'unsafe-inline';" />
     <title>Offline Folder RAG</title>
     <style>
         :root {
@@ -281,6 +281,12 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
             justify-content: center;
         }
 
+        #composer-bottom-row button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            border-color: var(--border);
+        }
+
         #composer-bottom-row button:hover,
         #composer-bottom-row button:focus-visible {
             border-color: var(--accent);
@@ -479,11 +485,11 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
                 <label for="composer-input">Message</label>
                 <textarea
                     id="composer-input"
-                    placeholder="\${placeholderText}"
+                    placeholder="${placeholderText}"
                     aria-label="Message input"
                     autocomplete="off"
                 ></textarea>
-                <p class="composer-hint">\${placeholderText}</p>
+                <p class="composer-hint">${placeholderText}</p>
 
                 <div id="context-attachments" class="context-attachments hidden" aria-live="polite"></div>
 
@@ -511,7 +517,7 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
                         </select>
                     </div>
                     <button id="attachment-button" type="button" aria-label="Attach file" title="Attach file">📎</button>
-                    <button id="microphone-button" type="button" aria-label="Record voice" title="Record voice">🎤</button>
+                    <button id="microphone-button" type="button" aria-label="Record voice" title="Not available" disabled>🎤</button>
                 </div>
 
                 <div class="composer-send-row">
@@ -540,7 +546,7 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
         </div>
     </div>
 
-    <script nonce="\${nonce}">
+    <script nonce="${nonce}">
         (function () {
             const vscode = acquireVsCodeApi();
             const composerForm = document.getElementById("composer-form");

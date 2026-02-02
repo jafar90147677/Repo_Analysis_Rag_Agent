@@ -23,3 +23,10 @@ def setup_logger():
     return logger
 
 logger = setup_logger()
+
+
+def get_component_logger(component: str):
+    """Return a logger for the given component (backwards-compatible; same as main logger if component is 'edge_agent')."""
+    if component == "edge_agent":
+        return logger
+    return logging.getLogger(f"edge_agent.{component}")

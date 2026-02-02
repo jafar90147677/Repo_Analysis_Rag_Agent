@@ -34,7 +34,8 @@ export function readRecentFolders(context: vscode.ExtensionContext): string[] {
 
 async function addRecentFolder(context: vscode.ExtensionContext, folder: string): Promise<void> {
     const current = context.globalState.get<string[]>(RECENT_FOLDERS_KEY, []) ?? [];
-    const filtered = current.filter((entry) => entry !== folder);
-    const updated = [folder, ...filtered].slice(0, MAX_RECENT_FOLDERS);
+    const normalizedFolder = normalizeFolder(folder);
+    const filtered = current.filter((entry) => normalizeFolder(entry) !== normalizedFolder);
+    const updated = [normalizedFolder, ...filtered].slice(0, MAX_RECENT_FOLDERS);
     await context.globalState.update(RECENT_FOLDERS_KEY, updated);
 }

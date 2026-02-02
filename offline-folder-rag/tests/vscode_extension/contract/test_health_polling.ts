@@ -1,4 +1,6 @@
 import * as assert from "assert";
+import * as path from "path";
+
 import { startHealthPolling, stopHealthPolling } from "../../../vscode-extension/src/services/agentClient";
 
 describe("Health Polling Contract Test", () => {

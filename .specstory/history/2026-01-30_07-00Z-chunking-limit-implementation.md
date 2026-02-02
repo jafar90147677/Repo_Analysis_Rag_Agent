@@ -4811,3 +4811,20 @@ At C:\Users\FAZLEEN ANEESA\AppData\Local\Temp\ps-script-80235df8-d0a2-407c-a84a-
 
 ---
 
+_**User**_
+
+give me the command to run the npm
+
+---
+
+_**Agent (model gpt-5.1-codex-mini, mode Agent)**_
+
+<think><details><summary>Thought Process</summary>
+**Providing npm run command**</details></think>
+
+---
+
+`npm run <script>`
+
+---
+
