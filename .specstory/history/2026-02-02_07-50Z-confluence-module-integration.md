@@ -636,7 +636,6 @@ If you want, after you paste this into Cursor and it finishes, send me:
 
 _**Agent (model default, mode Agent)**_
 
-
 Scanning the repo for existing paths and creating only missing items.
 
 
@@ -658,149 +657,60 @@ Parameters:
   "targetDirectory": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app"
 }
 ```
-Result:
+Additional data:
 
 ```json
 {
-  "directoryTreeRoot": {
-    "absPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app",
-    "childrenDirs": [
-      {
-        "absPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app\\api",
-        "childrenFiles": [
-          {
-            "name": "__init__.py"
-          },
-          {
-            "name": "routes.py"
-          },
-          {
-            "name": "schemas.py"
-          }
-        ],
-        "childrenWereProcessed": true
-      },
-      {
-        "absPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app\\config",
-        "childrenFiles": [
-          {
-            "name": "__init__.py"
-          },
-          {
-            "name": "defaults.py"
-          }
-        ],
-        "childrenWereProcessed": true
-      },
-      {
-        "absPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app\\indexing",
-        "childrenDirs": [
-          {
-            "absPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app\\indexing\\chunking",
-            "childrenFiles": [
-              {
-                "name": "__init__.py"
-              },
-              {
-                "name": "chunker.py"
-              },
-              {
-                "name": "code_chunker.py"
-              },
-              {
-                "name": "line_chunker.py"
-              },
-              {
-                "name": "markdown_chunker.py"
-              }
-            ],
-            "childrenWereProcessed": true
-          }
-        ],
-        "childrenFiles": [
-          {
-            "name": "__init__.py"
-          },
-          {
-            "name": "config_store.py"
-          },
-          {
-            "name": "index_dir.py"
-          },
-          {
-            "name": "indexer.py"
-          },
-          {
-            "name": "manifest_store.py"
-          },
-          {
-            "name": "scan_rules.py"
-          }
-        ],
-        "childrenWereProcessed": true
-      },
-      {
-        "absPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app\\logging",
-        "childrenFiles": [
-          {
-            "name": "logger.py"
-          }
-        ],
-        "childrenWereProcessed": true
-      },
-      {
-        "absPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app\\retrieval",
-        "childrenFiles": [
-          {
-            "name": "__init__.py"
-          },
-          {
-            "name": "ask.py"
-          }
-        ],
-        "childrenWereProcessed": true
-      },
-      {
-        "absPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app\\security",
-        "childrenFiles": [
-          {
-            "name": "__init__.py"
-          },
-          {
-            "name": "token_guard.py"
-          },
-          {
-            "name": "token_store.py"
-          }
-        ],
-        "childrenWereProcessed": true
-      },
-      {
-        "absPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app\\tools",
-        "childrenFiles": [
-          {
-            "name": "__init__.py"
-          },
-          {
-            "name": "doctor.py"
-          },
-          {
-            "name": "search.py"
-          }
-        ],
-        "childrenWereProcessed": true
-      }
-    ],
-    "childrenFiles": [
-      {
-        "name": "__init__.py"
-      },
-      {
-        "name": "main.py"
-      }
-    ],
-    "childrenWereProcessed": true
-  }
+  "isPruned": true,
+  "rootPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app",
+  "totalDirs": 8,
+  "totalFiles": 27,
+  "topEntries": [
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app\\api",
+      "isDir": true,
+      "numFiles": 0
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app\\config",
+      "isDir": true,
+      "numFiles": 0
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app\\indexing",
+      "isDir": true,
+      "numFiles": 0
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app\\logging",
+      "isDir": true,
+      "numFiles": 0
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app\\retrieval",
+      "isDir": true,
+      "numFiles": 0
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app\\security",
+      "isDir": true,
+      "numFiles": 0
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app\\tools",
+      "isDir": true,
+      "numFiles": 0
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app/__init__.py",
+      "isDir": false
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app/main.py",
+      "isDir": false
+    }
+  ],
+  "extensionCounts": {}
 }
 ```
 Status: **completed**
@@ -841,34 +751,58 @@ Parameters:
   "caseInsensitive": false
 }
 ```
-Result:
+Additional data:
 
 ```json
 {
-  "success": {
-    "pattern": "confluence",
-    "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent",
-    "outputMode": "files_with_matches",
-    "workspaceResults": {
-      "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent": {
-        "files": {
-          "files": [
-            ".\\offline-folder-rag\\vscode-extension\\.venv\\Lib\\site-packages\\unstructured\\nlp\\english-words.txt",
-            ".\\offline-folder-rag\\vscode-extension\\.venv\\Lib\\site-packages\\unstructured_client-0.42.8.dist-info\\RECORD",
-            ".\\offline-folder-rag\\vscode-extension\\.venv\\Lib\\site-packages\\unstructured_client\\models\\shared\\updatesourceconnector.py",
-            ".\\offline-folder-rag\\vscode-extension\\.venv\\Lib\\site-packages\\unstructured_client\\models\\shared\\sourceconnectortype.py",
-            ".\\offline-folder-rag\\vscode-extension\\.venv\\Lib\\site-packages\\unstructured_client\\models\\shared\\sourceconnectorinformation.py",
-            ".\\offline-folder-rag\\vscode-extension\\.venv\\Lib\\site-packages\\unstructured_client\\models\\shared\\createsourceconnector.py",
-            ".\\offline-folder-rag\\vscode-extension\\.venv\\Lib\\site-packages\\unstructured_client\\models\\shared\\__init__.py",
-            ".\\offline-folder-rag\\vscode-extension\\.venv\\Lib\\site-packages\\sympy\\simplify\\tests\\test_hyperexpand.py",
-            ".\\offline-folder-rag\\vscode-extension\\.venv\\Lib\\site-packages\\sympy\\combinatorics\\tests\\test_rewriting.py",
-            ".\\offline-folder-rag\\vscode-extension\\.venv\\Lib\\site-packages\\sympy\\combinatorics\\rewritingsystem.py"
-          ],
-          "totalFiles": 10
-        }
-      }
+  "isPruned": true,
+  "pattern": "confluence",
+  "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent",
+  "outputMode": "files_with_matches",
+  "totalFiles": 10,
+  "totalMatches": 10,
+  "topFiles": [
+    {
+      "uri": ".\\offline-folder-rag\\vscode-extension\\.venv\\Lib\\site-packages\\unstructured\\nlp\\english-words.txt",
+      "matchCount": 1
+    },
+    {
+      "uri": ".\\offline-folder-rag\\vscode-extension\\.venv\\Lib\\site-packages\\unstructured_client-0.42.8.dist-info\\RECORD",
+      "matchCount": 1
+    },
+    {
+      "uri": ".\\offline-folder-rag\\vscode-extension\\.venv\\Lib\\site-packages\\unstructured_client\\models\\shared\\updatesourceconnector.py",
+      "matchCount": 1
+    },
+    {
+      "uri": ".\\offline-folder-rag\\vscode-extension\\.venv\\Lib\\site-packages\\unstructured_client\\models\\shared\\sourceconnectortype.py",
+      "matchCount": 1
+    },
+    {
+      "uri": ".\\offline-folder-rag\\vscode-extension\\.venv\\Lib\\site-packages\\unstructured_client\\models\\shared\\sourceconnectorinformation.py",
+      "matchCount": 1
+    },
+    {
+      "uri": ".\\offline-folder-rag\\vscode-extension\\.venv\\Lib\\site-packages\\unstructured_client\\models\\shared\\createsourceconnector.py",
+      "matchCount": 1
+    },
+    {
+      "uri": ".\\offline-folder-rag\\vscode-extension\\.venv\\Lib\\site-packages\\unstructured_client\\models\\shared\\__init__.py",
+      "matchCount": 1
+    },
+    {
+      "uri": ".\\offline-folder-rag\\vscode-extension\\.venv\\Lib\\site-packages\\sympy\\simplify\\tests\\test_hyperexpand.py",
+      "matchCount": 1
+    },
+    {
+      "uri": ".\\offline-folder-rag\\vscode-extension\\.venv\\Lib\\site-packages\\sympy\\combinatorics\\tests\\test_rewriting.py",
+      "matchCount": 1
+    },
+    {
+      "uri": ".\\offline-folder-rag\\vscode-extension\\.venv\\Lib\\site-packages\\sympy\\combinatorics\\rewritingsystem.py",
+      "matchCount": 1
     }
-  }
+  ]
 }
 ```
 Status: **completed**
@@ -878,8 +812,6 @@ Status: **completed**
 </tool-use>
 
 ---
-
-
 
 
 
@@ -929,22 +861,25 @@ Parameters:
   "targetDirectory": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app\\config"
 }
 ```
-Result:
+Additional data:
 
 ```json
 {
-  "directoryTreeRoot": {
-    "absPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app\\config",
-    "childrenFiles": [
-      {
-        "name": "__init__.py"
-      },
-      {
-        "name": "defaults.py"
-      }
-    ],
-    "childrenWereProcessed": true
-  }
+  "isPruned": true,
+  "rootPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app\\config",
+  "totalDirs": 0,
+  "totalFiles": 2,
+  "topEntries": [
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app\\config/__init__.py",
+      "isDir": false
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app\\config/defaults.py",
+      "isDir": false
+    }
+  ],
+  "extensionCounts": {}
 }
 ```
 Status: **completed**
@@ -997,8 +932,6 @@ Status: **completed**
 
 
 
-
-
 ---
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
@@ -1048,83 +981,41 @@ Parameters:
   "targetDirectory": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\vscode-extension\\src"
 }
 ```
-Result:
+Additional data:
 
 ```json
 {
-  "directoryTreeRoot": {
-    "absPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\vscode-extension\\src",
-    "childrenDirs": [
-      {
-        "absPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\vscode-extension\\src\\commands",
-        "childrenFiles": [
-          {
-            "name": "commandRouter.ts"
-          },
-          {
-            "name": "slashCommands.ts"
-          }
-        ],
-        "childrenWereProcessed": true
-      },
-      {
-        "absPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\vscode-extension\\src\\services",
-        "childrenFiles": [
-          {
-            "name": "agentClient.ts"
-          },
-          {
-            "name": "autoIndexScheduler.ts"
-          },
-          {
-            "name": "indexGate.ts"
-          },
-          {
-            "name": "indexingState.ts"
-          },
-          {
-            "name": "storage.ts"
-          }
-        ],
-        "childrenWereProcessed": true
-      },
-      {
-        "absPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\vscode-extension\\src\\utils",
-        "childrenFiles": [
-          {
-            "name": "pathNormalize.ts"
-          }
-        ],
-        "childrenWereProcessed": true
-      },
-      {
-        "absPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\vscode-extension\\src\\webview",
-        "childrenDirs": [
-          {
-            "absPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\vscode-extension\\src\\webview\\ui",
-            "childrenFiles": [
-              {
-                "name": "chatPanelHtml.ts"
-              }
-            ],
-            "childrenWereProcessed": true
-          }
-        ],
-        "childrenFiles": [
-          {
-            "name": "ChatPanelViewProvider.ts"
-          }
-        ],
-        "childrenWereProcessed": true
-      }
-    ],
-    "childrenFiles": [
-      {
-        "name": "extension.ts"
-      }
-    ],
-    "childrenWereProcessed": true
-  }
+  "isPruned": true,
+  "rootPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\vscode-extension\\src",
+  "totalDirs": 5,
+  "totalFiles": 11,
+  "topEntries": [
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\vscode-extension\\src\\commands",
+      "isDir": true,
+      "numFiles": 0
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\vscode-extension\\src\\services",
+      "isDir": true,
+      "numFiles": 0
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\vscode-extension\\src\\utils",
+      "isDir": true,
+      "numFiles": 0
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\vscode-extension\\src\\webview",
+      "isDir": true,
+      "numFiles": 0
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\vscode-extension\\src/extension.ts",
+      "isDir": false
+    }
+  ],
+  "extensionCounts": {}
 }
 ```
 Status: **completed**
@@ -1160,8 +1051,6 @@ Directory: **c:\Users\FAZLEEN ANEESA\Desktop\Rag_Agent\Repo_Analysis_Rag_Agent\o
 
 
 
-
-
 ---
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
@@ -1192,49 +1081,22 @@ Parameters:
   "targetDirectory": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\tests"
 }
 ```
-Result:
+Additional data:
 
 ```json
 {
-  "directoryTreeRoot": {
-    "absPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\tests",
-    "childrenDirs": [
-      {
-        "absPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\tests\\edge_agent",
-        "childrenDirs": [
-          {
-            "absPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\tests\\edge_agent\\integration",
-            "childrenFiles": [
-              {
-                "name": "test_incremental_cap_e2e.py"
-              },
-              {
-                "name": "test_index_response_cap.py"
-              }
-            ],
-            "childrenWereProcessed": true
-          },
-          {
-            "absPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\tests\\edge_agent\\unit",
-            "childrenFiles": [
-              {
-                "name": "test_config_store_validation.py"
-              },
-              {
-                "name": "test_incremental_cap.py"
-              },
-              {
-                "name": "test_manifest_skip_reason.py"
-              }
-            ],
-            "childrenWereProcessed": true
-          }
-        ],
-        "childrenWereProcessed": true
-      }
-    ],
-    "childrenWereProcessed": true
-  }
+  "isPruned": true,
+  "rootPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\tests",
+  "totalDirs": 3,
+  "totalFiles": 5,
+  "topEntries": [
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\tests\\edge_agent",
+      "isDir": true,
+      "numFiles": 0
+    }
+  ],
+  "extensionCounts": {}
 }
 ```
 Status: **completed**
@@ -1257,148 +1119,193 @@ Parameters:
   "targetDirectory": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests\\unittest_cases"
 }
 ```
-Result:
+Additional data:
 
 ```json
 {
-  "directoryTreeRoot": {
-    "absPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests\\unittest_cases",
-    "childrenFiles": [
-      {
-        "name": "test_auto_index_scheduler.py"
-      },
-      {
-        "name": "test_chunker_code_routing.py"
-      },
-      {
-        "name": "test_chunker_fallback_routing.py"
-      },
-      {
-        "name": "test_chunker_limit.py"
-      },
-      {
-        "name": "test_chunker_markdown_routing.py"
-      },
-      {
-        "name": "test_chunker_metadata_propagation.py"
-      },
-      {
-        "name": "test_chunker_strategy_exclusivity.py"
-      },
-      {
-        "name": "test_chunking_rules.py"
-      },
-      {
-        "name": "test_citation_logging.py"
-      },
-      {
-        "name": "test_classification.py"
-      },
-      {
-        "name": "test_code_block_chunk_splitting.py"
-      },
-      {
-        "name": "test_code_boundary_detection.py"
-      },
-      {
-        "name": "test_code_brace_bounding.py"
-      },
-      {
-        "name": "test_code_fallback_line_chunking.py"
-      },
-      {
-        "name": "test_code_python_indentation_bounding.py"
-      },
-      {
-        "name": "test_config_load.py"
-      },
-      {
-        "name": "test_index_dir_resolution.py"
-      },
-      {
-        "name": "test_index_success_response.py"
-      },
-      {
-        "name": "test_index_token_enforcement.py"
-      },
-      {
-        "name": "test_indexer_state.py"
-      },
-      {
-        "name": "test_logger_extra.py"
-      },
-      {
-        "name": "test_main_extra.py"
-      },
-      {
-        "name": "test_manifest_entry_schema.py"
-      },
-      {
-        "name": "test_manifest_indexed_entry.py"
-      },
-      {
-        "name": "test_manifest_persistence.py"
-      },
-      {
-        "name": "test_manifest_size_cap_serialization.py"
-      },
-      {
-        "name": "test_manifest_size_cap.py"
-      },
-      {
-        "name": "test_manifest_skipped_entry.py"
-      },
-      {
-        "name": "test_markdown_heading_detection.py"
-      },
-      {
-        "name": "test_markdown_section_chunking.py"
-      },
-      {
-        "name": "test_markdown_section_line_count.py"
-      },
-      {
-        "name": "test_markdown_small_section.py"
-      },
-      {
-        "name": "test_markdown_spawns_markdown_chunker.py"
-      },
-      {
-        "name": "test_path_normalize_repo_id_legacy.py"
-      },
-      {
-        "name": "test_scan_skip_rules_standalone.py"
-      },
-      {
-        "name": "test_scan_skip_rules_unittest.py"
-      },
-      {
-        "name": "test_search_execution.py"
-      },
-      {
-        "name": "test_search_query_builder.py"
-      },
-      {
-        "name": "test_search_ranking_timeout.py"
-      },
-      {
-        "name": "test_search_ranking.py"
-      },
-      {
-        "name": "test_size_and_encoding.py"
-      },
-      {
-        "name": "test_token_enforcement.py"
-      },
-      {
-        "name": "test_token_logging.py"
-      },
-      {
-        "name": "test_token_store_extra.py"
-      }
-    ],
-    "childrenWereProcessed": true
-  }
+  "isPruned": true,
+  "rootPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests\\unittest_cases",
+  "totalDirs": 0,
+  "totalFiles": 44,
+  "topEntries": [
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests\\unittest_cases/test_auto_index_scheduler.py",
+      "isDir": false
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests\\unittest_cases/test_chunker_code_routing.py",
+      "isDir": false
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests\\unittest_cases/test_chunker_fallback_routing.py",
+      "isDir": false
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests\\unittest_cases/test_chunker_limit.py",
+      "isDir": false
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests\\unittest_cases/test_chunker_markdown_routing.py",
+      "isDir": false
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests\\unittest_cases/test_chunker_metadata_propagation.py",
+      "isDir": false
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests\\unittest_cases/test_chunker_strategy_exclusivity.py",
+      "isDir": false
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests\\unittest_cases/test_chunking_rules.py",
+      "isDir": false
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests\\unittest_cases/test_citation_logging.py",
+      "isDir": false
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests\\unittest_cases/test_classification.py",
+      "isDir": false
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests\\unittest_cases/test_code_block_chunk_splitting.py",
+      "isDir": false
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests\\unittest_cases/test_code_boundary_detection.py",
+      "isDir": false
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests\\unittest_cases/test_code_brace_bounding.py",
+      "isDir": false
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests\\unittest_cases/test_code_fallback_line_chunking.py",
+      "isDir": false
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests\\unittest_cases/test_code_python_indentation_bounding.py",
+      "isDir": false
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests\\unittest_cases/test_config_load.py",
+      "isDir": false
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests\\unittest_cases/test_index_dir_resolution.py",
+      "isDir": false
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests\\unittest_cases/test_index_success_response.py",
+      "isDir": false
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests\\unittest_cases/test_index_token_enforcement.py",
+      "isDir": false
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests\\unittest_cases/test_indexer_state.py",
+      "isDir": false
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests\\unittest_cases/test_logger_extra.py",
+      "isDir": false
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests\\unittest_cases/test_main_extra.py",
+      "isDir": false
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests\\unittest_cases/test_manifest_entry_schema.py",
+      "isDir": false
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests\\unittest_cases/test_manifest_indexed_entry.py",
+      "isDir": false
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests\\unittest_cases/test_manifest_persistence.py",
+      "isDir": false
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests\\unittest_cases/test_manifest_size_cap_serialization.py",
+      "isDir": false
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests\\unittest_cases/test_manifest_size_cap.py",
+      "isDir": false
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests\\unittest_cases/test_manifest_skipped_entry.py",
+      "isDir": false
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests\\unittest_cases/test_markdown_heading_detection.py",
+      "isDir": false
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests\\unittest_cases/test_markdown_section_chunking.py",
+      "isDir": false
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests\\unittest_cases/test_markdown_section_line_count.py",
+      "isDir": false
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests\\unittest_cases/test_markdown_small_section.py",
+      "isDir": false
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests\\unittest_cases/test_markdown_spawns_markdown_chunker.py",
+      "isDir": false
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests\\unittest_cases/test_path_normalize_repo_id_legacy.py",
+      "isDir": false
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests\\unittest_cases/test_scan_skip_rules_standalone.py",
+      "isDir": false
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests\\unittest_cases/test_scan_skip_rules_unittest.py",
+      "isDir": false
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests\\unittest_cases/test_search_execution.py",
+      "isDir": false
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests\\unittest_cases/test_search_query_builder.py",
+      "isDir": false
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests\\unittest_cases/test_search_ranking_timeout.py",
+      "isDir": false
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests\\unittest_cases/test_search_ranking.py",
+      "isDir": false
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests\\unittest_cases/test_size_and_encoding.py",
+      "isDir": false
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests\\unittest_cases/test_token_enforcement.py",
+      "isDir": false
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests\\unittest_cases/test_token_logging.py",
+      "isDir": false
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests\\unittest_cases/test_token_store_extra.py",
+      "isDir": false
+    }
+  ],
+  "extensionCounts": {}
 }
 ```
 Status: **completed**
@@ -1408,7 +1315,6 @@ Status: **completed**
 </tool-use>
 
 ---
-
 
 Creating the task list and implementing step by step.
 
@@ -1436,7 +1342,6 @@ Creating the task list and implementing step by step.
 
 ---
 
-
 Creating missing directories by adding initial files:
 
 
@@ -1459,8 +1364,6 @@ Creating missing directories by adding initial files:
 </tool-use>
 
 ---
-
-
 
 
 
@@ -1499,8 +1402,6 @@ Creating missing directories by adding initial files:
 
 
 
-
-
 ---
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2">
@@ -1535,15 +1436,11 @@ Creating missing directories by adding initial files:
 
 
 
-
-
 ---
 
 Incorrect tool arguments
 
 ---
-
-
 
 
 
@@ -1559,8 +1456,6 @@ Incorrect tool arguments
 
 
 
-
-
 ---
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2">
@@ -1572,7 +1467,6 @@ Incorrect tool arguments
 </tool-use>
 
 ---
-
 
 Including the confluence router in `routes.py` (no change to `main.py` if we mount it on the api router).
 
@@ -1608,7 +1502,6 @@ Including the confluence router in `routes.py` (no change to `main.py` if we mou
 </tool-use>
 
 ---
-
 
 Creating the confluence core module: client, formatter, templates, page_tracker, space_manager, state_machine, utils.
 
@@ -1695,7 +1588,6 @@ Creating the confluence core module: client, formatter, templates, page_tracker,
 
 ---
 
-
 Using workspace root for `confluence_data`: templates, page_tracker, and space_manager use `parents[3]` (offline-folder-rag). Checking where `confluence_data` should live:
 
 
@@ -1730,8 +1622,6 @@ Using workspace root for `confluence_data`: templates, page_tracker, and space_m
 </tool-use>
 
 ---
-
-
 
 
 
@@ -1840,8 +1730,6 @@ Using workspace root for `confluence_data`: templates, page_tracker, and space_m
 
 
 
-
-
 ---
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2">
@@ -1906,8 +1794,6 @@ Using workspace root for `confluence_data`: templates, page_tracker, and space_m
 
 
 
-
-
 ---
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2">
@@ -1939,8 +1825,6 @@ Using workspace root for `confluence_data`: templates, page_tracker, and space_m
 </tool-use>
 
 ---
-
-
 
 
 
@@ -1977,7 +1861,6 @@ Using workspace root for `confluence_data`: templates, page_tracker, and space_m
 
 ---
 
-
 Creating scripts and data files:
 
 
@@ -2013,7 +1896,6 @@ Creating scripts and data files:
 
 ---
 
-
 Using workspace root for confluence_data so scripts and edge_agent match. Updating scripts to use parents[2].
 
 
@@ -2048,7 +1930,6 @@ Using workspace root for confluence_data so scripts and edge_agent match. Updati
 </tool-use>
 
 ---
-
 
 Creating data files at the workspace root (confluence_data):
 
@@ -2187,8 +2068,6 @@ Creating data files at the workspace root (confluence_data):
 
 
 
-
-
 ---
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2">
@@ -2239,8 +2118,6 @@ Creating data files at the workspace root (confluence_data):
 
 
 
-
-
 ---
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2">
@@ -2282,8 +2159,6 @@ Creating data files at the workspace root (confluence_data):
 </tool-use>
 
 ---
-
-
 
 
 
@@ -2359,7 +2234,6 @@ Creating data files at the workspace root (confluence_data):
 
 ---
 
-
 Creating tests and fixing confluence_routes: the router is mounted on the main api router, so remove the duplicate `/confluence` prefix so paths stay correct.
 
 
@@ -2383,8 +2257,6 @@ Creating tests and fixing confluence_routes: the router is mounted on the main a
 
 
 
-
-
 ---
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2">
@@ -2399,8 +2271,6 @@ Creating tests and fixing confluence_routes: the router is mounted on the main a
 
 
 
-
-
 ---
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2">
@@ -2412,8 +2282,6 @@ Creating tests and fixing confluence_routes: the router is mounted on the main a
 </tool-use>
 
 ---
-
-
 
 
 
@@ -2471,8 +2339,6 @@ Creating tests and fixing confluence_routes: the router is mounted on the main a
 
 
 
-
-
 ---
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2">
@@ -2515,7 +2381,6 @@ Creating tests and fixing confluence_routes: the router is mounted on the main a
 </tool-use>
 
 ---
-
 
 Adding VS Code extension Confluence files as plain TypeScript (no React):
 
@@ -2614,8 +2479,6 @@ Adding VS Code extension Confluence files as plain TypeScript (no React):
 
 
 
-
-
 ---
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2">
@@ -2650,8 +2513,6 @@ Adding VS Code extension Confluence files as plain TypeScript (no React):
 
 
 
-
-
 ---
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2">
@@ -2676,8 +2537,6 @@ Adding VS Code extension Confluence files as plain TypeScript (no React):
 
 
 
-
-
 ---
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2">
@@ -2689,7 +2548,6 @@ Adding VS Code extension Confluence files as plain TypeScript (no React):
 </tool-use>
 
 ---
-
 
 Running verification: fixing config path (confluence_config is under edge_agent/app/config, so parents[4] = repo root).
 
@@ -2739,8 +2597,6 @@ The token '&amp;&amp;' is not a valid statement separator in this version.
 </tool-use>
 
 ---
-
-
 
 
 
@@ -2801,8 +2657,6 @@ offline-folder-rag/unittests/unittest_cases/confluence_unittests/test_confluence
 
 
 
-
-
 ---
 
 <tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
@@ -2823,8 +2677,6 @@ cd "c:\Users\FAZLEEN ANEESA\Desktop\Rag_Agent\Repo_Analysis_Rag_Agent"; python -
 </tool-use>
 
 ---
-
-
 
 
 
@@ -2850,7 +2702,6 @@ cd "c:\Users\FAZLEEN ANEESA\Desktop\Rag_Agent\Repo_Analysis_Rag_Agent"; python -
 </tool-use>
 
 ---
-
 
 **Changed files list**
 
@@ -2944,8 +2795,6 @@ _**Agent (model default, mode Agent)**_
 
 
 
-
-
 ---
 
 Cancelled
@@ -2964,257 +2813,80 @@ Parameters:
   "targetDirectory": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app"
 }
 ```
-Result:
+Additional data:
 
 ```json
 {
-  "directoryTreeRoot": {
-    "absPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app",
-    "childrenDirs": [
-      {
-        "absPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app\\agents",
-        "childrenFiles": [
-          {
-            "name": "__init__.py"
-          },
-          {
-            "name": "analytics_agent.py"
-          },
-          {
-            "name": "content_analysis_agent.py"
-          },
-          {
-            "name": "feedback_processor.py"
-          },
-          {
-            "name": "formatting_agent.py"
-          },
-          {
-            "name": "integration_agent.py"
-          },
-          {
-            "name": "learning_agent.py"
-          },
-          {
-            "name": "pattern_matching_agent.py"
-          }
-        ],
-        "childrenWereProcessed": true
-      },
-      {
-        "absPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app\\analytics",
-        "childrenFiles": [
-          {
-            "name": "__init__.py"
-          },
-          {
-            "name": "analytics_dashboard.py"
-          }
-        ],
-        "childrenWereProcessed": true
-      },
-      {
-        "absPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app\\api",
-        "childrenFiles": [
-          {
-            "name": "__init__.py"
-          },
-          {
-            "name": "confluence_routes.py"
-          },
-          {
-            "name": "routes.py"
-          },
-          {
-            "name": "schemas.py"
-          }
-        ],
-        "childrenWereProcessed": true
-      },
-      {
-        "absPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app\\config",
-        "childrenFiles": [
-          {
-            "name": "__init__.py"
-          },
-          {
-            "name": "config.py"
-          },
-          {
-            "name": "confluence_config.py"
-          },
-          {
-            "name": "defaults.py"
-          }
-        ],
-        "childrenWereProcessed": true
-      },
-      {
-        "absPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app\\confluence",
-        "childrenFiles": [
-          {
-            "name": "__init__.py"
-          },
-          {
-            "name": "client.py"
-          },
-          {
-            "name": "formatter.py"
-          },
-          {
-            "name": "page_tracker.py"
-          },
-          {
-            "name": "space_manager.py"
-          },
-          {
-            "name": "state_machine.py"
-          },
-          {
-            "name": "templates.py"
-          },
-          {
-            "name": "utils.py"
-          }
-        ],
-        "childrenWereProcessed": true
-      },
-      {
-        "absPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app\\indexing",
-        "childrenDirs": [
-          {
-            "absPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app\\indexing\\chunking",
-            "childrenFiles": [
-              {
-                "name": "__init__.py"
-              },
-              {
-                "name": "chunker.py"
-              },
-              {
-                "name": "code_chunker.py"
-              },
-              {
-                "name": "line_chunker.py"
-              },
-              {
-                "name": "markdown_chunker.py"
-              }
-            ],
-            "childrenWereProcessed": true
-          }
-        ],
-        "childrenFiles": [
-          {
-            "name": "__init__.py"
-          },
-          {
-            "name": "config_store.py"
-          },
-          {
-            "name": "index_dir.py"
-          },
-          {
-            "name": "indexer.py"
-          },
-          {
-            "name": "manifest_store.py"
-          },
-          {
-            "name": "scan_rules.py"
-          }
-        ],
-        "childrenWereProcessed": true
-      },
-      {
-        "absPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app\\logging",
-        "childrenFiles": [
-          {
-            "name": "confluence_logger.py"
-          },
-          {
-            "name": "logger.py"
-          }
-        ],
-        "childrenWereProcessed": true
-      },
-      {
-        "absPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app\\mcp_server",
-        "childrenFiles": [
-          {
-            "name": "__init__.py"
-          },
-          {
-            "name": "confluence_tasks.py"
-          },
-          {
-            "name": "health_monitor.py"
-          },
-          {
-            "name": "orchestrator.py"
-          },
-          {
-            "name": "state_tracker.py"
-          },
-          {
-            "name": "task_queue.py"
-          }
-        ],
-        "childrenWereProcessed": true
-      },
-      {
-        "absPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app\\retrieval",
-        "childrenFiles": [
-          {
-            "name": "__init__.py"
-          },
-          {
-            "name": "ask.py"
-          }
-        ],
-        "childrenWereProcessed": true
-      },
-      {
-        "absPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app\\security",
-        "childrenFiles": [
-          {
-            "name": "__init__.py"
-          },
-          {
-            "name": "token_guard.py"
-          },
-          {
-            "name": "token_store.py"
-          }
-        ],
-        "childrenWereProcessed": true
-      },
-      {
-        "absPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app\\tools",
-        "childrenFiles": [
-          {
-            "name": "__init__.py"
-          },
-          {
-            "name": "doctor.py"
-          },
-          {
-            "name": "search.py"
-          }
-        ],
-        "childrenWereProcessed": true
-      }
-    ],
-    "childrenFiles": [
-      {
-        "name": "__init__.py"
-      },
-      {
-        "name": "main.py"
-      }
-    ],
-    "childrenWereProcessed": true
-  }
+  "isPruned": true,
+  "rootPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app",
+  "totalDirs": 12,
+  "totalFiles": 55,
+  "topEntries": [
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app\\agents",
+      "isDir": true,
+      "numFiles": 0
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app\\analytics",
+      "isDir": true,
+      "numFiles": 0
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app\\api",
+      "isDir": true,
+      "numFiles": 0
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app\\config",
+      "isDir": true,
+      "numFiles": 0
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app\\confluence",
+      "isDir": true,
+      "numFiles": 0
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app\\indexing",
+      "isDir": true,
+      "numFiles": 0
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app\\logging",
+      "isDir": true,
+      "numFiles": 0
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app\\mcp_server",
+      "isDir": true,
+      "numFiles": 0
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app\\retrieval",
+      "isDir": true,
+      "numFiles": 0
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app\\security",
+      "isDir": true,
+      "numFiles": 0
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app\\tools",
+      "isDir": true,
+      "numFiles": 0
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app/__init__.py",
+      "isDir": false
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\edge_agent\\app/main.py",
+      "isDir": false
+    }
+  ],
+  "extensionCounts": {}
 }
 ```
 Status: **completed**
@@ -3237,85 +2909,32 @@ Parameters:
   "targetDirectory": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\confluence_data"
 }
 ```
-Result:
+Additional data:
 
 ```json
 {
-  "directoryTreeRoot": {
-    "absPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\confluence_data",
-    "childrenDirs": [
-      {
-        "absPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\confluence_data\\config",
-        "childrenFiles": [
-          {
-            "name": "default_config.json"
-          },
-          {
-            "name": "rate_limits.json"
-          },
-          {
-            "name": "spaces_config.json"
-          }
-        ],
-        "childrenWereProcessed": true
-      },
-      {
-        "absPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\confluence_data\\examples",
-        "childrenDirs": [
-          {
-            "absPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\confluence_data\\examples\\successful_creations",
-            "childrenFiles": [
-              {
-                "name": "example_001.json"
-              }
-            ],
-            "childrenWereProcessed": true
-          },
-          {
-            "absPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\confluence_data\\examples\\vector_embeddings",
-            "childrenFiles": [
-              {
-                "name": "example_embeddings.index"
-              },
-              {
-                "name": "template_embeddings.index"
-              }
-            ],
-            "childrenWereProcessed": true
-          }
-        ],
-        "childrenWereProcessed": true
-      },
-      {
-        "absPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\confluence_data\\templates",
-        "childrenFiles": [
-          {
-            "name": "config_template.json"
-          },
-          {
-            "name": "database_template.json"
-          },
-          {
-            "name": "library_template.json"
-          },
-          {
-            "name": "mixed_project_template.json"
-          },
-          {
-            "name": "python_api_template.json"
-          },
-          {
-            "name": "testing_template.json"
-          },
-          {
-            "name": "web_app_template.json"
-          }
-        ],
-        "childrenWereProcessed": true
-      }
-    ],
-    "childrenWereProcessed": true
-  }
+  "isPruned": true,
+  "rootPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\confluence_data",
+  "totalDirs": 5,
+  "totalFiles": 13,
+  "topEntries": [
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\confluence_data\\config",
+      "isDir": true,
+      "numFiles": 0
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\confluence_data\\examples",
+      "isDir": true,
+      "numFiles": 0
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\confluence_data\\templates",
+      "isDir": true,
+      "numFiles": 0
+    }
+  ],
+  "extensionCounts": {}
 }
 ```
 Status: **completed**
@@ -3338,73 +2957,27 @@ Parameters:
   "targetDirectory": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\tests"
 }
 ```
-Result:
+Additional data:
 
 ```json
 {
-  "directoryTreeRoot": {
-    "absPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\tests",
-    "childrenDirs": [
-      {
-        "absPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\tests\\confluence",
-        "childrenFiles": [
-          {
-            "name": "test_api_router.py"
-          },
-          {
-            "name": "test_client_auth.py"
-          },
-          {
-            "name": "test_imports.py"
-          },
-          {
-            "name": "test_page_tracker.py"
-          },
-          {
-            "name": "test_state_machine.py"
-          },
-          {
-            "name": "test_templates.py"
-          }
-        ],
-        "childrenWereProcessed": true
-      },
-      {
-        "absPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\tests\\edge_agent",
-        "childrenDirs": [
-          {
-            "absPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\tests\\edge_agent\\integration",
-            "childrenFiles": [
-              {
-                "name": "test_incremental_cap_e2e.py"
-              },
-              {
-                "name": "test_index_response_cap.py"
-              }
-            ],
-            "childrenWereProcessed": true
-          },
-          {
-            "absPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\tests\\edge_agent\\unit",
-            "childrenFiles": [
-              {
-                "name": "test_config_store_validation.py"
-              },
-              {
-                "name": "test_incremental_cap.py"
-              },
-              {
-                "name": "test_manifest_skip_reason.py"
-              }
-            ],
-            "childrenWereProcessed": true
-          }
-        ],
-        "childrenWereProcessed": true
-      }
-    ],
-    "childrenWereProcessed": true
-  }
+  "isPruned": true,
+  "rootPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\tests",
+  "totalDirs": 4,
+  "totalFiles": 11,
+  "topEntries": [
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\tests\\confluence",
+      "isDir": true,
+      "numFiles": 0
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\tests\\edge_agent",
+      "isDir": true,
+      "numFiles": 0
+    }
+  ],
+  "extensionCounts": {}
 }
 ```
 Status: **completed**
@@ -3427,255 +3000,27 @@ Parameters:
   "targetDirectory": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests"
 }
 ```
-Result:
+Additional data:
 
 ```json
 {
-  "directoryTreeRoot": {
-    "absPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests",
-    "childrenDirs": [
-      {
-        "absPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests\\functionaltestcases",
-        "childrenFiles": [
-          {
-            "name": "agent_core_functional_tests.csv"
-          },
-          {
-            "name": "ask_endpoint_json.e2e.test.ts"
-          },
-          {
-            "name": "doctor_endpoint_json.e2e.test.ts"
-          },
-          {
-            "name": "index_report_endpoint_json.e2e.test.ts"
-          },
-          {
-            "name": "overview_endpoint_json.e2e.test.ts"
-          },
-          {
-            "name": "search_endpoint_json.e2e.test.ts"
-          },
-          {
-            "name": "test_agent_auth.py"
-          },
-          {
-            "name": "test_ask_endpoint_json.py"
-          },
-          {
-            "name": "test_chunk_metadata_integrity_flow.py"
-          },
-          {
-            "name": "test_code_chunking_flow.py"
-          },
-          {
-            "name": "test_code_file_chunking_flow.py"
-          },
-          {
-            "name": "test_csv_matrix.py"
-          },
-          {
-            "name": "test_doctor_endpoint_json.py"
-          },
-          {
-            "name": "test_exclusion_rules.py"
-          },
-          {
-            "name": "test_fallback_file_chunking_flow.py"
-          },
-          {
-            "name": "test_index_persistence_restart.py"
-          },
-          {
-            "name": "test_index_report_endpoint_json.py"
-          },
-          {
-            "name": "test_local_dropdown_selection_and_cancel.py"
-          },
-          {
-            "name": "test_local_dropdown_selection_and_cancel.ts"
-          },
-          {
-            "name": "test_manifest_tracking_flow.py"
-          },
-          {
-            "name": "test_markdown_file_chunking_flow.py"
-          },
-          {
-            "name": "test_microphone_icon_disabled_state.py"
-          },
-          {
-            "name": "test_microphone_icon_disabled_state.ts"
-          },
-          {
-            "name": "test_overview_endpoint_json.py"
-          },
-          {
-            "name": "test_root_path_boundary.py"
-          },
-          {
-            "name": "test_search_endpoint_json.py"
-          },
-          {
-            "name": "test_single_strategy_per_file_flow.py"
-          }
-        ],
-        "childrenWereProcessed": true
-      },
-      {
-        "absPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests\\unittest_cases",
-        "childrenDirs": [
-          {
-            "absPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests\\unittest_cases\\confluence_unittests",
-            "childrenFiles": [
-              {
-                "name": "__init__.py"
-              },
-              {
-                "name": "test_confluence_formatter.py"
-              }
-            ],
-            "childrenWereProcessed": true
-          }
-        ],
-        "childrenFiles": [
-          {
-            "name": "test_auto_index_scheduler.py"
-          },
-          {
-            "name": "test_chunker_code_routing.py"
-          },
-          {
-            "name": "test_chunker_fallback_routing.py"
-          },
-          {
-            "name": "test_chunker_limit.py"
-          },
-          {
-            "name": "test_chunker_markdown_routing.py"
-          },
-          {
-            "name": "test_chunker_metadata_propagation.py"
-          },
-          {
-            "name": "test_chunker_strategy_exclusivity.py"
-          },
-          {
-            "name": "test_chunking_rules.py"
-          },
-          {
-            "name": "test_citation_logging.py"
-          },
-          {
-            "name": "test_classification.py"
-          },
-          {
-            "name": "test_code_block_chunk_splitting.py"
-          },
-          {
-            "name": "test_code_boundary_detection.py"
-          },
-          {
-            "name": "test_code_brace_bounding.py"
-          },
-          {
-            "name": "test_code_fallback_line_chunking.py"
-          },
-          {
-            "name": "test_code_python_indentation_bounding.py"
-          },
-          {
-            "name": "test_config_load.py"
-          },
-          {
-            "name": "test_index_dir_resolution.py"
-          },
-          {
-            "name": "test_index_success_response.py"
-          },
-          {
-            "name": "test_index_token_enforcement.py"
-          },
-          {
-            "name": "test_indexer_state.py"
-          },
-          {
-            "name": "test_logger_extra.py"
-          },
-          {
-            "name": "test_main_extra.py"
-          },
-          {
-            "name": "test_manifest_entry_schema.py"
-          },
-          {
-            "name": "test_manifest_indexed_entry.py"
-          },
-          {
-            "name": "test_manifest_persistence.py"
-          },
-          {
-            "name": "test_manifest_size_cap_serialization.py"
-          },
-          {
-            "name": "test_manifest_size_cap.py"
-          },
-          {
-            "name": "test_manifest_skipped_entry.py"
-          },
-          {
-            "name": "test_markdown_heading_detection.py"
-          },
-          {
-            "name": "test_markdown_section_chunking.py"
-          },
-          {
-            "name": "test_markdown_section_line_count.py"
-          },
-          {
-            "name": "test_markdown_small_section.py"
-          },
-          {
-            "name": "test_markdown_spawns_markdown_chunker.py"
-          },
-          {
-            "name": "test_path_normalize_repo_id_legacy.py"
-          },
-          {
-            "name": "test_scan_skip_rules_standalone.py"
-          },
-          {
-            "name": "test_scan_skip_rules_unittest.py"
-          },
-          {
-            "name": "test_search_execution.py"
-          },
-          {
-            "name": "test_search_query_builder.py"
-          },
-          {
-            "name": "test_search_ranking_timeout.py"
-          },
-          {
-            "name": "test_search_ranking.py"
-          },
-          {
-            "name": "test_size_and_encoding.py"
-          },
-          {
-            "name": "test_token_enforcement.py"
-          },
-          {
-            "name": "test_token_logging.py"
-          },
-          {
-            "name": "test_token_store_extra.py"
-          }
-        ],
-        "childrenWereProcessed": true
-      }
-    ],
-    "childrenWereProcessed": true
-  }
+  "isPruned": true,
+  "rootPath": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests",
+  "totalDirs": 3,
+  "totalFiles": 73,
+  "topEntries": [
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests\\functionaltestcases",
+      "isDir": true,
+      "numFiles": 0
+    },
+    {
+      "path": "c:\\Users\\FAZLEEN ANEESA\\Desktop\\Rag_Agent\\Repo_Analysis_Rag_Agent\\offline-folder-rag\\unittests\\unittest_cases",
+      "isDir": true,
+      "numFiles": 0
+    }
+  ],
+  "extensionCounts": {}
 }
 ```
 Status: **completed**
@@ -3685,7 +3030,6 @@ Status: **completed**
 </tool-use>
 
 ---
-
 
 **Repo snapshot — Repo_Analysis_Rag_Agent**
 
@@ -3792,7 +3136,6 @@ now i want to git push the above implemted on in the branch
 
 _**Agent (model default, mode Agent)**_
 
-
 I'm in **Ask mode**, so I can't run git commands for you. Here are the steps and commands you can run yourself.
 
 **1. See what’s changed**
@@ -3874,7 +3217,6 @@ _**User**_
 
 _**Agent (model default, mode Agent)**_
 
-
 **What went wrong**
 
 GitHub **rejected the push** because a file in your repo is over its **100 MB limit**:
@@ -3940,7 +3282,6 @@ _**User**_
 ---
 
 _**Agent (model default, mode Agent)**_
-
 
 ## Root cause
 
@@ -4051,8 +3392,6 @@ _**Agent (model default, mode Agent)**_
 
 
 
-
-
 ---
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
@@ -4062,7 +3401,6 @@ _**Agent (model default, mode Agent)**_
 </tool-use>
 
 ---
-
 
 Fixing .gitignore (removing leading spaces on .venv lines) and removing .venv from git tracking.
 
@@ -4078,7 +3416,6 @@ Fixing .gitignore (removing leading spaces on .venv lines) and removing .venv fr
 </tool-use>
 
 ---
-
 
 Removing `.venv` from git tracking and fixing history. Checking git status and recent commits:
 
@@ -4114,13 +3451,122 @@ d021341 merge conflict
 
 ---
 
-
 Checking whether `.venv` is in the last commit:
 
 
 ---
 
 Cancelled
+
+---
+
+_**User**_
+
+git push
+
+(.venv) PS C:\Users\FAZLEEN ANEESA\Desktop\Rag_Agent\Repo_Analysis_Rag_Agent> git push
+Enumerating objects: 11959, done.
+Counting objects: 100% (11959/11959), done.
+Delta compression using up to 18 threads
+Compressing objects: 100% (9983/9983), done.
+Writing objects: 100% (11908/11908), 79.37 MiB | 4.29 MiB/s, done.
+Total 11908 (delta 1656), reused 11877 (delta 1631), pack-reused 0 (from 0)
+remote: Resolving deltas: 100% (1656/1656), completed with 26 local objects.
+remote: error: Trace: 89e0e59e1833894937e97276dc87184fca92871fa5b1579ca5b9b5cb60df18db       
+remote: error: See https://gh.io/lfs for more information.
+remote: error: File offline-folder-rag/vscode-extension/.venv/Lib/site-packages/llvmlite/binding/llvmlite.dll is 101.66 MB; this exceeds GitHub's file size limit of 100.00 MB            
+remote: error: GH001: Large files detected. You may want to try Git Large File Storage - https://git-lfs.github.com.                                                                      
+To https://github.com/jafar90147677/Repo_Analysis_Rag_Agent.git
+ ! [remote rejected] Confluence-MCP -> Confluence-MCP (pre-receive hook declined)
+error: failed to push some refs to 'https://github.com/jafar90147677/Repo_Analysis_Rag_Agent.git'  
+
+findout root cause and fix it                                                                                       
+
+---
+
+_**Agent (model default, mode Agent)**_
+
+
+Removing `.venv` from the branch history — it's still present in past commits, so the push fails. Rewriting history to remove it.
+
+
+---
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd "c:\Users\FAZLEEN ANEESA\Desktop\Rag_Agent\Repo_Analysis_Rag_Agent"; git log --oneline -5; git rev-list --objects --all | git cat-file --batch-check="%(objecttype) %(objectname) %(objectsize) %(rest)" | findstr "blob" | sort -k3 -n -r 2>nul | head -5</summary>
+
+```bash
+cd "c:\Users\FAZLEEN ANEESA\Desktop\Rag_Agent\Repo_Analysis_Rag_Agent"; git log --oneline -5; git rev-list --objects --all | git cat-file --batch-check="%(objecttype) %(objectname) %(objectsize) %(rest)" | findstr "blob" | sort -k3 -n -r 2>nul | head -5
+```
+
+```
+70432d2 ok1
+713e87f ok
+816c4c3 feat: Confluence integration - API routes, agents, MCP, templates, tests, docs
+d021341 merge conflict
+790a0c2 Resolve binary merge conflicts in pycache files
+out-file : FileStream was asked to open a device that was not a file. For support for devices like 'com1:' or 'lpt1:', 
+call CreateFile, then use the FileStream constructors that take an OS handle as an IntPtr.
+At C:\Users\FAZLEEN ANEESA\AppData\Local\Temp\ps-script-7874ab08-6d7e-4044-b64b-9d628b4f8f96.ps1:7 char:95
++ ... oneline -5; git rev-list --objects --all | git cat-file --batch-check ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OpenError: (:) [Out-File], NotSupportedException
+    + FullyQualifiedErrorId : FileOpenFailure,Microsoft.PowerShell.Commands.OutFileCommand
+ 
+
+```
+</details>
+</tool-use>
+
+---
+
+
+
+
+
+---
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd "c:\Users\FAZLEEN ANEESA\Desktop\Rag_Agent\Repo_Analysis_Rag_Agent"; git branch</summary>
+
+```bash
+cd "c:\Users\FAZLEEN ANEESA\Desktop\Rag_Agent\Repo_Analysis_Rag_Agent"; git branch
+```
+
+```
+* Confluence-MCP
+  main
+
+```
+</details>
+</tool-use>
+
+---
+
+
+Rewriting history to remove `.venv` from all commits using `git filter-branch`:
+
+
+---
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd "c:\Users\FAZLEEN ANEESA\Desktop\Rag_Agent\Repo_Analysis_Rag_Agent"; git filter-branch --force --index-filter "git rm -rf --cached --ignore-unmatch offline-folder-rag/vscode-extension/.venv" --prune-empty HEAD</summary>
+
+```bash
+cd "c:\Users\FAZLEEN ANEESA\Desktop\Rag_Agent\Repo_Analysis_Rag_Agent"; git filter-branch --force --index-filter "git rm -rf --cached --ignore-unmatch offline-folder-rag/vscode-extension/.venv" --prune-empty HEAD
+```
+
+```
+WARNING: git-filter-branch has a glut of gotchas generating mangled history
+	 rewrites.  Hit Ctrl-C before proceeding to abort, then use an
+	 alternative filtering tool such as 'git filter-repo'
+	 (https://github.com/newren/git-filter-repo/) instead.  See the
+	 filter-branch manual page for more details; to squelch this warning,
+	 set FILTER_BRANCH_SQUELCH_WARNING=1.
+
+```
+</details>
+</tool-use>
 
 ---
 
