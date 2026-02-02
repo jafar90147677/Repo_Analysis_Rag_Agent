@@ -3811,7 +3811,316 @@ git checkout Confluence-MCP
 
 **3. Stage the Confluence changes**
 ```bash
-git add .cursor/
+git add .cursor/plans/confluence-integration.plan.md
+git add .gitignore
+git add confluence_data/
+git add confluence_requirements.txt
+git add docker/
+git add docker-compose.yml
+git add docs/
+git add migrations/
+git add offline-folder-rag/edge_agent/app/agents/
+git add offline-folder-rag/edge_agent/app/analytics/
+git add offline-folder-rag/edge_agent/app/api/confluence_routes.py
+git add offline-folder-rag/edge_agent/app/api/routes.py
+git add offline-folder-rag/edge_agent/app/config/config.py
+git add offline-folder-rag/edge_agent/app/config/confluence_config.py
+git add offline-folder-rag/edge_agent/app/confluence/
+git add offline-folder-rag/edge_agent/app/logging/confluence_logger.py
+git add offline-folder-rag/edge_agent/app/logging/logger.py
+git add offline-folder-rag/edge_agent/app/mcp_server/
+git add offline-folder-rag/scripts/setup_confluence.py
+git add offline-folder-rag/scripts/log_cleanup.py
+git add offline-folder-rag/scripts/backup_confluence_data.py
+git add offline-folder-rag/unittests/unittest_cases/confluence_unittests/
+git add offline-folder-rag/vscode-extension/package.json
+git add offline-folder-rag/vscode-extension/src/extension.ts
+git add offline-folder-rag/vscode-extension/src/confluence/
+git add offline-folder-rag/vscode-extension/tests/confluence/
+git add offline-folder-rag/requirements.txt
+git add pytest.ini
+git add requirements.txt
+git add tests/confluence/
+```
+Or stage everything:
+```bash
+git add -A
+```
+
+**4. Commit**
+```bash
+git commit -m "feat: Confluence integration - API routes, agents, MCP, templates, tests, docs"
+```
+
+**5. Push to remote**
+```bash
+git push -u origin Confluence-MCP
+```
+If the branch name is different, replace `Confluence-MCP` with your branch name.
+
+**Optional: avoid committing build/cache**
+- Make sure `.gitignore` already has things like `logs/`, `state_files/`, `__pycache__/`, `node_modules/`, etc.
+- If you used `git add -A`, check with `git status` that no unwanted files are staged.
+
+If you want me to run these commands in your repo, switch to **Agent mode** and ask again.
+
+---
+
+_**User**_
+
+@c:\Users\FAZLEEN ANEESA\.cursor\projects\c-Users-FAZLEEN-ANEESA-Desktop-Rag-Agent-Repo-Analysis-Rag-Agent\terminals\2.txt:991-1014 what is the error 
+
+---
+
+_**Agent (model default, mode Agent)**_
+
+
+**What went wrong**
+
+GitHub **rejected the push** because a file in your repo is over its **100 MB limit**:
+
+- **File:**  
+  `offline-folder-rag/vscode-extension/.venv/Lib/site-packages/llvmlite/binding/llvmlite.dll`  
+- **Size:** 101.66 MB  
+- **Limit:** 100 MB per file  
+
+That path is inside a **Python virtual environment** (`.venv`). Those folders are local and often contain large binaries, so they should **not** be in git.
+
+So the error is: **a large file from `.venv` was committed and is now in your branch history**, so the push fails.
+
+---
+
+**What you need to do**
+
+1. **Stop tracking `.venv`**  
+   Add this to `.gitignore` (if it isn’t there already):
+   ```text
+   .venv/
+   offline-folder-rag/vscode-extension/.venv/
+   ```
+
+2. **Remove the large file from the last commit**  
+   You have to rewrite history so that `llvmlite.dll` (and ideally the whole `.venv`) is never in any commit on this branch. Two common ways:
+
+   - **If the bad commit is the latest one**  
+     Uncommit but keep your changes, then remove `.venv` from the index and amend:
+     ```bash
+     git reset --soft HEAD~1
+     git reset HEAD offline-folder-rag/vscode-extension/.venv
+     git checkout -- offline-folder-rag/vscode-extension/.venv
+     # ensure .gitignore has .venv/
+     git add .gitignore
+     git add -A
+     git commit -m "feat: Confluence integration (no .venv)"
+     git push origin Confluence-MCP
+     ```
+     (Adjust the commit message if you like.)
+
+   - **If the large file was added in an older commit**  
+     You need to remove it from history (e.g. with `git filter-branch` or `git filter-repo`). That’s more involved; say if you want step‑by‑step for that.
+
+3. **Push again**  
+   After the branch history no longer contains the 101 MB file, `git push origin Confluence-MCP` should succeed.
+
+---
+
+**Summary**
+
+- **Error:** Push failed because **a file > 100 MB** (`llvmlite.dll` in `.venv`) is in your committed history.
+- **Fix:** Add `.venv/` to `.gitignore`, remove `.venv` (and the large file) from the branch’s history, then push again.
+
+I’m in Ask mode and can’t run git or edit files for you. If you want this done automatically in your repo, switch to Agent mode and ask to “fix the git push by removing .venv from the Confluence-MCP branch.”
+
+---
+
+_**User**_
+
+@c:\Users\FAZLEEN ANEESA\.cursor\projects\c-Users-FAZLEEN-ANEESA-Desktop-Rag-Agent-Repo-Analysis-Rag-Agent\terminals\2.txt:992-1014 what is the root cause how to fix it
+
+---
+
+_**Agent (model default, mode Agent)**_
+
+
+## Root cause
+
+1. **A large file was committed**  
+   The file  
+   `offline-folder-rag/vscode-extension/.venv/Lib/site-packages/llvmlite/binding/llvmlite.dll`  
+   (101.66 MB) is in your git history. GitHub rejects any file over **100 MB**.
+
+2. **Why it’s there**  
+   The vscode-extension **Python virtual environment** (`.venv`) was added to git. `.venv` contains installed packages (including `llvmlite` and its DLL), so it’s large and should not be tracked.
+
+3. **Why the push fails**  
+   GitHub’s pre-receive hook checks every file in the push; it sees this 101 MB file and rejects the whole push.
+
+So: **root cause = `.venv` (and the large `llvmlite.dll` inside it) was committed and is still in your branch history.**
+
+---
+
+## How to fix it
+
+You need to:
+
+1. **Stop tracking `.venv`** (so it never gets committed again).
+2. **Remove `.venv` from the current branch’s history** (so the 101 MB file is no longer in any commit).
+
+### Step 1: Ignore `.venv` everywhere
+
+Add to your **`.gitignore`** (at repo root):
+
+```gitignore
+.venv/
+**/.venv/
+```
+
+Save the file.
+
+### Step 2: Remove `.venv` from the last commit (if it was added in the last commit)
+
+If you’re sure the `.venv` was added only in the **most recent** commit:
+
+```powershell
+# Undo last commit, keep all changes staged
+git reset --soft HEAD~1
+
+# Unstage and remove .venv from the index (file stays on disk)
+git rm -r --cached offline-folder-rag/vscode-extension/.venv
+
+# Stage .gitignore and everything else (without .venv)
+git add .gitignore
+git add -A
+
+# Commit again (no .venv in this commit)
+git commit -m "feat: Confluence integration"
+
+# Push
+git push origin Confluence-MCP
+```
+
+If you get “pathspec did not match any file(s)” for the `git rm` line, `.venv` might be under a different path; use:
+
+```powershell
+git rm -r --cached "offline-folder-rag/vscode-extension/.venv" 2>$null; git add .gitignore; git add -A; git status
+```
+
+then commit and push.
+
+### Step 3: If `.venv` was added in an older commit
+
+Then the big file is in **earlier** history. You must rewrite history so that file never existed in the branch:
+
+- **Option A – BFG (simplest):**  
+  Install [BFG Repo-Cleaner](https://rtyley.github.io/bfg-repo-cleaner/), then from the repo root:
+  ```powershell
+  bfg --delete-files llvmlite.dll
+  git reflog expire --expire=now --all && git gc --prune=now --aggressive
+  git push origin Confluence-MCP --force
+  ```
+
+- **Option B – git filter-repo:**  
+  Install `git-filter-repo`, then:
+  ```powershell
+  git filter-repo --path offline-folder-rag/vscode-extension/.venv --invert-paths --force
+  git push origin Confluence-MCP --force
+  ```
+
+Use **Step 2** if only the latest commit added `.venv`; use **Step 3** if it was committed multiple commits ago.
+
+---
+
+## Summary
+
+| What | Detail |
+|------|--------|
+| **Root cause** | `.venv` (with 101 MB `llvmlite.dll`) was committed; GitHub rejects files > 100 MB. |
+| **Fix** | Add `.venv/` to `.gitignore`, remove `.venv` from the branch history (amend last commit or use BFG/filter-repo), then push again. |
+
+I’m in Ask mode and can’t run these commands for you. If you want this done automatically in your repo, switch to **Agent mode** and ask to remove `.venv` from the Confluence-MCP branch and fix the push.
+
+---
+
+_**User**_
+
+apply above changes
+
+---
+
+_**Agent (model default, mode Agent)**_
+
+
+
+
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: c:\Users\FAZLEEN ANEESA\Desktop\Rag_Agent\Repo_Analysis_Rag_Agent\.gitignore</summary>
+
+</details>
+</tool-use>
+
+---
+
+
+Fixing .gitignore (removing leading spaces on .venv lines) and removing .venv from git tracking.
+
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: c:\Users\FAZLEEN ANEESA\Desktop\Rag_Agent\Repo_Analysis_Rag_Agent\.gitignore</summary>
+
+</details>
+
+</tool-use>
+
+---
+
+
+Removing `.venv` from git tracking and fixing history. Checking git status and recent commits:
+
+
+---
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd "c:\Users\FAZLEEN ANEESA\Desktop\Rag_Agent\Repo_Analysis_Rag_Agent"; git status; git log --oneline -3</summary>
+
+```bash
+cd "c:\Users\FAZLEEN ANEESA\Desktop\Rag_Agent\Repo_Analysis_Rag_Agent"; git status; git log --oneline -3
+```
+
+```
+On branch Confluence-MCP
+Your branch is ahead of 'origin/Confluence-MCP' by 1 commit.
+  (use "git push" to publish your local commits)
+
+Changes not staged for commit:
+  (use "git add &lt;file&gt;..." to update what will be committed)
+  (use "git restore &lt;file&gt;..." to discard changes in working directory)
+	modified:   .gitignore
+	modified:   .specstory/history/2026-02-02_07-50Z-confluence-module-integration.md
+
+no changes added to commit (use "git add" and/or "git commit -a")
+816c4c3 feat: Confluence integration - API routes, agents, MCP, templates, tests, docs
+d021341 merge conflict
+790a0c2 Resolve binary merge conflicts in pycache files
+
+```
+</details>
+</tool-use>
+
+---
+
+
+Checking whether `.venv` is in the last commit:
+
+
+---
+
+Cancelled
 
 ---
 
