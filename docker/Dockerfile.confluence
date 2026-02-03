@@ -1,7 +1,1 @@
-FROM python:3.11-slim
-WORKDIR /app
-COPY offline-folder-rag/requirements.txt confluence_requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt -r confluence_requirements.txt
-COPY . .
-ENV PYTHONPATH=/app/offline-folder-rag
-CMD ["uvicorn", "edge_agent.app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# placeholder

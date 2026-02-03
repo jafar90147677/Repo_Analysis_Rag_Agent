@@ -1,1 +1,1 @@
-{"name": "database_template", "description": "Database schema/docs", "sections": ["Schema", "Migrations"], "rules": {"type": "database"}}
+{}
