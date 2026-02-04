@@ -4,7 +4,8 @@ import * as vscode from "vscode";
 
 import { parseSlashCommand, CommandResultMessage, CommandRouter } from "../commands/commandRouter";
 import { getChatPanelHtml } from "./ui/chatPanelHtml";
-import { triggerFullIndex, setIndexing, clearIndexing, isPathInsideRoot, getIndexReport } from "../services/indexGate";
+import { getConfluenceFileSelectorHtml } from "./ui/confluenceHtml";
+import { triggerFullIndex, setIndexing, clearIndexing, isPathInsideRoot } from "../services/indexGate";
 // import { renderAssistantResponse } from "./components/AssistantResponseRenderer";
 const renderAssistantResponse = (payload: any) => JSON.stringify(payload);
 import {
@@ -15,7 +16,9 @@ import {
     isComposerMode,
     readComposerMode,
     writeComposerMode,
-    ComposerMode
+    ComposerMode,
+    DEFAULT_AGENT_BASE_URL,
+    getIndexReport
 } from "../services/agentClient";
 import { readRecentFolders, readRootPath, writeRootPath, readAutoIndex, writeAutoIndex } from "../services/storage";
 import { AutoIndexScheduler } from "../services/autoIndexScheduler";
@@ -43,7 +46,7 @@ export class ChatPanelViewProvider {
     private panel: vscode.WebviewPanel | undefined;
     private readonly router: CommandRouter;
     private readonly modeState: ModeState;
-    private readonly agentBaseUrl = "http://localhost:8000"; // Default agent URL
+    private readonly agentBaseUrl = DEFAULT_AGENT_BASE_URL; // Default agent URL
     private readonly scheduler: AutoIndexScheduler;
 
     constructor(
@@ -114,9 +117,10 @@ export class ChatPanelViewProvider {
                         this.postMessage(result);
                     }
                 } else {
+                    const extraContext = this.buildExtraContext();
                     if (normalizedMode === "rag") {
                         try {
-                            const response = await askWithOverride(text, "rag");
+                            const response = await askWithOverride(text, "rag", extraContext);
                             const result = await response.json();
                             
                             if (result.error === "INVALID_TOKEN") {
@@ -146,7 +150,7 @@ export class ChatPanelViewProvider {
                         }
                     } else if (normalizedMode === "auto") {
                         try {
-                            await this.router.autoRouteInput(text);
+                            await this.router.autoRouteInput(text, extraContext);
                         } catch (error) {
                             this.postMessage({
                                 type: "commandResult",
@@ -154,7 +158,7 @@ export class ChatPanelViewProvider {
                             });
                         }
                     } else {
-                        await this.router.handleCommand(text);
+                        await this.router.handleCommand(text, extraContext);
                     }
                 }
             } else if (message.type === "indexAction") {
@@ -183,6 +187,9 @@ export class ChatPanelViewProvider {
             } else if (message.type === "modeChange" && isComposerMode(message.mode)) {
                 this.modeState.setMode(message.mode);
                 this.postModeState();
+            } else if (message.type === "confluenceSave") {
+                const html = getConfluenceFileSelectorHtml([], this.getNonce());
+                this.postMessage({ type: 'commandResult', payload: html, isHtml: true, isConfluence: true });
             } else if (message.type === "contextRequest") {
                 this.handleContextRequest(message.action);
             } else if (message.type === "attachmentPick") {
@@ -202,6 +209,55 @@ export class ChatPanelViewProvider {
                     await writeRootPath(this.extensionContext, folder[0].fsPath);
                     this.postLocalState();
                 }
+            } else if (message.type === "confluenceBrowse") {
+                const files = await vscode.window.showOpenDialog({
+                    canSelectMany: true,
+                    canSelectFolders: false,
+                    canSelectFiles: true,
+                    filters: {
+                        'Code and Text': ['txt', 'py', 'js', 'ts', 'tsx', 'json', 'md', 'html', 'css', 'yml', 'yaml']
+                    },
+                    openLabel: "Select Files for Confluence",
+                });
+                if (files && files.length > 0) {
+                    const fileNames = files.map(f => path.basename(f.fsPath));
+                    const html = getConfluenceFileSelectorHtml(fileNames, this.getNonce());
+                    this.postMessage({ type: 'commandResult', payload: html, isHtml: true, isConfluence: true });
+                }
+            } else if (message.type === "confluenceNext") {
+                const { getConfluenceAnalysisHtml } = require("./ui/confluenceHtml");
+                const html = getConfluenceAnalysisHtml(message.files || [], this.getNonce());
+                this.postMessage({ type: 'commandResult', payload: html, isHtml: true, isConfluence: true });
+            } else if (message.type === "confluenceCreate") {
+                const { getConfluenceProgressHtml, getConfluenceErrorHtml, getConfluenceSuccessHtml } = require("./ui/confluenceHtml");
+                const progressHtml = getConfluenceProgressHtml();
+                this.postMessage({ type: 'commandResult', payload: progressHtml, isHtml: true, isConfluence: true });
+                
+                // Simulate creation delay
+                setTimeout(() => {
+                    // Randomly show error or success for testing
+                    const isError = Math.random() > 0.8;
+                    if (isError) {
+                        const errorHtml = getConfluenceErrorHtml(
+                            "intelligence_error",
+                            "AI could not determine optimal format",
+                            "Try providing more context or different files",
+                            0.45,
+                            this.getNonce()
+                        );
+                        this.postMessage({ type: 'commandResult', payload: errorHtml, isHtml: true, isConfluence: true });
+                    } else {
+                        const successHtml = getConfluenceSuccessHtml(this.getNonce());
+                        this.postMessage({ type: 'commandResult', payload: successHtml, isHtml: true, isConfluence: true });
+                    }
+                }, 3000);
+            } else if (message.type === "openUrl" && message.url) {
+                vscode.env.openExternal(vscode.Uri.parse(message.url));
+            } else if (message.type === "copyToClipboard" && message.text) {
+                vscode.env.clipboard.writeText(message.text);
+                vscode.window.showInformationMessage('Link copied to clipboard!');
+            } else if (message.type === "confluenceSettings") {
+                vscode.commands.executeCommand('workbench.action.openSettings', 'confluence');
             }
         });
 
@@ -225,9 +281,10 @@ export class ChatPanelViewProvider {
                     this.postMessage(result);
                 }
             } else {
+                const extraContext = this.buildExtraContext();
                 if (normalizedMode === "rag") {
                     try {
-                        const response = await askWithOverride(text, "rag");
+                        const response = await askWithOverride(text, "rag", extraContext);
                         const result = await response.json();
                         let payload = result.answer || JSON.stringify(result);
                         
@@ -249,7 +306,7 @@ export class ChatPanelViewProvider {
                     }
                 } else if (normalizedMode === "auto") {
                     try {
-                        await this.router.autoRouteInput(text);
+                        await this.router.autoRouteInput(text, extraContext);
                     } catch (error) {
                         this.postMessage({
                             type: "commandResult",
@@ -257,7 +314,7 @@ export class ChatPanelViewProvider {
                         });
                     }
                 } else {
-                    await this.router.handleCommand(text);
+                    await this.router.handleCommand(text, extraContext);
                 }
             }
         } else if (message.type === "indexAction") {
@@ -333,7 +390,7 @@ export class ChatPanelViewProvider {
                 (msg) => this.postMessage({ type: "commandResult", payload: msg })
             );
             
-            const report = await getIndexReport(this.agentBaseUrl);
+            const report = await getIndexReport(this.agentBaseUrl, rootPath);
             const reportHtml = this.renderIndexReport(report);
             this.postMessage({
                 type: "commandResult",
@@ -484,5 +541,22 @@ export class ChatPanelViewProvider {
             rootPath: this.getEffectiveRootPath(),
             recentFolders: readRecentFolders(this.extensionContext),
         });
+    }
+
+    private getNonce(): string {
+        const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        let text = "";
+        for (let i = 0; i < 16; i++) {
+            text += possible.charAt(Math.floor(Math.random() * possible.length));
+        }
+        return text;
+    }
+
+    private buildExtraContext(): { root_path: string } | undefined {
+        const rootPath = this.getEffectiveRootPath();
+        if (!rootPath) {
+            return undefined;
+        }
+        return { root_path: rootPath };
     }
 }

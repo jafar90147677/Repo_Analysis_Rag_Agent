@@ -58,6 +58,25 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
             padding: 16px;
             box-sizing: border-box;
             gap: 16px;
+            position: relative;
+        }
+
+        #confluence-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg);
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        #confluence-overlay.visible {
+            display: flex;
         }
 
         #chat-panel-header {
@@ -103,6 +122,15 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
             box-shadow: 0 0 0 2px rgba(14, 99, 156, 0.2);
         }
 
+        #confluence-button {
+            font-size: 1.2rem !important;
+        }
+
+        .confluence-card {
+            margin-top: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
         #conversation {
             flex: 1;
             overflow-y: auto;
@@ -123,9 +151,10 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
         .conversation-message {
             padding: 10px 14px;
             border-radius: 10px;
-            max-width: 80%;
+            max-width: 90%;
             line-height: 1.4;
             word-break: break-word;
+            box-sizing: border-box;
         }
 
         .conversation-message.user {
@@ -138,6 +167,8 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
             align-self: flex-start;
             background: var(--surface);
             border: 1px solid var(--border);
+            width: 100%;
+            max-width: 100%;
         }
 
         #composer-card {
@@ -465,6 +496,7 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
 </head>
 <body>
     <div id="chat-panel-container">
+        <div id="confluence-overlay"></div>
         <header id="chat-panel-header">
             <div id="header-titles">
                 <h1>Chat</h1>
@@ -518,6 +550,7 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
                     </div>
                     <button id="attachment-button" type="button" aria-label="Attach file" title="Attach file">📎</button>
                     <button id="microphone-button" type="button" aria-label="Record voice" title="Not available" disabled>🎤</button>
+                    <button id="confluence-button" type="button" aria-label="Save to Confluence" title="Save to Confluence">💾</button>
                 </div>
 
                 <div class="composer-send-row">
@@ -549,6 +582,7 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
     <script nonce="${nonce}">
         (function () {
             const vscode = acquireVsCodeApi();
+            window.vscode = vscode;
             const composerForm = document.getElementById("composer-form");
             const composerInput = document.getElementById("composer-input");
             const conversation = document.getElementById("conversation");
@@ -562,6 +596,7 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
             const infinityDropdown = document.getElementById("infinity-dropdown");
             const attachmentButton = document.getElementById("attachment-button");
             const microphoneButton = document.getElementById("microphone-button");
+            const confluenceButton = document.getElementById("confluence-button");
             const localDropdown = document.getElementById("local-dropdown");
 
             const COMPOSER_MODES = ["auto", "rag", "tools"];
@@ -876,6 +911,66 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
                 });
             }
 
+            if (confluenceButton) {
+                confluenceButton.addEventListener("click", () => {
+                    vscode.postMessage({ type: "confluenceSave" });
+                });
+            }
+
+            const confluenceOverlay = document.getElementById('confluence-overlay');
+            if (confluenceOverlay) {
+                function updateConfluenceSelectionUI() {
+                    const list = confluenceOverlay.querySelector('#confluence-file-list');
+                    const countEl = confluenceOverlay.querySelector('#confluence-selection-count');
+                    const nextBtn = confluenceOverlay.querySelector('#confluence-next-button');
+                    if (!list || !countEl || !nextBtn) return;
+                    const checkboxes = list.querySelectorAll('input[type="checkbox"]:checked');
+                    const n = checkboxes.length;
+                    const files = Array.from(checkboxes).map(function(cb) { return cb.value; });
+                    countEl.textContent = 'Selected: ' + n + ' files';
+                    nextBtn.disabled = n === 0;
+                    nextBtn.style.cursor = n === 0 ? 'not-allowed' : 'pointer';
+                    nextBtn.style.opacity = n === 0 ? '0.5' : '1';
+                }
+                function isClickInConfluenceFileList(target) {
+                    if (!target || !(target instanceof HTMLElement)) return false;
+                    const list = confluenceOverlay.querySelector('#confluence-file-list');
+                    return list && list.contains(target);
+                }
+                confluenceOverlay.addEventListener('change', function(event) {
+                    const target = event.target;
+                    if (target && target instanceof HTMLInputElement && target.type === 'checkbox' && isClickInConfluenceFileList(target))
+                        updateConfluenceSelectionUI();
+                });
+                confluenceOverlay.addEventListener('click', function(event) {
+                    if (isClickInConfluenceFileList(event.target)) {
+                        setTimeout(updateConfluenceSelectionUI, 0);
+                        return;
+                    }
+                    const btn = event.target && event.target instanceof HTMLElement ? event.target.closest('button[data-action]') : null;
+                    if (!btn) return;
+                    if (btn.getAttribute('data-action') === 'confluenceBrowse') {
+                        event.preventDefault();
+                        vscode.postMessage({ type: 'confluenceBrowse' });
+                        return;
+                    }
+                    if (btn.getAttribute('data-action') === 'confluenceCancel') {
+                        event.preventDefault();
+                        confluenceOverlay.classList.remove('visible');
+                        return;
+                    }
+                    if (btn.getAttribute('data-action') === 'confluenceNext') {
+                        event.preventDefault();
+                        if (btn.hasAttribute('disabled')) return;
+                        const list = confluenceOverlay.querySelector('#confluence-file-list');
+                        if (!list) return;
+                        const checkboxes = list.querySelectorAll('input[type="checkbox"]:checked');
+                        const files = Array.from(checkboxes).map(function(cb) { return cb.value; });
+                        if (files.length > 0) vscode.postMessage({ type: 'confluenceNext', files: files });
+                    }
+                });
+            }
+
             document.addEventListener('click', (event) => {
                 const target = event.target;
                 if (target && target instanceof HTMLElement && target.classList.contains('citation-link')) {
@@ -952,7 +1047,37 @@ export function getChatPanelHtml(extensionUri: vscode.Uri, placeholderText: stri
                 }
 
                 if (message.type === "commandResult" && message.payload) {
+                    if (message.isConfluence) {
+                        const overlay = document.getElementById('confluence-overlay');
+                        if (overlay) {
+                            overlay.innerHTML = message.payload;
+                            overlay.classList.add('visible');
+                            
+                            // Re-run scripts in the overlay
+                            const scripts = overlay.querySelectorAll('script');
+                            scripts.forEach(oldScript => {
+                                const newScript = document.createElement('script');
+                                Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                                newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+                                oldScript.parentNode.replaceChild(newScript, oldScript);
+                            });
+                        }
+                        return;
+                    }
+
                     appendMessage(message.payload, "assistant", Boolean(message.isHtml));
+                    
+                    // Re-run scripts in the appended HTML
+                    const lastMessage = conversation.lastElementChild;
+                    if (lastMessage && message.isHtml) {
+                        const scripts = lastMessage.querySelectorAll('script');
+                        scripts.forEach(oldScript => {
+                            const newScript = document.createElement('script');
+                            Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                            newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+                            oldScript.parentNode.replaceChild(newScript, oldScript);
+                        });
+                    }
                     return;
                 }
             });

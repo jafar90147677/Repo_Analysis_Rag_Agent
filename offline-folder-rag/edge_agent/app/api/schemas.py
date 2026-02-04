@@ -49,6 +49,7 @@ class ToolResponse(BaseModel):
 
 class AskRequest(BaseModel):
     query: str
+    root_path: str | None = None
     top_k: int | None = Field(
         default=None,
         gt=0,

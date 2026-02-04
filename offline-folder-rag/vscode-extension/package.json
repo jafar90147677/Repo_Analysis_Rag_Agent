@@ -1,12 +1,11 @@
 {
-  "name": "offline-folder-rag",
-  "displayName": "Offline Folder RAG",
+  "name": "offline-folder-rag-dev",
+  "displayName": "Offline Folder RAG (DEV)",
   "version": "0.0.1",
-  "publisher": "local",
+  "main": "./out/vscode-extension/src/extension.js",
   "engines": {
-    "vscode": "^1.85.0"
+    "vscode": "^1.75.0"
   },
-  "main": "./out/extension.js",
   "scripts": {
     "compile": "tsc -p .",
     "test": "mocha -r ts-node/register -r ./tests/setup.ts \"../tests/vscode_extension/contract/**/*.ts\""
@@ -17,6 +16,8 @@
     "@types/expect": "^1.20.4",
     "@types/mocha": "^10.0.10",
     "@types/node": "^20.19.30",
+    "@types/react": "^19.2.10",
+    "@types/react-dom": "^19.2.3",
     "@types/vscode": "^1.85.0",
     "axios": "^1.13.4",
     "axios-mock-adapter": "^2.1.0",
@@ -32,9 +33,49 @@
     "commands": [
       {
         "command": "offlineFolderRag.openChat",
-        "title": "Offline Folder RAG: Open Chat"
+        "title": "DEBUG: Open Chat Panel",
+        "category": "OFFLINE-DEV"
+      },
+      {
+        "command": "offlineFolderRag.analyzeFolder",
+        "title": "Analyze Folder",
+        "category": "Offline Folder RAG"
+      },
+      {
+        "command": "confluence.saveToIntelligent",
+        "title": "PRD: Save to Confluence (Intelligent)",
+        "category": "Confluence"
+      },
+      {
+        "command": "confluence.saveSelection",
+        "title": "PRD: Save Selection (AI Formatting)",
+        "category": "Confluence"
+      },
+      {
+        "command": "confluence.documentProject",
+        "title": "PRD: Document Project Intelligently",
+        "category": "Confluence"
+      },
+      {
+        "command": "confluence.viewCreations",
+        "title": "PRD: View Intelligent Creations",
+        "category": "Confluence"
+      },
+      {
+        "command": "confluence.configureSettings",
+        "title": "PRD: Configure AI Settings",
+        "category": "Confluence"
       }
-    ]
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "confluence.saveSelection",
+          "when": "editorHasSelection",
+          "group": "confluence@1"
+        }
+      ]
+    }
   },
   "description": "",
   "dependencies": {
@@ -165,5 +206,9 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs"
+  "type": "commonjs",
+  "activationEvents": [
+    "onStartupFinished",
+    "onCommand:offlineFolderRag.openChat"
+  ]
 }

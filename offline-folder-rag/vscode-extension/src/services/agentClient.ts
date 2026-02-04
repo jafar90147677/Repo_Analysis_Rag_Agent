@@ -1,11 +1,18 @@
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
+import { URL } from "url";
 
 const TOKEN_FILENAME = "agent_token.txt";
 const MODE_STATE_FILENAME = "composer_mode.json";
 
 const COMPOSER_MODES = ["auto", "rag", "tools"] as const;
+
+export const DEFAULT_AGENT_BASE_URL = (process.env.OFFLINE_RAG_AGENT_URL?.trim() || "http://127.0.0.1:8000");
+
+function buildAgentUrl(endpoint: string): string {
+    return new URL(endpoint, DEFAULT_AGENT_BASE_URL).toString();
+}
 
 function getIndexDir(): string {
     const envDir = process.env.RAG_INDEX_DIR;
@@ -99,15 +106,19 @@ export async function authenticatedFetch(url: string, options: RequestInit = {})
     });
 }
 
-export async function getIndexReport(baseUrl: string): Promise<IndexReport> {
-    const response = await authenticatedFetch(`${baseUrl}/index_report`);
+export async function getIndexReport(baseUrl: string, rootPath: string): Promise<IndexReport> {
+    const response = await authenticatedFetch(`${baseUrl}/index_report`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ root_path: rootPath }),
+    });
     if (!response.ok) {
         throw new Error(`Failed to fetch index report: ${response.statusText}`);
     }
     return await response.json() as IndexReport;
 }
 
-export async function triggerIndex(baseUrl: string, mode: 'full' | 'incremental'): Promise<IndexReport | { status: string }> {
+export async function triggerIndex(baseUrl: string, mode: 'full' | 'incremental', rootPath?: string): Promise<IndexReport | { status: string }> {
     const response = await authenticatedFetch(`${baseUrl}/index`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -123,7 +134,10 @@ export async function triggerIndex(baseUrl: string, mode: 'full' | 'incremental'
         return result;
     }
     
-    return await getIndexReport(baseUrl);
+    if (!rootPath) {
+        throw new Error('rootPath required to fetch index report');
+    }
+    return await getIndexReport(baseUrl, rootPath);
 }
 
 export async function fetchHealth(baseUrl: string): Promise<HealthResponse | null> {
@@ -182,40 +196,52 @@ export async function sendMessageToAgent(message: string): Promise<void> {
     // Implementation for sending message to agent
 }
 
+function buildQueryPayload(question: string, extraContext?: any) {
+  const payload: Record<string, any> = {
+    query: question,
+    extra_context: extraContext,
+  };
+
+  const rootPath = extraContext?.root_path ?? extraContext?.rootPath;
+  if (typeof rootPath === "string" && rootPath.trim()) {
+    payload.root_path = path.resolve(rootPath);
+  }
+
+  return payload;
+}
+
 export function ask(question: string, extraContext?: any) {
-  return fetch('/ask', {
+  return authenticatedFetch(buildAgentUrl("/ask"), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ question, extra_context: extraContext }),
+    body: JSON.stringify(buildQueryPayload(question, extraContext)),
   });
 }
 
 export function overview(question: string, extraContext?: any) {
-  return fetch('/overview', {
+  return authenticatedFetch(buildAgentUrl("/overview"), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ question, extra_context: extraContext }),
+    body: JSON.stringify(buildQueryPayload(question, extraContext)),
   });
 }
 
 export function askWithOverride(question: string, modeOverride: string, extraContext?: any) {
-  return fetch('/ask', {
+  const payload = buildQueryPayload(question, extraContext);
+  payload.mode_override = modeOverride;
+  return authenticatedFetch(buildAgentUrl("/ask"), {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({
-      question,
-      mode_override: modeOverride,
-      extra_context: extraContext
-    }),
+    body: JSON.stringify(payload),
   });
 }
 
 export function search(question: string, extraContext?: any) {
-  return fetch('/search', {
+  return authenticatedFetch(buildAgentUrl("/search"), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ question, extra_context: extraContext }),
+    body: JSON.stringify(buildQueryPayload(question, extraContext)),
   });
 }

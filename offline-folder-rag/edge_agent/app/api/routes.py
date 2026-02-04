@@ -11,9 +11,10 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 from ..indexing import indexer
+from ..indexing.index_dir import resolve_index_dir
 from ..indexing.scan_rules import scan_repository, normalize_root_path, compute_repo_id as compute_repo_id_func
 from ..logging.logger import logger
-from ..retrieval.ask import DEFAULT_TOP_K, retrieve_vector_results
+from ..retrieval.ask import DEFAULT_TOP_K, DEFAULT_CODE_COLLECTION, DEFAULT_DOC_COLLECTION, DEFAULT_SEARCH_ROOT, retrieve_vector_results
 from ..security import TOKEN_HEADER, verify_token, require_token
 from ..tools.doctor import check_ollama, check_ripgrep, check_chroma
 from .schemas import (
@@ -135,9 +136,31 @@ def _summarize_vector_hits(query: str, citation_count: int, truncated: bool) -> 
 async def ask(request: AskRequest):
     top_k = request.top_k or DEFAULT_TOP_K
     max_chunks = request.max_context_chunks
+    persist_directory = None
+    code_collection = DEFAULT_CODE_COLLECTION
+    doc_collection = DEFAULT_DOC_COLLECTION
+    search_root = DEFAULT_SEARCH_ROOT
+
+    if request.root_path:
+        try:
+            normalized_root = normalize_root_path(request.root_path)
+            repo_id = compute_repo_id_func(normalized_root)
+            persist_directory = resolve_index_dir() / repo_id
+            code_collection = f"{repo_id}_code_chunks"
+            doc_collection = f"{repo_id}_doc_chunks"
+            search_root = Path(request.root_path)
+        except ValueError as exc:
+            logger.warning("Invalid root path provided for /ask: %s", exc)
+
     try:
         vector_results = retrieve_vector_results(
-            request.query, top_k=top_k, max_context_chunks=max_chunks
+            request.query,
+            top_k=top_k,
+            persist_directory=persist_directory,
+            code_collection=code_collection,
+            doc_collection=doc_collection,
+            search_root=search_root,
+            max_context_chunks=max_chunks,
         )
     except Exception as exc:
         logger.warning("Vector retrieval failed for query=%s: %s", request.query, exc)
@@ -147,7 +170,17 @@ async def ask(request: AskRequest):
     doc_citations = vector_results.get("docs", [])
     citations = vector_results.get("merged", [])
     truncated = vector_results.get("truncated", False)
-    answer = _summarize_vector_hits(request.query, len(citations), truncated)
+    retrieved_chunk_count = len(citations)
+    logger.info("retrieved_chunk_count=%s query=%s", retrieved_chunk_count, request.query)
+    if retrieved_chunk_count == 0:
+        return {
+            "mode": "rag",
+            "confidence": "not_found",
+            "answer": "NOT FOUND IN INDEXED FILES",
+            "citations": [],
+            "truncated": False,
+        }
+    answer = _summarize_vector_hits(request.query, retrieved_chunk_count, truncated)
     if not citations:
         confidence = "not_found"
     elif truncated:

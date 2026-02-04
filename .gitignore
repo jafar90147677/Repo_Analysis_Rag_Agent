@@ -15,7 +15,7 @@ yarn-error.log*
 # VS Code
 .vscode/
 out/
-
+.specstory/
 # Temporary Word Files
 ~$*.docx
 ~$low is FINAL User version.docx
@@ -27,5 +27,6 @@ FINAL PRD v1.docx
 
 edge_agent/app/indexing/chunking/__pycache__/
 edge_agent\app\logging\__pycache__/
+edge_agent\__pycache__\__init__.cpython-311.pyc
 
 
